@@ -249,8 +249,8 @@ last_layer_train_varList = [
                     ]
 
 optimizer = tf.train.RMSPropOptimizer(learning_rate).\
-    minimize(cost, var_list=fine_tune_varList)  # frozen other variables
-print("# Updated layers: ", "all_layers\n")
+    minimize(cost, var_list=decoder_train_varList)  # frozen other variables
+print("# Updated layers: ", "decoder\n")
 
 
 # Initializing the variables
