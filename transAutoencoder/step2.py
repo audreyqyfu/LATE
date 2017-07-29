@@ -104,9 +104,9 @@ df2_test = df2.ix[df_test.index]
 # save_hd5(df_train, 'df_train.hd5')
 
 # Parameters #
-learning_rate = 0.003
+learning_rate = 0.001
 training_epochs = 150
-batch_size = 32
+batch_size = 128
 sd = 0.01 #stddev for random init
 
 display_step = 1
@@ -121,9 +121,10 @@ log_dir = './re_train'
 # refresh tensorboard folder
 if tf.gfile.Exists(log_dir):
     tf.gfile.DeleteRecursively(log_dir)
-    import shutil
-    shutil.rmtree(log_dir)
+    print (log_dir, "deleted")
 tf.gfile.MakeDirs(log_dir)
+print(log_dir, 'created')
+time.sleep(1)
 
 # LOG
 print(os.getcwd(),"\n",
@@ -264,21 +265,21 @@ sess = tf.Session()
 # sess.run(init)
 
 saver = tf.train.Saver()
-saver.restore(sess, "./step1.ckpt")
+saver.restore(sess, "./pre_train/step1.ckpt")
 
 train_writer = tf.summary.FileWriter(log_dir+'/train', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 # benchmark_writer = tf.summary.FileWriter(log_dir+'/benchmark', sess.graph)
 
-# # Evaluate the transferred network
-# cost_train = sess.run(cost, feed_dict={X: df_train.values})
-# cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
-# print("\nTransferred network at Epoch 0: cost_train=", round(cost_train,3), "cost_valid=", round(cost_valid,3))
-#
-# h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100]})
-# h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100]})
-# print("medium pearsonr in first 100 train cells: ", medium_corr(df2_train.values, h_train))
-# print("medium pearsonr in first 100 valid cells: ", medium_corr(df2_valid.values, h_valid))
+# # Evaluate the init network
+cost_train = sess.run(cost, feed_dict={X: df_train.values})
+cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
+print("\nTransferred network at Epoch 0: cost_train=", round(cost_train,3), "cost_valid=", round(cost_valid,3))
+
+h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100]})
+h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100]})
+print("medium benchmark_pearsonr in first 100 train cells: ", medium_corr(df2_train.values, h_train))
+print("medium benchmark_pearsonr in first 100 valid cells: ", medium_corr(df2_valid.values, h_valid))
 
 # Train
 total_batch = math.floor(len(df_train)/batch_size)  # floor
@@ -339,10 +340,10 @@ for epoch in range(1, training_epochs+1):
         h_input = sess.run(y_pred, feed_dict={X: df.values})
         print("medium pearsonr in all imputation cells: ", medium_corr(df2.values, h_input, num=m))
         df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
-        save_hd5(df_h_input, "imputation.hd5")
+        save_hd5(df_h_input, log_dir+"/imputation.hd5")
 
         # save model
-        save_path = saver.save(sess, "./step2.ckpt")
+        save_path = saver.save(sess, log_dir+"/step2.ckpt")
         print("Model saved in: %s" % save_path)
 
 

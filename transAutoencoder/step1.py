@@ -104,9 +104,9 @@ df2_test = df2.ix[df_test.index]
 # save_hd5(df_train, 'df_train.hd5')
 
 # Parameters #
-learning_rate = 0.0003
-training_epochs = 50
-batch_size = 32
+learning_rate = 0.001
+training_epochs = 150
+batch_size = 128
 sd = 0.01 #stddev for random init
 
 display_step = 1
@@ -121,9 +121,10 @@ log_dir = './pre_train'
 # refresh tensorboard folder
 if tf.gfile.Exists(log_dir):
     tf.gfile.DeleteRecursively(log_dir)
-    import shutil
-    shutil.rmtree(log_dir)
+    print (log_dir, "deleted")
 tf.gfile.MakeDirs(log_dir)
+print(log_dir, 'created')
+time.sleep(1)
 
 # LOG
 print(os.getcwd(),"\n",
@@ -339,10 +340,10 @@ for epoch in range(1, training_epochs+1):
         h_input = sess.run(y_pred, feed_dict={X: df.values})
         print("medium pearsonr in all imputation cells: ", medium_corr(df2.values, h_input, num=m))
         df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
-        save_hd5(df_h_input, "imputation.hd5")
+        save_hd5(df_h_input, log_dir+"/imputation.hd5")
 
         # save model
-        save_path = saver.save(sess, "./step1.ckpt")
+        save_path = saver.save(sess, log_dir+"/step1.ckpt")
         print("Model saved in: %s" % save_path)
 
 
