@@ -2,8 +2,13 @@
 # https://www.tensorflow.org/get_started/summaries_and_tensorboard
 # 07/25/2017
 import tensorflow as tf
+print('tf.__version__', tf.__version__)
+import sys
+print ('python version:', sys.version)
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
@@ -87,8 +92,8 @@ def scatterplot(x, y, title, xlabel, ylabel):
     plt.savefig(title + '.png', bbox_inches='tight')
 
 # read data #
-file = "../data/splat_v1-1-2/splat.OneGroup.norm.log.A.hd5" #data need imputation
-file_benchmark = "../data/splat_v1-1-2/splat.OneGroup.norm.log.A.hd5" #data need imputation
+file = "../../data/splat_v1-1-2/splat.OneGroup.norm.log.A.hd5" #data need imputation
+file_benchmark = "../../data/splat_v1-1-2/splat.OneGroup.norm.log.A.hd5" #data need imputation
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
