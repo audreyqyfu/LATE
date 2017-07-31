@@ -1,6 +1,9 @@
 # load pre-trained NN, transfer learning
 # https://www.tensorflow.org/get_started/summaries_and_tensorboard
 # 07/25/2017
+from __future__ import division #fix division // get float bug
+from __future__ import print_function #fix printing \n
+
 import tensorflow as tf
 print('tf.__version__', tf.__version__)
 import sys
@@ -21,9 +24,9 @@ def split_arr(arr, a=0.8, b=0.1, c=0.1):
     a: train, b: valid, c: test
     e.g.: [arr_train, arr_valid, arr_test] = split(df.values)"""
     np.random.seed(1) # for splitting consistency
-    train_indices = np.random.choice(arr.shape[0], round(arr.shape[0] * a/(a+b+c)), replace=False)
+    train_indices = np.random.choice(arr.shape[0], int(round(arr.shape[0] * a//(a+b+c))), replace=False)
     remain_indices = np.array(list(set(range(arr.shape[0])) - set(train_indices)))
-    valid_indices = np.random.choice(remain_indices, round(len(remain_indices) * b/(b+c)), replace=False)
+    valid_indices = np.random.choice(remain_indices, int(round(len(remain_indices) * b//(b+c))), replace=False)
     test_indices = np.array(list( set(remain_indices) - set(valid_indices) ))
     np.random.seed() # cancel seed effect
     print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
@@ -40,9 +43,9 @@ def split_df(df, a=0.8, b=0.1, c=0.1):
     a: train, b: valid, c: test
     e.g.: [df_train, df2, df_test] = split(df, a=0.7, b=0.15, c=0.15)"""
     np.random.seed(1) # for splitting consistency
-    train_indices = np.random.choice(df.shape[0], round(df.shape[0] * a/(a+b+c)), replace=False)
+    train_indices = np.random.choice(df.shape[0], int(df.shape[0] * a//(a+b+c)), replace=False)
     remain_indices = np.array(list(set(range(df.shape[0])) - set(train_indices)))
-    valid_indices = np.random.choice(remain_indices, round(len(remain_indices) * b/(b+c)), replace=False)
+    valid_indices = np.random.choice(remain_indices, int(len(remain_indices) * b//(b+c)), replace=False)
     test_indices = np.array(list( set(remain_indices) - set(valid_indices) ))
     np.random.seed() # cancel seed effect
     print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
@@ -62,7 +65,7 @@ def medium_corr(arr1, arr2, num=100, accuracy = 3):
     for i in range(num - 1):
         pearsonrlog.append(pearsonr(arr1[i], arr2[i]))
     pearsonrlog.sort()
-    result = round(pearsonrlog[round(num/2)][0], accuracy)
+    result = round(pearsonrlog[int(num//2)][0], accuracy)
     return(result)
 
 def save_hd5 (df, out_name):
@@ -109,9 +112,9 @@ df2_test = df2.ix[df_test.index]
 # save_hd5(df_train, 'df_train.hd5')
 
 # Parameters #
-learning_rate = 0.001
-training_epochs = 150
-batch_size = 128
+learning_rate = 0.0001
+training_epochs = 1000
+batch_size = 32
 sd = 0.01 #stddev for random init
 
 display_step = 1
@@ -287,7 +290,7 @@ print("medium benchmark_pearsonr in first 100 train cells: ", medium_corr(df2_tr
 print("medium benchmark_pearsonr in first 100 valid cells: ", medium_corr(df2_valid.values, h_valid))
 
 # Train
-total_batch = math.floor(len(df_train)/batch_size)  # floor
+total_batch = int(math.floor(len(df_train)//batch_size))  # floor
 # Training cycle,step2
 for epoch in range(1, training_epochs+1):
     tic_cpu = time.clock(); tic_wall = time.time()
@@ -305,6 +308,7 @@ for epoch in range(1, training_epochs+1):
 
     # Log per epoch
     if (epoch == 1) or (epoch % display_step == 0):
+        tic_log = time.time()
         print("\n#Epoch ", epoch, " took: ",
               round(toc_cpu - tic_cpu, 1), " CPU seconds; ",
               round(toc_wall - tic_wall, 1), "Wall seconds")
@@ -332,9 +336,12 @@ for epoch in range(1, training_epochs+1):
         print("cost_batch=", "{:.6f}".format(cost_batch),
               "cost_train=", "{:.6f}".format(cost_train),
               "cost_valid=", "{:.6f}".format(cost_valid))
+        toc_log=time.time()
+        print('log time for each epoch:', round(toc_log-tic_log, 1))
 
     # Log per observation interval
     if (epoch == 1) or (epoch % snapshot_step == 0) or (epoch == training_epochs):
+        tic_log2 = time.time()
         print("#Snapshot: ")
         # show full data-set corr
         h_train = sess.run(y_pred, feed_dict={X: df_train.values})  # np.array [len(df_train),1]
@@ -350,7 +357,8 @@ for epoch in range(1, training_epochs+1):
         # save model
         save_path = saver.save(sess, log_dir+"/step1.ckpt")
         print("Model saved in: %s" % save_path)
-
+        toc_log2 = time.time()
+        print ('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
 train_writer.close()
 valid_writer.close()
