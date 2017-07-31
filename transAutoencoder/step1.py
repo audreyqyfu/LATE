@@ -14,6 +14,7 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
+# from future import division #fix division // get float bug
 
 
 def split_arr(arr, a=0.8, b=0.1, c=0.1):
