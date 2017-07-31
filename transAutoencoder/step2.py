@@ -1,9 +1,14 @@
 # load pre-trained NN, transfer learning
 # https://www.tensorflow.org/get_started/summaries_and_tensorboard
 # 07/25/2017
-import tensorflow as tf
+from __future__ import division #fix division // get float bug
+from __future__ import print_function #fix printing \n
+
+import tensorflow as tf; print('tf.__version__', tf.__version__)
+import sys; print ('python version:', sys.version)
 import numpy as np
 import pandas as pd
+import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
@@ -16,9 +21,9 @@ def split_arr(arr, a=0.8, b=0.1, c=0.1):
     a: train, b: valid, c: test
     e.g.: [arr_train, arr_valid, arr_test] = split(df.values)"""
     np.random.seed(1) # for splitting consistency
-    train_indices = np.random.choice(arr.shape[0], round(arr.shape[0] * a/(a+b+c)), replace=False)
+    train_indices = np.random.choice(arr.shape[0], int(arr.shape[0] * a/(a+b+c)), replace=False)
     remain_indices = np.array(list(set(range(arr.shape[0])) - set(train_indices)))
-    valid_indices = np.random.choice(remain_indices, round(len(remain_indices) * b/(b+c)), replace=False)
+    valid_indices = np.random.choice(remain_indices, int(len(remain_indices) * b/(b+c)), replace=False)
     test_indices = np.array(list( set(remain_indices) - set(valid_indices) ))
     np.random.seed() # cancel seed effect
     print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
@@ -35,9 +40,9 @@ def split_df(df, a=0.8, b=0.1, c=0.1):
     a: train, b: valid, c: test
     e.g.: [df_train, df2, df_test] = split(df, a=0.7, b=0.15, c=0.15)"""
     np.random.seed(1) # for splitting consistency
-    train_indices = np.random.choice(df.shape[0], round(df.shape[0] * a/(a+b+c)), replace=False)
+    train_indices = np.random.choice(df.shape[0], int(df.shape[0] * a/(a+b+c)), replace=False)
     remain_indices = np.array(list(set(range(df.shape[0])) - set(train_indices)))
-    valid_indices = np.random.choice(remain_indices, round(len(remain_indices) * b/(b+c)), replace=False)
+    valid_indices = np.random.choice(remain_indices, int(len(remain_indices) * b/(b+c)), replace=False)
     test_indices = np.array(list( set(remain_indices) - set(valid_indices) ))
     np.random.seed() # cancel seed effect
     print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
@@ -57,7 +62,7 @@ def medium_corr(arr1, arr2, num=100, accuracy = 3):
     for i in range(num - 1):
         pearsonrlog.append(pearsonr(arr1[i], arr2[i]))
     pearsonrlog.sort()
-    result = round(pearsonrlog[round(num/2)][0], accuracy)
+    result = round(pearsonrlog[int(num/2)][0], accuracy)
     return(result)
 
 def save_hd5 (df, out_name):
@@ -87,8 +92,8 @@ def scatterplot(x, y, title, xlabel, ylabel):
     plt.savefig(title + '.png', bbox_inches='tight')
 
 # read data #
-file = "../data/splat_v1-1-2/splat.OneGroup.norm.log.B.mask90.hd5" #data need imputation
-file_benchmark = "../data/splat_v1-1-2/splat.OneGroup.norm.log.B.hd5" #data need imputation
+file = "../../data/splat_v1-1-2/splat.OneGroup.norm.log.B.mask90.hd5" #data need imputation
+file_benchmark = "../../data/splat_v1-1-2/splat.OneGroup.norm.log.B.hd5" #data need imputation
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
@@ -282,7 +287,7 @@ print("medium benchmark_pearsonr in first 100 train cells: ", medium_corr(df2_tr
 print("medium benchmark_pearsonr in first 100 valid cells: ", medium_corr(df2_valid.values, h_valid))
 
 # Train
-total_batch = math.floor(len(df_train)/batch_size)  # floor
+total_batch = int(math.floor(len(df_train)/batch_size))  # floor
 # Training cycle,step2
 for epoch in range(1, training_epochs+1):
     tic_cpu = time.clock(); tic_wall = time.time()

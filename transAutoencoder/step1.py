@@ -4,14 +4,11 @@
 from __future__ import division #fix division // get float bug
 from __future__ import print_function #fix printing \n
 
-import tensorflow as tf
-print('tf.__version__', tf.__version__)
-import sys
-print ('python version:', sys.version)
+import tensorflow as tf; print('tf.__version__', tf.__version__)
+import sys; print ('python version:', sys.version)
 import numpy as np
 import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
+import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
