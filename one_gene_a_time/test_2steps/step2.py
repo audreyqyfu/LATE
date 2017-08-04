@@ -119,8 +119,8 @@ m, n = df.shape  # m: n_cells; n: n_genes
 
 # Parameters #
 learning_rate = 0.001
-training_epochs = 10
-batch_size = 32
+training_epochs = 10000
+batch_size = 256
 sd = 0.01 #stddev for random init
 
 display_step = 1
@@ -235,28 +235,14 @@ saver = tf.train.Saver()
 saver.restore(sess, "./pre_train/step1.ckpt")
 print("restored ")
 # init new parameters
-# weights2 = {
-#     'fnn_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='fnn_w1'),
-#     'fnn_w2': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev= sd), name='fnn_w2')
-# }
-# biases2 = {
-#     'fnn_b1': tf.Variable(tf.ones([n_hidden_1]), name='fnn_b1'),
-#     'fnn_b2': tf.Variable(tf.ones([1]), name='fnn_b2')
-# }
-
-decoder_w1_j_arr = sess.run(weights['decoder_w1'])
-decoder_b1_j_arr = sess.run(biases['decoder_b1'])
-decoder_w2_j_arr = sess.run(weights['decoder_w2'][:,j:j+1])
-decoder_b2_j_arr = sess.run(biases['decoder_b2'][j:j+1])
 weights2 = {
-    'fnn_w1': tf.Variable(decoder_w1_j_arr, name='fnn_w1'),
-    'fnn_w2': tf.Variable(decoder_w2_j_arr, name='fnn_w2')
+    'fnn_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='fnn_w1'),
+    'fnn_w2': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev= sd), name='fnn_w2')
 }
 biases2 = {
-    'fnn_b1': tf.Variable(decoder_b1_j_arr, name='fnn_b1'),
-    'fnn_b2': tf.Variable(decoder_b2_j_arr, name='fnn_b2')
+    'fnn_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev=sd), name='fnn_b1'),
+    'fnn_b2': tf.Variable(tf.ones([1]), name='fnn_b2')
 }
-
 parameters2 = {**weights2, **biases2}
 init_params2 = tf.variables_initializer(parameters2.values())
 sess.run(init_params2)
@@ -284,9 +270,14 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('cost_decoder', cost_decoder)
     tf.summary.scalar('cost_decoder_benchmark', cost_decoder_benchmark)
 
+# optimizer = (
+#     tf.train.GradientDescentOptimizer(learning_rate).
+#     minimize(cost_fnn, var_list=[list(weights2.values()), list(biases2.values())])
+# )# frozen other variables
+
 optimizer = (
     tf.train.GradientDescentOptimizer(learning_rate).
-    minimize(cost_fnn, var_list=[list(weights2.values()), list(biases2.values())])
+    minimize(cost_fnn)
 )# frozen other variables
 print("# Updated layers: ", "rand inited fnn layers\n")
 
