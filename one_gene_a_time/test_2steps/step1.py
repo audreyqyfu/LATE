@@ -114,11 +114,11 @@ df2_test = df2.ix[df_test.index]
 # Parameters #
 print ("this is just testing version, superfast and bad")
 learning_rate = 0.0001
-training_epochs = 10000
+training_epochs = 10
 batch_size = 256
 sd = 0.01 #stddev for random init
 
-display_step = 100
+display_step = 1
 snapshot_step = 2500
 
 # Network Parameters #
@@ -164,13 +164,18 @@ weights = {
     'decoder_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='decoder_w1'),
     'decoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_input], stddev= sd), name='decoder_w2'),
 }
+# biases = {
+#     'encoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='encoder_b1'),
+#     'encoder_b2': tf.Variable(tf.random_normal([n_hidden_2], stddev= sd), name='encoder_b2'),
+#     'decoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='decoder_b1'),
+#     'decoder_b2': tf.Variable(tf.random_normal([n_input], stddev= sd), name='decoder_b2'),
+# }
 biases = {
-    'encoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='encoder_b1'),
-    'encoder_b2': tf.Variable(tf.random_normal([n_hidden_2], stddev= sd), name='encoder_b2'),
-    'decoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='decoder_b1'),
-    'decoder_b2': tf.Variable(tf.random_normal([n_input], stddev= sd), name='decoder_b2'),
+    'encoder_b1': tf.Variable(tf.ones([n_hidden_1]), name='encoder_b1'),
+    'encoder_b2': tf.Variable(tf.ones([n_hidden_2]), name='encoder_b2'),
+    'decoder_b1': tf.Variable(tf.ones([n_hidden_1]), name='decoder_b1'),
+    'decoder_b2': tf.Variable(tf.ones([n_input]), name='decoder_b2'),
 }
-
 parameters = {**weights, **biases}
 
 def encoder(x):
