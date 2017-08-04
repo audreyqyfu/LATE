@@ -71,8 +71,8 @@ def medium_corr(arr1, arr2, num=100, accuracy = 3):
 def corr_one_gene(col1, col2, accuracy = 3):
     """will calculate pearsonr for gene(i)"""
     # from scipy.stats.stats import pearsonr
-    result = pearsonr(col1, col2)[0]
-    # result = round(result, accuracy)
+    result = pearsonr(col1, col2)[0][0]
+    result = round(result, accuracy)
     return(result)
 
 def save_hd5 (df, out_name):
@@ -102,8 +102,8 @@ def scatterplot(x, y, title, xlabel, ylabel):
     plt.savefig(title + '.png', bbox_inches='tight')
 
 # read data #
-file = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.B.hd5" #data need imputation
-file_benchmark = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.B.hd5" #data need imputation
+file = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.A.hd5" #data need imputation
+file_benchmark = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.A.hd5"
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
@@ -111,17 +111,16 @@ m, n = df.shape  # m: n_cells; n: n_genes
 # rand split data
 [df_train, df_valid, df_test] = split_df(df)
 
-df2_train = df2.ix[df_train.index]
-df2_valid = df2.ix[df_valid.index]
-df2_test = df2.ix[df_test.index]
+[df2_train, df2_valid, df2_test] = \
+    [df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]]
 
 # save real data for comparison
 # save_hd5(df_train, 'df_train.hd5')
 
 # Parameters #
-learning_rate = 0.0001
-training_epochs = 1000
-batch_size = 256
+learning_rate = 0.001
+training_epochs = 10
+batch_size = 32
 sd = 0.01 #stddev for random init
 
 display_step = 1
@@ -155,7 +154,7 @@ print(os.getcwd(),"\n",
     "\ndf2_train.shape", df2_train.shape,
     "\ndf2_valid.values.shape", df2_valid.values.shape,
     "\n")
-print("input_array:\n", df.values[0:4,0:4], "\n")
+print("input_array:\n", df.ix[0:4,0:4], "\n")
 
 corr_log = []
 epoch_log = []
@@ -234,6 +233,7 @@ sess = tf.Session()
 # restore pre-trained parameters
 saver = tf.train.Saver()
 saver.restore(sess, "./pre_train/step1.ckpt")
+print("restored ")
 # init new parameters
 weights2 = {
     'fnn_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='fnn_w1'),
@@ -253,9 +253,9 @@ focusFnn_op = focusFnn(encoder_op)  # for one gene a time prediction
 decoder_op = decoder(encoder_op)  # for pearson correlation of the whole matrix #bug (8092, 0)
 
 # Prediction and truth
+y_true = X[:, j:j+1]
 y_pred = focusFnn_op  # [m, 1]
-y_true = X[:, j]
-y_benchmark = M[:, j]  # benchmark for cost_fnn
+y_benchmark = M[:, j:j+1]  # benchmark for cost_fnn
 M_train = df2_train.values[:, j:j+1]  # benchmark for corr
 M_valid = df2_valid.values[:, j:j+1]
 
@@ -279,7 +279,7 @@ optimizer = (
     tf.train.GradientDescentOptimizer(learning_rate).
     minimize(cost_fnn)
 )# frozen other variables
-print("# Updated layers: ", "fnn layers\n")
+print("# Updated layers: ", "rand inited fnn layers\n")
 
 train_writer = tf.summary.FileWriter(log_dir+'/train', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
@@ -291,6 +291,11 @@ valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 print("\nEpoch 0: cost_fnn_train=", round(cost_train,3), "cost_fnn_valid=", round(cost_valid,3))
 print("benchmark_pearsonr for gene ", j, " in training cells :", corr_one_gene(M_train, h_train))
 print("benchmark_pearsonr for gene ", j, " in valid cells:", corr_one_gene(M_valid, h_valid))
+
+[cost_decoder_train, h_decoder_train] = sess.run([cost_decoder, decoder_op], feed_dict={X: df_train.values})
+corr_decoder_train  = medium_corr(h_decoder_train, df_train.values)
+print("cost_decoder_train: ", cost_decoder_train)
+print("corr decoder train: ", corr_decoder_train)
 time.sleep(2)
 
 # Train

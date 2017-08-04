@@ -96,7 +96,7 @@ def scatterplot(x, y, title, xlabel, ylabel):
 
 # read data #
 file = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.A.hd5" #data need imputation
-file_benchmark = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.A.hd5" #data need imputation
+file_benchmark = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.A.hd5"
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
