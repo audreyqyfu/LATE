@@ -119,13 +119,13 @@ df2_test = df2.ix[df_test.index]
 # save_hd5(df_train, 'df_train.hd5')
 
 # Parameters #
-learning_rate = 0.001
+learning_rate = 0.0001
 training_epochs = 1000
-batch_size = 32
+batch_size = 256
 sd = 0.01 #stddev for random init
 
-display_step = 100
-snapshot_step = 1000
+display_step = 1
+snapshot_step = 2500
 
 # Network Parameters #
 n_input = n
@@ -168,29 +168,17 @@ X = tf.placeholder(tf.float32, [None, n_input])  # input
 M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 # Y = tf.placeholder(tf.float32, [None, 1]) # for a gene
 
-# weights = {
-#     'encoder_w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev= sd), name='encoder_w1'),
-#     'encoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2], stddev= sd), name='encoder_w2'),
-#     'decoder_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='decoder_w1'),
-#     'decoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_input], stddev= sd), name='decoder_w2'),
-# }
-# biases = {
-#     'encoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='encoder_b1'),
-#     'encoder_b2': tf.Variable(tf.random_normal([n_hidden_2], stddev= sd), name='encoder_b2'),
-#     'decoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='decoder_b1'),
-#     'decoder_b2': tf.Variable(tf.random_normal([n_input], stddev= sd), name='decoder_b2'),
-# }
 weights = {
-    'encoder_w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev= sd)),
-    'encoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2], stddev= sd)),
-    'decoder_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd)),
-    'decoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_input], stddev= sd)),
+    'encoder_w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev= sd), name='encoder_w1'),
+    'encoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2], stddev= sd), name='encoder_w2'),
+    'decoder_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='decoder_w1'),
+    'decoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_input], stddev= sd), name='decoder_w2'),
 }
 biases = {
-    'encoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd)),
-    'encoder_b2': tf.Variable(tf.random_normal([n_hidden_2], stddev= sd)),
-    'decoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd)),
-    'decoder_b2': tf.Variable(tf.random_normal([n_input], stddev= sd)),
+    'encoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='encoder_b1'),
+    'encoder_b2': tf.Variable(tf.random_normal([n_hidden_2], stddev= sd), name='encoder_b2'),
+    'decoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='decoder_b1'),
+    'decoder_b2': tf.Variable(tf.random_normal([n_input], stddev= sd), name='decoder_b2'),
 }
 
 def encoder(x):
@@ -206,8 +194,8 @@ def encoder(x):
         variable_summaries('weights_w2', weights['encoder_w2'])
         variable_summaries('biases_b1', biases['encoder_b1'])
         variable_summaries('biases_b2', biases['encoder_b2'])
-        variable_summaries('activations_w1', layer_1)
-        variable_summaries('activations_w2', layer_2)
+        variable_summaries('activations_a1', layer_1)
+        variable_summaries('activations_a2', layer_2)
     return layer_2
 
 def decoder(x):
@@ -223,39 +211,52 @@ def decoder(x):
         variable_summaries('weights_w2', weights['decoder_w2'])
         variable_summaries('biases_b1', biases['decoder_b1'])
         variable_summaries('biases_b2', biases['decoder_b2'])
-        variable_summaries('activations_w1', layer_1)
-        variable_summaries('activations_w2', layer_2)
+        variable_summaries('activations_a1', layer_1)
+        variable_summaries('activations_a2', layer_2)
     return layer_2
 
 def focusFnn(x):
     """output shape is [m, 1]"""
     with tf.name_scope("focusFnn"):
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, weights['decoder_w1']),
-                                       biases['decoder_b1']))
-        layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1, weights['decoder_w2'][:,j:j+1]),
-                                       biases['decoder_b2'][j:j+1]))
-
-        # variable_summaries('weights_w1', weights['decoder_w1'])
-        # variable_summaries('weights_w2_j', weights['decoder_w2'][:,j:j+1])
-        # variable_summaries('biases_b1', biases['decoder_b1'])
-        # variable_summaries('biases_b2_j', biases['decoder_b2'][j])
-        # variable_summaries('activations_a1', layer_1)
-        # variable_summaries('activations_a2', layer_2)
-        # variable_summaries('activations_a2_j', layer_2[:, j])
+        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, weights2['fnn_w1']),
+                                       biases2['fnn_b1']))
+        layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1, weights2['fnn_w2']),
+                                       biases2['fnn_b2']))
+        variable_summaries('fnn_w1', weights2['fnn_w1'])
+        variable_summaries('fnn_w2', weights2['fnn_w2'])
+        variable_summaries('fnn_b1', biases2['fnn_b1'])
+        variable_summaries('fnn_b2', biases2['fnn_b2'])
     return layer_2
+
+
+# Session Start
+sess = tf.Session()
+# restore pre-trained parameters
+saver = tf.train.Saver()
+saver.restore(sess, "./pre_train/step1.ckpt")
+# init new parameters
+weights2 = {
+    'fnn_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='fnn_w1'),
+    'fnn_w2': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev= sd), name='fnn_w2')
+}
+biases2 = {
+    'fnn_b1': tf.Variable(tf.ones([n_hidden_1]), name='fnn_b1'),
+    'fnn_b2': tf.Variable(tf.ones([1]), name='fnn_b2')
+}
+parameters2 = {**weights2, **biases2}
+init_params2 = tf.variables_initializer(parameters2.values())
+sess.run(init_params2)
 
 # Construct model
 encoder_op = encoder(X)
 focusFnn_op = focusFnn(encoder_op)  # for one gene a time prediction
-decoder_op = decoder(encoder_op)  # for pearson correlation of the whole matrix
+decoder_op = decoder(encoder_op)  # for pearson correlation of the whole matrix #bug (8092, 0)
 
-# Prediction
-y_pred = focusFnn_op # [m, 1]
-# Targets (Labels) are the input data.
-y_true = X[:, j:j+1]
-y_benchmark = M[:, j:j+1]
-
-M_train = df2_train.values[:, j:j+1]
+# Prediction and truth
+y_pred = focusFnn_op  # [m, 1]
+y_true = X[:, j]
+y_benchmark = M[:, j]  # benchmark for cost_fnn
+M_train = df2_train.values[:, j:j+1]  # benchmark for corr
 M_valid = df2_valid.values[:, j:j+1]
 
 # Define loss and optimizer, minimize the squared error
@@ -269,61 +270,24 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('cost_decoder', cost_decoder)
     tf.summary.scalar('cost_decoder_benchmark', cost_decoder_benchmark)
 
-fine_tune_varList = [
-                  weights['encoder_w1'],
-                  weights['encoder_w2'],
-                  weights['decoder_w1'],
-                  weights['decoder_w2'],
-                  biases['encoder_b1'],
-                  biases['encoder_b2'],
-                  biases['decoder_b1'],
-                  biases['decoder_b2']
-                  ]
-decoder_train_varList = [
-                  weights['decoder_w1'],
-                  weights['decoder_w2'],
-                  biases['decoder_b1'],
-                  biases['decoder_b2']
-                  ]
-last_layer_train_varList = [
-                    weights['decoder_w2'],
-                    biases['decoder_b2']
-                    ]
-
 optimizer = (
-    tf.train.AdamOptimizer(learning_rate).
-    minimize(cost_fnn, var_list=fine_tune_varList)
+    tf.train.GradientDescentOptimizer(learning_rate).
+    minimize(cost_fnn, var_list=[list(weights2.values()), list(biases2.values())])
 )# frozen other variables
-print("# Updated layers: ", "all layers\n")
-
-
-# Initializing the variables
-# init = tf.global_variables_initializer()
-# init_group = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-
-
-
-# Launch Session#
-sess = tf.Session()
-
-# sess.run(init)
-
-saver = tf.train.Saver()
-saver.restore(sess, "./pre_train/step1.ckpt")
+print("# Updated layers: ", "fnn layers\n")
 
 train_writer = tf.summary.FileWriter(log_dir+'/train', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 # benchmark_writer = tf.summary.FileWriter(log_dir+'/benchmark', sess.graph)
 
 # Evaluate the init network
-cost_train = sess.run(cost_fnn, feed_dict={X: df_train.values, M: df2_train.values})
-cost_valid = sess.run(cost_fnn, feed_dict={X: df_valid.values, M: df2_valid.values})
+[cost_train, h_train] = sess.run([cost_fnn, y_pred], feed_dict={X: df_train.values})
+[cost_valid, h_valid] = sess.run([cost_fnn, y_pred], feed_dict={X: df_valid.values})
 print("\nEpoch 0: cost_fnn_train=", round(cost_train,3), "cost_fnn_valid=", round(cost_valid,3))
-
-h_train = sess.run(y_pred, feed_dict={X: df_train.values})
-h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
 print("benchmark_pearsonr for gene ", j, " in training cells :", medium_corr_one_gene(M_train, h_train))
 print("benchmark_pearsonr for gene ", j, " in valid cells:", medium_corr_one_gene(M_valid, h_valid))
+time.sleep(2)
+
 # Train
 total_batch = int(math.floor(len(df_train)/batch_size))  # floor
 # Training cycle,step2
@@ -345,8 +309,8 @@ for epoch in range(1, training_epochs+1):
     if (epoch == 1) or (epoch % display_step == 0):
         tic_log = time.time()
         print("\n#Epoch ", epoch, " took: ",
-              round(toc_cpu - tic_cpu, 1), " CPU seconds; ",
-              round(toc_wall - tic_wall, 1), "Wall seconds")
+              round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
+              round(toc_wall - tic_wall, 2), "Wall seconds")
 
         run_metadata = tf.RunMetadata()
         train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
@@ -357,9 +321,6 @@ for epoch in range(1, training_epochs+1):
         corr_train = medium_corr_one_gene(M_train, h_train)
         corr_valid = medium_corr_one_gene(M_valid, h_valid)
 
-        print("medium pearsonr in train cells: ", corr_train)
-        print("medium pearsonr in valid cells: ", corr_valid)
-        
         corr_log.append(corr_valid)
         epoch_log.append(epoch)
 
@@ -371,13 +332,14 @@ for epoch in range(1, training_epochs+1):
         train_writer.add_summary(summary_train, epoch)
         valid_writer.add_summary(summary_valid, epoch)
 
+
         print("cost_batch=", "{:.6f}".format(cost_batch),
               "cost_train=", "{:.6f}".format(cost_train),
               "cost_valid=", "{:.6f}".format(cost_valid))
-        toc_log=time.time()
+        print("benchmark_pearsonr for gene ", j, " in training cells :", corr_train)
+        print("benchmark_pearsonr for gene ", j, " in valid cells:", corr_valid)
 
-        # #test
-        print ("test w_decoder_w2:", sess.run(weights['decoder_w2'][0:5, 0:5]))
+        toc_log=time.time()
         print('log time for each display:', round(toc_log-tic_log, 1))
 
     # # Log per observation interval
@@ -399,5 +361,8 @@ for epoch in range(1, training_epochs+1):
 train_writer.close()
 valid_writer.close()
 scatterplot(epoch_log, corr_log, 'correlation_metrics.step2', 'epoch', 'Pearson corr with ground truth')
+
+sess.close()
+
 print("Finished!")
 
