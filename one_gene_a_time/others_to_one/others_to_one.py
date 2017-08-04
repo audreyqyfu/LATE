@@ -159,23 +159,11 @@ corr_log = []
 epoch_log = []
 
 # regression #
-X = tf.placeholder(tf.float32, [None, n_input])  # input
+X = tf.placeholder(tf.float32, [None, n_input-1])  # input
 Y = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 
-# weights = {
-#     'encoder_w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev= sd), name='encoder_w1'),
-#     'encoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2], stddev= sd), name='encoder_w2'),
-#     'decoder_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd), name='decoder_w1'),
-#     'decoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_input], stddev= sd), name='decoder_w2'),
-# }
-# biases = {
-#     'encoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='encoder_b1'),
-#     'encoder_b2': tf.Variable(tf.random_normal([n_hidden_2], stddev= sd), name='encoder_b2'),
-#     'decoder_b1': tf.Variable(tf.random_normal([n_hidden_1], stddev= sd), name='decoder_b1'),
-#     'decoder_b2': tf.Variable(tf.random_normal([n_input], stddev= sd), name='decoder_b2'),
-# }
 weights = {
-    'encoder_w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev= sd)),
+    'encoder_w1': tf.Variable(tf.random_normal([n_input-1, n_hidden_1], stddev= sd)),
     'encoder_w2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2], stddev= sd)),
     'decoder_w1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev= sd)),
     'decoder_w2': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev= sd))
@@ -235,6 +223,14 @@ y_benchmark = Y[:, j:j+1]
 M_train = df2_train.values[:, j:j+1]
 M_valid = df2_valid.values[:, j:j+1]
 
+x_feed_train = np.delete(df_train.values, [j], axis=1)
+x_feed_valid = np.delete(df_valid.values, [j], axis=1)
+print (
+    "x_feed_train:", x_feed_train.shape,
+    "x_feed_valid:", x_feed_valid.shape
+)
+
+
 # Define loss and optimizer, minimize the squared error
 with tf.name_scope("Metrics"):
     cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
@@ -275,8 +271,6 @@ print("# Updated layers: ", "all layers\n")
 init = tf.global_variables_initializer()
 # init_group = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
-
-
 # Launch Session#
 sess = tf.Session()
 
@@ -290,12 +284,12 @@ valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 # benchmark_writer = tf.summary.FileWriter(log_dir+'/benchmark', sess.graph)
 
 # # Evaluate the init network
-cost_train = sess.run(cost, feed_dict={X: df_train.values})
-cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
+cost_train = sess.run(cost, feed_dict={X: x_feed_train})
+cost_valid = sess.run(cost, feed_dict={X: x_feed_valid})
 print("\nTransferred network at Epoch 0: cost_train=", round(cost_train,3), "cost_valid=", round(cost_valid,3))
 
-h_train = sess.run(y_pred, feed_dict={X: df_train.values})
-h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+h_train = sess.run(y_pred, feed_dict={X: x_feed_train})
+h_valid = sess.run(y_pred, feed_dict={X: x_feed_valid})
 print("medium benchmark_pearsonr for gene ", j, " in training cells :", medium_corr_one_gene(M_train, h_train))
 print("medium benchmark_pearsonr for gene ", j, " in valid cells:", medium_corr_one_gene(M_valid, h_valid))
 
@@ -308,11 +302,11 @@ for epoch in range(1, training_epochs+1):
     np.random.shuffle(random_indices)
     for i in range(total_batch):
         indices = np.arange(batch_size*i, batch_size*(i+1))
-        batch_xs = df_train.values[indices,:]
+        batch_xs = x_feed_train[indices,:]
         _, cost_batch = sess.run([optimizer, cost], feed_dict={X: batch_xs})
     if (batch_size*(i+1) < len(df_train)):
         indices = np.arange(batch_size*(i+1), len(df_train))
-        batch_xs = df_train.values[indices,:]
+        batch_xs = x_feed_train[indices,:]
         _, cost_batch = sess.run([optimizer, cost], feed_dict={X: batch_xs})
     toc_cpu = time.clock(); toc_wall = time.time()
 
@@ -326,8 +320,8 @@ for epoch in range(1, training_epochs+1):
         run_metadata = tf.RunMetadata()
         train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
 
-        h_train = sess.run(y_pred, feed_dict={X: df_train.values})
-        h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+        h_train = sess.run(y_pred, feed_dict={X: x_feed_train})
+        h_valid = sess.run(y_pred, feed_dict={X: x_feed_valid})
         corr_train = medium_corr_one_gene(M_train, h_train)
         corr_valid = medium_corr_one_gene(M_valid, h_valid)
         print("medium pearsonr in train cells: ", corr_train)
@@ -338,8 +332,8 @@ for epoch in range(1, training_epochs+1):
         #Summary
         merged = tf.summary.merge_all()
 
-        [summary_train, cost_train] = sess.run([merged, cost], feed_dict={X: df_train.values, Y: df2_train.values})
-        [summary_valid, cost_valid] = sess.run([merged, cost], feed_dict={X: df_valid.values, Y: df2_valid.values})
+        [summary_train, cost_train] = sess.run([merged, cost], feed_dict={X: x_feed_train, Y: df2_train.values})
+        [summary_valid, cost_valid] = sess.run([merged, cost], feed_dict={X: x_feed_valid, Y: df2_valid.values})
         train_writer.add_summary(summary_train, epoch)
         valid_writer.add_summary(summary_valid, epoch)
 
@@ -354,8 +348,8 @@ for epoch in range(1, training_epochs+1):
     #     tic_log2 = time.time()
     #     print("#Snapshot: ")
     #     # show full data-set corr
-    #     h_train = sess.run(y_pred, feed_dict={X: df_train.values})
-    #     h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+    #     h_train = sess.run(y_pred, feed_dict={X: x_feed_train})
+    #     h_valid = sess.run(y_pred, feed_dict={X: x_feed_valid})
     #     print("medium benchmark_pearsonr for gene ", j, " in training cells :",
     #           medium_corr_one_gene(df2_train.values[:, j:j + 1], h_train))
     #     print("medium benchmark_pearsonr for gene ", j, " in valid cells:",
