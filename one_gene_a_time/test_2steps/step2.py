@@ -68,7 +68,7 @@ def medium_corr(arr1, arr2, num=100, accuracy = 3):
     result = round(pearsonrlog[int(num/2)][0], accuracy)
     return(result)
 
-def medium_corr_one_gene(col1, col2, accuracy = 3):
+def corr_one_gene(col1, col2, accuracy = 3):
     """will calculate pearsonr for gene(i)"""
     # from scipy.stats.stats import pearsonr
     result = pearsonr(col1, col2)[0]
@@ -270,9 +270,14 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('cost_decoder', cost_decoder)
     tf.summary.scalar('cost_decoder_benchmark', cost_decoder_benchmark)
 
+# optimizer = (
+#     tf.train.GradientDescentOptimizer(learning_rate).
+#     minimize(cost_fnn, var_list=[list(weights2.values()), list(biases2.values())])
+# )# frozen other variables
+
 optimizer = (
     tf.train.GradientDescentOptimizer(learning_rate).
-    minimize(cost_fnn, var_list=[list(weights2.values()), list(biases2.values())])
+    minimize(cost_fnn)
 )# frozen other variables
 print("# Updated layers: ", "fnn layers\n")
 
@@ -284,8 +289,8 @@ valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 [cost_train, h_train] = sess.run([cost_fnn, y_pred], feed_dict={X: df_train.values})
 [cost_valid, h_valid] = sess.run([cost_fnn, y_pred], feed_dict={X: df_valid.values})
 print("\nEpoch 0: cost_fnn_train=", round(cost_train,3), "cost_fnn_valid=", round(cost_valid,3))
-print("benchmark_pearsonr for gene ", j, " in training cells :", medium_corr_one_gene(M_train, h_train))
-print("benchmark_pearsonr for gene ", j, " in valid cells:", medium_corr_one_gene(M_valid, h_valid))
+print("benchmark_pearsonr for gene ", j, " in training cells :", corr_one_gene(M_train, h_train))
+print("benchmark_pearsonr for gene ", j, " in valid cells:", corr_one_gene(M_valid, h_valid))
 time.sleep(2)
 
 # Train
@@ -318,8 +323,8 @@ for epoch in range(1, training_epochs+1):
         h_train = sess.run(y_pred, feed_dict={X: df_train.values})
         h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
 
-        corr_train = medium_corr_one_gene(M_train, h_train)
-        corr_valid = medium_corr_one_gene(M_valid, h_valid)
+        corr_train = corr_one_gene(M_train, h_train)
+        corr_valid = corr_one_gene(M_valid, h_valid)
 
         corr_log.append(corr_valid)
         epoch_log.append(epoch)
