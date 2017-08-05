@@ -18,6 +18,8 @@ import time
 
 print('tf.__version__', tf.__version__)
 print ('python version:', sys.version)
+j=1 #can loop in range(n)
+
 
 def split_arr(arr, a=0.8, b=0.1, c=0.1):
     """input array, output rand split arrays
@@ -110,9 +112,13 @@ m, n = df.shape  # m: n_cells; n: n_genes
 
 # rand split data
 [df_train, df_valid, df_test] = split_df(df)
-
-[df2_train, df2_valid, df2_test] = \
-    [df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]]
+# filter data
+solid_row_id = (df_train.ix[:,j:j+1] > 0).values
+df_train = df_train[solid_row_id]
+# df2 benchmark
+df2_train = df2.ix[df_train.index]
+df2_valid = df2.ix[df_valid.index]
+df2_test = df2.ix[df_test.index]
 
 # save real data for comparison
 # save_hd5(df_train, 'df_train.hd5')
@@ -160,7 +166,6 @@ corr_log = []
 epoch_log = []
 
 # regression #
-j=1 #can loop in range(n)
 print('gene index: ', j)
 
 X = tf.placeholder(tf.float32, [None, n_input])  # input
@@ -331,7 +336,9 @@ for epoch in range(1, training_epochs+1):
         h_train = sess.run(y_pred, feed_dict={X: df_train.values})
         h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
 
-        print("prediction:\n", h_train, "\ntruth:\n", df2_train.values[:, j:j + 1])
+        print("prediction_train:\n", h_train[0:5,:], "\ntruth_train:\n", df2_train.values[0:5, j:j + 1])
+        print("prediction_valid:\n", h_valid[0:5,:], "\ntruth_valid:\n", df2_valid.values[0:5, j:j + 1])
+
 
         corr_train = corr_one_gene(M_train, h_train)
         corr_valid = corr_one_gene(M_valid, h_valid)
