@@ -102,6 +102,15 @@ def scatterplot(x, y, title, xlabel, ylabel):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.savefig(title + '.png', bbox_inches='tight')
+    plt.close()
+
+def scatterplot2(x, y, title, xlabel, ylabel):
+    plt.plot(x, y, 'o')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.savefig(title + '.png', bbox_inches='tight')
+    plt.close()
 
 # read data #
 file = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.B.mask90.hd5" #data need imputation
@@ -374,25 +383,25 @@ for epoch in range(1, training_epochs+1):
         toc_log=time.time()
         print('log time for each display:', round(toc_log-tic_log, 1))
 
-    # # Log per observation interval
-    # if (epoch == 1) or (epoch % snapshot_step == 0) or (epoch == training_epochs):
-    #     tic_log2 = time.time()
-    #     print("#Snapshot: ")
-    #     # save predictions
-    #     h_input = sess.run(y_pred, feed_dict={X: df.values})
-    #     df_h_input = pd.DataFrame(data=h_input, columns=[j], index=df.index)
-    #     save_hd5(df_h_input, log_dir+"/h."+str(j)+".hd5")
+    # Log per observation interval
+    if (epoch == 1) or (epoch % snapshot_step == 0) or (epoch == training_epochs):
+        tic_log2 = time.time()
+        print("#Snapshot: ")
+        # save predictions
+        h_input = sess.run(y_pred, feed_dict={X: df.values})
+        df_h_input = pd.DataFrame(data=h_input, columns=[j], index=df.index)
+        save_hd5(df_h_input, log_dir+"/h."+str(j)+".hd5")
 
-    #     # save model
-    #     save_path = saver.save(sess, log_dir+"/step2.ckpt")
-    #     print("Model saved in: %s" % save_path)
-    #     toc_log2 = time.time()
-    #     print ('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
-
+        # save model
+        save_path = saver.save(sess, log_dir+"/step2.ckpt")
+        print("Model saved in: %s" % save_path)
+        toc_log2 = time.time()
+        print ('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
 train_writer.close()
 valid_writer.close()
 scatterplot(epoch_log, corr_log, 'correlation_metrics.step2', 'epoch', 'Pearson corr with ground truth')
+scatterplot2(M_valid, h_valid, 'Ground Truth vs Prediction in Validation set', 'Ground Truth B', 'Prediction from m.msk')
 
 sess.close()
 
