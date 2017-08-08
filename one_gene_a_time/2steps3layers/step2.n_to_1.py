@@ -100,14 +100,13 @@ def scatterplot(x, y, title, xlabel, ylabel):
     plt.savefig(title + '.png', bbox_inches='tight')
 
 
-def evaluate_epoch0():
-    cost_train = sess.run(cost, feed_dict={X: df_train.values})
-    cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
-    print("\nEpoch 0: cost_train=", round(cost_train,3), "cost_valid=", round(cost_valid,3))
-    h_input = sess.run(y_pred, feed_dict={X: df.values})
-    print('corr', pearsonr(h_input, df.values[:,j:j+1]))
-    print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
-
+def scatterplot2(x, y, title, xlabel, ylabel):
+    plt.plot(x, y, 'o')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.savefig(title + '.png', bbox_inches='tight')
+    plt.close()
 
 
 def snapshot():
@@ -158,8 +157,7 @@ def epoch_summary():
     train_writer.add_summary(summary_train, epoch)
     valid_writer.add_summary(summary_valid, epoch)
 
-    print("cost_batch=", "{:.6f}".format(cost_batch),
-          "cost_train=", "{:.6f}".format(cost_train),
+    print("cost_train=", "{:.6f}".format(cost_train),
           "cost_valid=", "{:.6f}".format(cost_valid))
 
 # read data #
@@ -180,12 +178,13 @@ df2_test = df2.ix[df_test.index]
 print ("this is just testing version, superfast and bad")
 j=3
 learning_rate = 0.0001
-training_epochs = 100
+training_epochs = 20
 batch_size = 256
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
-log_dir = './re_train'
+log_dir = './re_train_withZero'
+refresh_logfolder()
 display_step = 1
 snapshot_step = 5
 
@@ -268,7 +267,8 @@ train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost, var_l
 train_writer = tf.summary.FileWriter(log_dir+'/train', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 
-evaluate_epoch0()
+epoch = 0
+epoch_summary()
 
 total_batch = int(math.floor(len(df_train)//batch_size))  # floor
 # Training cycle
@@ -304,6 +304,8 @@ train_writer.close()
 valid_writer.close()
 
 scatterplot(epoch_log, corr_log, 'correlation_metrics.step1', 'epoch', 'Pearson corr with ground truth')
+h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+scatterplot2(df2_valid.values[:,j:j+1], h_valid, 'Ground Truth vs Prediction in Validation set, with zeros', 'Ground Truth B', 'Prediction from B.msk (with zeros)')
 
 print("Finished!")
 

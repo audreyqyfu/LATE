@@ -100,6 +100,15 @@ def scatterplot(x, y, title, xlabel, ylabel):
     plt.savefig(title + '.png', bbox_inches='tight')
 
 
+def scatterplot2(x, y, title, xlabel, ylabel):
+    plt.plot(x, y, 'o')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.savefig(title + '.png', bbox_inches='tight')
+    plt.close()
+
+
 def evaluate_epoch0():
     cost_train = sess.run(cost, feed_dict={X: df_train.values})
     cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
@@ -181,6 +190,7 @@ sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
 log_dir = './re_train'
+refresh_logfolder()
 display_step = 1
 snapshot_step = 5
 
@@ -308,7 +318,9 @@ for epoch in range(1, training_epochs+1):
 train_writer.close()
 valid_writer.close()
 
-scatterplot(epoch_log, corr_log, 'correlation_metrics.step1', 'epoch', 'Pearson corr with ground truth')
+scatterplot(epoch_log, corr_log, 'correlation_metrics.step2.noZero', 'epoch', 'Pearson corr with ground truth')
+h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+scatterplot2(df2_valid.values[:,j:j+1], h_valid, 'Ground Truth vs Prediction in Validation set, without zeros', 'Ground Truth B', 'Prediction from B.msk')
 
 print("Finished!")
 
