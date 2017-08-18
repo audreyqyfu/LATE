@@ -36,58 +36,6 @@ def variable_summaries(name, var):
         tf.summary.scalar('min', tf.reduce_min(var))
         tf.summary.histogram('histogram', var)
 
-        
-def pearsonr_hist(arr1, arr2, title='hist_genes'):
-    # calculate correlation between genes
-    # arr [cells, genes]
-    # if arr1.shape is arr2.shape:
-    range_size = arr2.shape[1]
-    hist = []
-    for i in range(range_size):
-        corr = pearsonr(arr1[:, i], arr2[:, i])[0]
-        if not math.isnan(corr):
-            hist.append(corr)
-    hist.sort()
-    print(hist)
-    # histogram of correlation
-    fig = plt.figure(figsize=(9, 9))
-    plt.hist(hist)
-    plt.xlabel('Pearson corr between genes')
-    plt.ylabel('Freq.')
-    plt.title("Correlation among any two genes in prediction and ground truth")
-    plt.savefig(str(title + ".png"), bbox_inches='tight')
-    plt.close(fig)
-    return (hist)
-
-
-def evaluate_epoch0():
-    cost_train = sess.run(cost, feed_dict={X: df_train.values})
-    cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
-    print("\nEpoch 0: cost_train=", round(cost_train, 3), "cost_valid=", round(cost_valid, 3))
-    h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100]})
-    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100]})
-    print("medium benchmark-cell-pearsonr in first 100 train cells, between prediction and ground truth: ",
-          scimpute.medium_corr(df2_train.values, h_train))
-    print("medium benchmark-cell-pearsonr in first 100 valid cells: between prediction and ground truth:",
-          scimpute.medium_corr(df2_valid.values, h_valid))
-
-
-def snapshot():
-    print("#Snapshot: ")
-    # show full data-set corr
-    h_train = sess.run(y_pred, feed_dict={X: df_train.values})  # np.array [len(df_train),1]
-    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
-    print("medium cell-pearsonr in all train data: ", scimpute.medium_corr(df2_train.values, h_train, num=len(df_train)))
-    print("medium cell-pearsonr in all valid data: ", scimpute.medium_corr(df2_valid.values, h_valid, num=len(df_valid)))
-    # save predictions
-    h_input = sess.run(y_pred, feed_dict={X: df.values})
-    print("medium cell-pearsonr in all imputation cells: ", scimpute.medium_corr(df2.values, h_input, num=m))
-    df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
-    scimpute.save_hd5(df_h_input, log_dir + "/imputation.step1.hd5")
-    # save model
-    save_path = saver.save(sess, log_dir + "/step1.ckpt")
-    print("Model saved in: %s" % save_path)
-
 
 def print_parameters():
     print(os.getcwd(), "\n",
@@ -105,12 +53,16 @@ def print_parameters():
     print("input_array:\n", df.values[0:4, 0:4], "\n")
 
 
-def refresh_logfolder():
-    if tf.gfile.Exists(log_dir):
-        tf.gfile.DeleteRecursively(log_dir)
-        print(log_dir, "deleted")
-    tf.gfile.MakeDirs(log_dir)
-    print(log_dir, 'created')
+def evaluate_epoch0():
+    cost_train = sess.run(cost, feed_dict={X: df_train.values})
+    cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
+    print("\nEpoch 0: cost_train=", round(cost_train, 3), "cost_valid=", round(cost_valid, 3))
+    h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100]})
+    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100]})
+    print("medium benchmark-cell-pearsonr in first 100 train cells, between prediction and ground truth: ",
+          scimpute.medium_corr(df2_train.values, h_train))
+    print("medium benchmark-cell-pearsonr in first 100 valid cells: between prediction and ground truth:",
+          scimpute.medium_corr(df2_valid.values, h_valid))
 
 
 def epoch_summary():
@@ -137,6 +89,23 @@ def epoch_summary():
           "cost_valid=", "{:.6f}".format(cost_valid))
 
 
+def snapshot():
+    print("#Snapshot: ")
+    # show full data-set corr
+    h_train = sess.run(y_pred, feed_dict={X: df_train.values})  # np.array [len(df_train),1]
+    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+    print("medium cell-pearsonr in all train data: ", scimpute.medium_corr(df2_train.values, h_train, num=len(df_train)))
+    print("medium cell-pearsonr in all valid data: ", scimpute.medium_corr(df2_valid.values, h_valid, num=len(df_valid)))
+    # save predictions
+    h_input = sess.run(y_pred, feed_dict={X: df.values})
+    print("medium cell-pearsonr in all imputation cells: ", scimpute.medium_corr(df2.values, h_input, num=m))
+    df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
+    scimpute.save_hd5(df_h_input, log_dir + "/imputation.step1.hd5")
+    # save model
+    save_path = saver.save(sess, log_dir + "/step1.ckpt")
+    print("Model saved in: %s" % save_path)
+
+
 # read data #
 file = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"  # data need imputation
 file_benchmark = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"
@@ -153,7 +122,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0001
-training_epochs = 1
+training_epochs = 5
 batch_size = 256
 sd = 0.0001  # stddev for random init
 n_input = n
@@ -164,7 +133,7 @@ Bname = 'F2'
 display_step = 1
 snapshot_step = 5
 
-refresh_logfolder()
+scimpute.refresh_logfolder(log_dir)
 
 print_parameters()
 
