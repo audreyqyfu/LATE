@@ -167,6 +167,7 @@ epoch_log = []
 X = tf.placeholder(tf.float32, [None, n_input])  # input
 M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 
+tf.set_random_seed(3)  # seed
 encoder_params = {
     'w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev=sd), name='encoder_w1'),
     'b1': tf.Variable(tf.random_normal([n_hidden_1], mean=100 * sd, stddev=sd), name='encoder_b1')
