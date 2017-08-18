@@ -73,8 +73,8 @@ def epoch_summary():
     h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100]})
     corr_train = scimpute.medium_corr(df2_train.values, h_train)
     corr_valid = scimpute.medium_corr(df2_valid.values, h_valid)
-    print("medium pearsonr in first 100 train cells: ", corr_train)
-    print("medium pearsonr in first 100 valid cells: ", corr_valid)
+    print("medium cell-pearsonr in first 100 train cells: ", corr_train)
+    print("medium cell-pearsonr in first 100 valid cells: ", corr_valid)
     corr_log.append(corr_valid)
     epoch_log.append(epoch)
 
@@ -106,21 +106,6 @@ def snapshot():
     print("Model saved in: %s" % save_path)
 
 
-def visualization_of_weights():
-    encoder_w1 = sess.run(encoder_params['w1'])
-    encoder_b1 = sess.run(encoder_params['b1'])
-    decoder_w1 = sess.run(decoder_params['w1'])
-    decoder_b1 = sess.run(decoder_params['b1'])
-
-    encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
-    decoder_b1 = decoder_b1.reshape(len(decoder_b1), 1)
-
-    scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
-    scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
-    scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
-    scimpute.heatmap_vis2(decoder_b1.T, title='decoder_b1.T')
-
-
 def visualization_of_dfs():
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
     scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
@@ -145,7 +130,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0001
-training_epochs = 25
+training_epochs = 100
 batch_size = 256
 sd = 0.0001  # stddev for random init
 n_input = n
@@ -288,7 +273,7 @@ hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                   title="gene-corr, prediction vs ground-truth"
                                   )
 
-# correlation for gene-j
+# gene-correlation for gene-j
 for j in [0, 999]:
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j],
                           title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
@@ -297,17 +282,28 @@ for j in [0, 999]:
                           )
 
 # visualization of weights
-visualization_of_weights()
+encoder_w1 = sess.run(encoder_params['w1'])  #1000, 500
+encoder_b1 = sess.run(encoder_params['b1'])  #500, (do T)
+encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
+encoder_b1_T = encoder_b1.T
+decoder_w1 = sess.run(decoder_params['w1'])  #500, 1000
+decoder_b1 = sess.run(decoder_params['b1'])  #1000, (do T)
+decoder_b1 = decoder_b1.reshape(len(decoder_b1), 1)
+decoder_b1_T = decoder_b1.T
+
+scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
+scimpute.visualize_weights_biases(decoder_w1, decoder_b1_T, 'decoder_w1, b1')
+# scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
+# scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
+# scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
+# scimpute.heatmap_vis2(decoder_b1, title='decoder_b1')
 
 # visualizing dfs
 visualization_of_dfs()
+
 # visualizing activations
 scimpute.heatmap_vis(code_neck_valid, title='code bottle-neck, valid', xlab='nodes', ylab='cells')
 
-
-
-
-
-
 sess.close()
 print("Finished!")
+

@@ -3,6 +3,7 @@ import numpy as np
 import time
 import os
 import matplotlib.pyplot as plt
+import matplotlib
 from scipy.stats.stats import pearsonr
 import math
 import tensorflow as tf
@@ -190,6 +191,10 @@ def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
     plt.close(fig)
     print('heatmap vis ', title, ' done')
 
+
+
+
+
 def hist_arr_flat (arr, title='', xlab='', ylab=''):
     '''create histogram for flattened arr'''
     if not os.path.exists("plots"):
@@ -343,3 +348,50 @@ def max_min_element_in_arrs(arr_list):
     min_all = min(min_list)
 
     return max_all, min_all
+
+
+def visualize_weights_biases(weight, bias, title, cmap='rainbow'):
+    '''heatmap visualization of weight and bias
+    weights: [1000, 500]
+    bias: [1, 500]
+    '''
+    # https://stackoverflow.com/questions/43076488/single-row-or-column-heat-map-in-python
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
+    fname = "./plots/" + title + '.vis.png'
+
+    vmax_w, vmin_w = max_min_element_in_arrs([weight])
+    vmax_b, vmin_b = max_min_element_in_arrs([bias])
+
+    norm_w = matplotlib.colors.Normalize(vmin=vmin_w, vmax=vmax_w)
+    norm_b = matplotlib.colors.Normalize(vmin=vmin_b, vmax=vmax_b)
+
+    grid = dict(height_ratios=[weight.shape[0], weight.shape[0] / 40, weight.shape[0] / 40],
+                width_ratios=[weight.shape[1], weight.shape[1] / 40])
+    fig, axes = plt.subplots(ncols=2, nrows=3, gridspec_kw=grid)
+
+    axes[0, 0].imshow(weight, aspect="auto", cmap=cmap, norm=norm_w)
+    axes[1, 0].imshow(bias, aspect="auto", cmap=cmap, norm=norm_b)
+
+    for ax in [axes[1, 0]]:
+        ax.set_xticks([])
+
+    for ax in [axes[1, 0]]:
+        ax.set_yticks([])
+
+    for ax in [axes[1, 1], axes[2, 1]]:
+        ax.axis("off")
+
+    # axes[1, 0].set_xlabel('node out')
+    # axes[1, 0].set_ylabel('node in')
+
+    sm_w = matplotlib.cm.ScalarMappable(cmap=cmap, norm=norm_w)
+    sm_w.set_array([])
+    sm_b = matplotlib.cm.ScalarMappable(cmap=cmap, norm=norm_b)
+    sm_b.set_array([])
+
+    fig.colorbar(sm_w, cax=axes[0, 1])
+    fig.colorbar(sm_b, cax=axes[2, 0], orientation="horizontal")
+
+    plt.savefig(fname, bbox_inches='tight')
+    plt.close(fig)
