@@ -24,19 +24,6 @@ print('sys.path', sys.path)
 import scimpute
 
 
-def variable_summaries(name, var):
-    """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
-    with tf.name_scope(name):
-        mean = tf.reduce_mean(var)
-        tf.summary.scalar('mean', mean)
-        with tf.name_scope('stddev'):
-            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
-        tf.summary.scalar('stddev', stddev)
-        tf.summary.scalar('max', tf.reduce_max(var))
-        tf.summary.scalar('min', tf.reduce_min(var))
-        tf.summary.histogram('histogram', var)
-
-
 def print_parameters():
     print(os.getcwd(), "\n",
           "\n# Hyper parameters:",
@@ -51,6 +38,19 @@ def print_parameters():
           "\ndf2_valid.values.shape", df2_valid.values.shape,
           "\n")
     print("input_array:\n", df.values[0:4, 0:4], "\n")
+
+
+def variable_summaries(name, var):
+    """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+    with tf.name_scope(name):
+        mean = tf.reduce_mean(var)
+        tf.summary.scalar('mean', mean)
+        with tf.name_scope('stddev'):
+            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+        tf.summary.scalar('stddev', stddev)
+        tf.summary.scalar('max', tf.reduce_max(var))
+        tf.summary.scalar('min', tf.reduce_min(var))
+        tf.summary.histogram('histogram', var)
 
 
 def evaluate_epoch0():
@@ -106,6 +106,29 @@ def snapshot():
     print("Model saved in: %s" % save_path)
 
 
+def visualization_of_weights():
+    encoder_w1 = sess.run(encoder_params['w1'])
+    encoder_b1 = sess.run(encoder_params['b1'])
+    decoder_w1 = sess.run(decoder_params['w1'])
+    decoder_b1 = sess.run(decoder_params['b1'])
+
+    encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
+    decoder_b1 = decoder_b1.reshape(len(decoder_b1), 1)
+
+    scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
+    scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
+    scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
+    scimpute.heatmap_vis2(decoder_b1.T, title='decoder_b1.T')
+
+
+def visualization_of_dfs():
+    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
+    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+
+
 # read data #
 file = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"  # data need imputation
 file_benchmark = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"
@@ -128,8 +151,8 @@ sd = 0.0001  # stddev for random init
 n_input = n
 n_hidden_1 = 500
 log_dir = './pre_train'
-Aname = 'E2'
-Bname = 'F2'
+Aname = '(E2)'
+Bname = '(F2)'
 display_step = 1
 snapshot_step = 5
 
@@ -246,6 +269,11 @@ valid_writer.close()
 
 
 # summaries and plots #
+# calculation
+h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+h = sess.run(y_pred, feed_dict={X: df.values})
+code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
+
 # learning curve
 scimpute.curveplot(epoch_log, corr_log,
                      title='learning_curve_pearsonr.step1',
@@ -253,7 +281,7 @@ scimpute.curveplot(epoch_log, corr_log,
                      ylabel='Pearson corr (predction vs ground truth, valid)')
 
 # gene-corr hist
-h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+
 hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                   fprefix='hist gene-corr, valid, step1',
                                   title="gene-corr, prediction vs ground-truth"
@@ -263,26 +291,22 @@ hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
 for j in [0, 999]:
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j],
                           title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
-                          xlabel='Ground Truth (' + Aname + ')',
-                          ylabel='Prediction (' + Bname + ')'
+                          xlabel='Ground Truth ' + Aname,
+                          ylabel='Prediction ' + Bname
                           )
 
 # visualization of weights
-def visualization_of_weights():
-    encoder_w1 = sess.run(encoder_params['w1'])
-    encoder_b1 = sess.run(encoder_params['b1'])
-    decoder_w1 = sess.run(decoder_params['w1'])
-    decoder_b1 = sess.run(decoder_params['b1'])
-
-    encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
-    decoder_b1 = decoder_b1.reshape(len(decoder_b1), 1)
-
-    scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
-    scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
-    scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
-    scimpute.heatmap_vis2(decoder_b1.T, title='decoder_b1.T')
-
 visualization_of_weights()
+
+# visualizing dfs
+visualization_of_dfs()
+# visualizing activations
+scimpute.heatmap_vis(code_neck_valid, title='code bottle-neck, valid', xlab='nodes', ylab='cells')
+
+
+
+
+
 
 sess.close()
 print("Finished!")
