@@ -267,6 +267,22 @@ for j in [0, 999]:
                           ylabel='Prediction (' + Bname + ')'
                           )
 
+# visualization of weights
+def visualization_of_weights():
+    encoder_w1 = sess.run(encoder_params['w1'])
+    encoder_b1 = sess.run(encoder_params['b1'])
+    decoder_w1 = sess.run(decoder_params['w1'])
+    decoder_b1 = sess.run(decoder_params['b1'])
+
+    encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
+    decoder_b1 = decoder_b1.reshape(len(decoder_b1), 1)
+
+    scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
+    scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
+    scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
+    scimpute.heatmap_vis2(decoder_b1.T, title='decoder_b1.T')
+
+visualization_of_weights()
 
 sess.close()
 print("Finished!")
