@@ -40,15 +40,14 @@ def evaluate_epoch0():
     print("\nEpoch 0: cost_train=", round(cost_train,3), "cost_valid=", round(cost_valid,3))
     h_input = sess.run(y_pred, feed_dict={X: df.values})
     print('corr', pearsonr(h_input, df.values[:,j:j+1]))
-    print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
-
+    # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
 
 
 def snapshot():
     print("#Snapshot: ")
     h_input = sess.run(y_pred, feed_dict={X: df.values})
     print('corr', pearsonr(h_input, df.values[:,j:j+1]))
-    print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
+    # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
     df_h_input = pd.DataFrame(data=h_input, columns=df.columns[j:j+1], index=df.index)
     scimpute.save_hd5(df_h_input, log_dir + "/imputation.step2.hd5")
     # save model
@@ -91,23 +90,24 @@ def epoch_summary():
 # read data #
 file = "../data/v1-1-5-2/v1-1-5-2.F2.msk.hd5" #data need imputation
 file_benchmark = "../data/v1-1-5-2/v1-1-5-2.F2.hd5"
+Aname = '(E2)'
+Bname = '(F2)'
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
-
 
 
 # Parameters #
 print ("this is just testing version, superfast and bad")
 j = 999
 learning_rate = 0.0001
-training_epochs = 100
+training_epochs = 10000 #100
 batch_size = 256
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
 log_dir = './re_train'
-scimpute.refresh_logfolder()
+scimpute.refresh_logfolder(log_dir)
 display_step = 1
 snapshot_step = 5
 
@@ -167,6 +167,7 @@ sess = tf.Session()
 saver = tf.train.Saver()
 saver.restore(sess, "./pre_train/step1.ckpt")
 
+tf.set_random_seed(4)  # seed
 focusFnn_params = {
     'w1': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev=sd), name='focusFnn_w1'),
     'b1': tf.Variable(tf.random_normal([1], mean=30*sd, stddev=sd), name='focusFnn_b1')
@@ -229,8 +230,8 @@ for epoch in range(1, training_epochs+1):
         # log corr
         h_train = sess.run(y_pred, feed_dict={X: df_train.values})
         h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
-        print("prediction_train:\n", h_train[0:5,:], "\ntruth_train:\n", df2_train.values[0:5, j:j + 1])
-        print("prediction_valid:\n", h_valid[0:5,:], "\ntruth_valid:\n", df2_valid.values[0:5, j:j + 1])
+        # print("prediction_train:\n", h_train[0:5,:], "\ntruth_train:\n", df2_train.values[0:5, j:j + 1])
+        # print("prediction_valid:\n", h_valid[0:5,:], "\ntruth_valid:\n", df2_valid.values[0:5, j:j + 1])
         corr_train = scimpute.corr_one_gene(df2_train.values[:,j:j+1], h_train)
         corr_valid = scimpute.corr_one_gene(df2_valid.values[:,j:j+1], h_valid)
         corr_log.append(corr_valid)
@@ -266,29 +267,49 @@ h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
 h = sess.run(y_pred, feed_dict={X: df.values})
 code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
 
-
 # learning curve
 scimpute.curveplot(epoch_log, corr_log,
-                     title='learning_curve_pearsonr.step1',
+                     title='learning_curve_pearsonr.step2',
                      xlabel='epoch',
                      ylabel='Pearson corr (predction vs ground truth, valid)')
 
-# gene-corr hist
-hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
-                                  fprefix='hist gene-corr, valid, step1',
-                                  title="gene-corr, prediction vs ground-truth"
-                                  )
 
-# heatmap
+# gene-correlation for gene-j
+scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:,0],
+                      title=str('scatterplot, gene-' + str(j) + ', valid, step2'),
+                      xlabel='Ground Truth ' + Aname,
+                      ylabel='Prediction ' + Bname
+                      )
 
+# visualization of weights (new way)
+encoder_w1 = sess.run(encoder_params['w1'])  #1000, 500
+encoder_b1 = sess.run(encoder_params['b1'])  #500, (do T)
+encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
+encoder_b1_T = encoder_b1.T
 
+scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
+
+# problem
+focusFnn_w1 = sess.run(focusFnn_params['w1'])  #500, 1
+focusFnn_b1 = sess.run(focusFnn_params['b1'])  #1
+focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
+focusFnn_b1_T = focusFnn_b1.T
+
+scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1')
+
+# old way
+# scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
+# scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
+# scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
+# scimpute.heatmap_vis2(decoder_b1, title='decoder_b1')
 
 # vis df
 def visualization_of_dfs():
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
+    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values, df2.values])
     scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2.values, title='df2'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 visualization_of_dfs()

@@ -117,6 +117,8 @@ def visualization_of_dfs():
 # read data #
 file = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"  # data need imputation
 file_benchmark = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"
+Aname = '(E2)'
+Bname = '(F2)'
 df = pd.read_hdf(file).transpose()  # [cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
@@ -136,8 +138,7 @@ sd = 0.0001  # stddev for random init
 n_input = n
 n_hidden_1 = 500
 log_dir = './pre_train'
-Aname = '(E2)'
-Bname = '(F2)'
+
 display_step = 1
 snapshot_step = 5
 
@@ -280,7 +281,7 @@ for j in [0, 999]:
                           ylabel='Prediction ' + Bname
                           )
 
-# visualization of weights
+# visualization of weights (new way)
 encoder_w1 = sess.run(encoder_params['w1'])  #1000, 500
 encoder_b1 = sess.run(encoder_params['b1'])  #500, (do T)
 encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
@@ -292,6 +293,7 @@ decoder_b1_T = decoder_b1.T
 
 scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
 scimpute.visualize_weights_biases(decoder_w1, decoder_b1_T, 'decoder_w1, b1')
+# old way
 # scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
 # scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
 # scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
