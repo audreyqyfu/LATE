@@ -267,7 +267,6 @@ scimpute.curveplot(epoch_log, corr_log,
                      ylabel='Pearson corr (predction vs ground truth, valid)')
 
 # gene-corr hist
-
 hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                   fprefix='hist gene-corr, valid, step1',
                                   title="gene-corr, prediction vs ground-truth"

@@ -395,3 +395,11 @@ def visualize_weights_biases(weight, bias, title, cmap='rainbow'):
 
     plt.savefig(fname, bbox_inches='tight')
     plt.close(fig)
+
+
+def corr_one_gene(col1, col2, accuracy = 3):
+    """will calculate pearsonr for gene(i)"""
+    # from scipy.stats.stats import pearsonr
+    result = pearsonr(col1, col2)[0][0]
+    result = round(result, accuracy)
+    return(result)
