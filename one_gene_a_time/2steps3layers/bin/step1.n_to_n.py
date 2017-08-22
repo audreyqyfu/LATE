@@ -171,8 +171,8 @@ keep_prob_hidden = tf.placeholder(tf.float32)
 def encoder(x):
     with tf.name_scope("Encoder"):
         # Encoder Hidden layer with sigmoid activation #1
-        x_drop = tf.nn.dropout(x, 0.2)
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(x_drop, encoder_params['w1']),
+        # x_drop = tf.nn.dropout(x, 0.2)
+        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, encoder_params['w1']),
                                     encoder_params['b1']))
         variable_summaries('encoder_w1', encoder_params['w1'])
         variable_summaries('encoder_b1', encoder_params['b1'])
