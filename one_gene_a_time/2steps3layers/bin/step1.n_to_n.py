@@ -132,7 +132,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0001
-training_epochs = 25
+training_epochs = 100
 batch_size = 256
 sd = 0.0001  # stddev for random init
 n_input = n
@@ -140,7 +140,7 @@ n_hidden_1 = 500
 log_dir = './pre_train'
 
 display_step = 1
-snapshot_step = 5
+snapshot_step = 50
 
 scimpute.refresh_logfolder(log_dir)
 
@@ -277,11 +277,12 @@ hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                   )
 
 # gene-correlation for gene-j
-for j in [0, 999]:
+for j in [0, 1, 200, 201, 400, 401, 600, 601, 800, 801, 998, 999]:
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j],
                           title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
                           xlabel='Ground Truth ' + Aname,
-                          ylabel='Prediction ' + Bname
+                          ylabel='Prediction ' + Bname,
+                          range=[0, 6]
                           )
 
 # visualization of weights (new way)
