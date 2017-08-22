@@ -115,10 +115,10 @@ def visualization_of_dfs():
 
 
 # read data #
-file = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"  # data need imputation
-file_benchmark = "../data/v1-1-5-2/v1-1-5-2.E2.hd5"
-Aname = '(E2)'
-Bname = '(F2)'
+file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
+file_benchmark = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"
+Aname = '(E3)'
+Bname = '(F3)'
 df = pd.read_hdf(file).transpose()  # [cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
@@ -165,11 +165,13 @@ decoder_params = {
 }
 parameters = {**encoder_params, **decoder_params}
 
+keep_prob_input = tf.placeholder(tf.float32)
+keep_prob_hidden = tf.placeholder(tf.float32)
 
 def encoder(x):
     with tf.name_scope("Encoder"):
         # Encoder Hidden layer with sigmoid activation #1
-        x_drop = tf.nn.dropout(x, 0.8)
+        x_drop = tf.nn.dropout(x, 0.2)
         layer_1 = tf.nn.relu(tf.add(tf.matmul(x_drop, encoder_params['w1']),
                                     encoder_params['b1']))
         variable_summaries('encoder_w1', encoder_params['w1'])
