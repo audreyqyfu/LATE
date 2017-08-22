@@ -90,7 +90,7 @@ def epoch_summary():
 # read data #
 file = "../data/v1-1-5-2/v1-1-5-2.F2.msk.hd5" #data need imputation
 file_benchmark = "../data/v1-1-5-2/v1-1-5-2.F2.hd5"
-Aname = '(E2)'
+Aname = '(F2.msk)'
 Bname = '(F2)'
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
@@ -100,15 +100,15 @@ m, n = df.shape  # m: n_cells; n: n_genes
 # Parameters #
 print ("this is just testing version, superfast and bad")
 j = 999
-learning_rate = 0.0001
-training_epochs = 10000 #100
-batch_size = 256
+learning_rate = 0.003
+training_epochs = 200 #100
+batch_size = 32
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
 log_dir = './re_train'
 scimpute.refresh_logfolder(log_dir)
-display_step = 1
+display_step = 10
 snapshot_step = 5
 
 corr_log = []
@@ -207,6 +207,7 @@ valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 evaluate_epoch0()
 
 total_batch = int(math.floor(len(df_train)//batch_size))  # floor
+
 # Training cycle
 for epoch in range(1, training_epochs+1):
     tic_cpu = time.clock()
@@ -309,7 +310,7 @@ def visualization_of_dfs():
     scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df2.values, title='df2'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2.values, title='df2'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 visualization_of_dfs()
