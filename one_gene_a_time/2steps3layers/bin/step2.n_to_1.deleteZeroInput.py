@@ -100,7 +100,7 @@ m, n = df.shape  # m: n_cells; n: n_genes
 # Parameters #
 print ("this is just testing version, superfast and bad")
 j = 999
-learning_rate = 0.001
+learning_rate = 0.01
 training_epochs = 10000 #100
 batch_size = 32
 sd = 0.0001 #stddev for random init
@@ -108,8 +108,8 @@ n_input = n
 n_hidden_1 = 500
 log_dir = './re_train'
 scimpute.refresh_logfolder(log_dir)
-display_step = 10
-snapshot_step = 100
+display_step = 50
+snapshot_step = 500
 
 corr_log = []
 epoch_log = []
