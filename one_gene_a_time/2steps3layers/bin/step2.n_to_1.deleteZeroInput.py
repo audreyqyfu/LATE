@@ -74,22 +74,6 @@ def print_parameters():
     print("input_array:\n", df.values[0:4,0:4], "\n")
 
 
-def epoch_summary():
-    run_metadata = tf.RunMetadata()
-    train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
-
-    # Summary
-    merged = tf.summary.merge_all()
-
-    [summary_train, cost_train] = sess.run([merged, cost], feed_dict={X: df_train_solid.values, M: df2_train_solid.values})
-    [summary_valid, cost_valid] = sess.run([merged, cost], feed_dict={X: df_valid_solid.values, M: df2_valid_solid.values})
-    train_writer.add_summary(summary_train, epoch)
-    valid_writer.add_summary(summary_valid, epoch)
-
-    print("cost_batch=", "{:.6f}".format(cost_batch),
-          "cost_train=", "{:.6f}".format(cost_train),
-          "cost_valid=", "{:.6f}".format(cost_valid))
-
 # read data #
 file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
 file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
@@ -102,16 +86,18 @@ m, n = df.shape  # m: n_cells; n: n_genes
 
 # Parameters #
 print ("this is just testing version, superfast and bad")
-j = 800
+j = 400
+print("\n\n>>> for gene", j)
+
 learning_rate = 0.002
-training_epochs = 20 # todo change to 20000
+training_epochs = 10000  # change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
-log_dir = './re_train'
+log_dir = './re_train' + '_j' + str(j)
 scimpute.refresh_logfolder(log_dir)
-display_step = 1 # todo change to 100
+display_step = 100  # change to 100
 snapshot_step = 1000
 
 corr_log = []
@@ -203,7 +189,7 @@ y_pred = fnn_op
 
 with tf.name_scope("Metrics"):
     cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
-    cost_benchmark = tf.reduce_mean(tf.pow(y_pred - y_benchmark, 2))
+    cost_benchmark = tf.reduce_mean(tf.pow(y_benchmark - y_pred, 2))
     tf.summary.scalar('cost', cost)
     tf.summary.scalar('cost_benchmark', cost_benchmark)
 
@@ -234,6 +220,25 @@ for epoch in range(1, training_epochs+1):
         print("\n#Epoch ", epoch, " took: ",
               round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
               round(toc_wall - tic_wall, 2), "Wall seconds")
+
+        def epoch_summary():
+            run_metadata = tf.RunMetadata()
+            train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
+
+            # Summary
+            merged = tf.summary.merge_all()
+
+            [summary_train, cost_train] = sess.run([merged, cost],
+                                                   feed_dict={X: df_train_solid.values, M: df2_train_solid.values})
+            [summary_valid, cost_valid] = sess.run([merged, cost],
+                                                   feed_dict={X: df_valid_solid.values, M: df2_valid_solid.values})
+            train_writer.add_summary(summary_train, epoch)
+            valid_writer.add_summary(summary_valid, epoch)
+
+            print("cost_batch=", "{:.6f}".format(cost_batch),
+                  "cost_train=", "{:.6f}".format(cost_train),
+                  "cost_valid=", "{:.6f}".format(cost_valid))
+
         epoch_summary()
 
         # log corr
@@ -277,7 +282,7 @@ h_valid_solid = sess.run(y_pred, feed_dict={X: df_valid_solid.values})
 h = sess.run(y_pred, feed_dict={X: df.values})
 
 # code_neck_valid_solid = sess.run(encoder_op, feed_dict={X: df_valid_solid.values})
-code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
+# code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
 
 # learning curve
 scimpute.curveplot(epoch_log, corr_log,
@@ -307,18 +312,20 @@ focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
 focusFnn_b1_T = focusFnn_b1.T
 
 scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1')
-scimpute.heatmap_vis(code_neck_valid, title='code_neck_valid, all cells' + Bname, xlab='', ylab='', vmax=max, vmin=min)
+# scimpute.heatmap_vis(code_neck_valid, title='code_neck_valid, all cells' + Bname, xlab='', ylab='', vmax=max, vmin=min)
 
 # vis df
 def visualization_of_dfs():
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid_solid, h, df.values, df2.values])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h_valid_solid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df2.values, title='df2'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df_valid_solid.values, title='df.valid.solid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h_valid_solid, title='h.valid.solid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df_valid.values, title='df.valid.all'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h_valid, title='h.valid.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df.values, title='df.all'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2.values, title='df2.all'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h, title='h.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 visualization_of_dfs()
-
-print("Finished!")
+sess.close()
+print("Finished gene", j)
 
