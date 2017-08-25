@@ -15,10 +15,68 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
-import scimpute
 
 print ('python version:', sys.version)
 print('tf.__version__', tf.__version__)
+
+def split_arr(arr, a=0.8, b=0.1, c=0.1):
+    """input array, output rand split arrays
+    a: train, b: valid, c: test
+    e.g.: [arr_train, arr_valid, arr_test] = split(df.values)"""
+    np.random.seed(1) # for splitting consistency
+    train_indices = np.random.choice(arr.shape[0], int(round(arr.shape[0] * a//(a+b+c))), replace=False)
+    remain_indices = np.array(list(set(range(arr.shape[0])) - set(train_indices)))
+    valid_indices = np.random.choice(remain_indices, int(round(len(remain_indices) * b//(b+c))), replace=False)
+    test_indices = np.array(list( set(remain_indices) - set(valid_indices) ))
+    np.random.seed() # cancel seed effect
+    print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
+    print('train:', len(train_indices), ' valid:', len(valid_indices), 'test:', len(test_indices))
+
+    arr_train = arr[train_indices]
+    arr_valid = arr[valid_indices]
+    arr_test = arr[test_indices]
+
+    return(arr_train, arr_valid, arr_test)
+
+
+def split_df(df, a=0.8, b=0.1, c=0.1):
+    """input df, output rand split dfs
+    a: train, b: valid, c: test
+    e.g.: [df_train, df2, df_test] = split(df, a=0.7, b=0.15, c=0.15)"""
+    np.random.seed(1) # for splitting consistency
+    train_indices = np.random.choice(df.shape[0], int(df.shape[0] * a//(a+b+c)), replace=False)
+    remain_indices = np.array(list(set(range(df.shape[0])) - set(train_indices)))
+    valid_indices = np.random.choice(remain_indices, int(len(remain_indices) * b//(b+c)), replace=False)
+    test_indices = np.array(list( set(remain_indices) - set(valid_indices) ))
+    np.random.seed() # cancel seed effect
+    print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
+    print('train:', len(train_indices), ' valid:', len(valid_indices), 'test:', len(test_indices))
+
+    df_train = df.ix[train_indices, :]
+    df_valid = df.ix[valid_indices, :]
+    df_test = df.ix[test_indices, :]
+
+    return(df_train, df_valid, df_test)
+
+
+def medium_corr(arr1, arr2, num=100, accuracy = 3):
+    """arr1 & arr2 must have same shape
+    will calculate correlation between corresponding columns"""
+    # from scipy.stats.stats import pearsonr
+    pearsonrlog = []
+    for i in range(num - 1):
+        pearsonrlog.append(pearsonr(arr1[i], arr2[i]))
+    pearsonrlog.sort()
+    result = round(pearsonrlog[int(num//2)][0], accuracy)
+    return(result)
+
+
+def save_hd5 (df, out_name):
+    """save blosc compressed hd5"""
+    tic = time.time()
+    df.to_hdf(out_name, key='null', mode='w', complevel=9, complib='blosc')
+    toc = time.time()
+    print("saving" + out_name + " took {:.1f} seconds".format(toc-tic))
 
 
 def variable_summaries(name, var):
@@ -34,22 +92,30 @@ def variable_summaries(name, var):
         tf.summary.histogram('histogram', var)
 
 
-def evaluate_epoch0():
-    cost_train = sess.run(cost, feed_dict={X: df_train.values})
-    cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
-    print("\nEpoch 0: cost_train=", round(cost_train,3), "cost_valid=", round(cost_valid,3))
-    h_input = sess.run(y_pred, feed_dict={X: df.values})
-    print('corr', pearsonr(h_input, df.values[:,j:j+1]))
-    # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
+def scatterplot(x, y, title, xlabel, ylabel):
+    plt.plot(x, y)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.savefig(title + '.png', bbox_inches='tight')
+
+
+def scatterplot2(x, y, title, xlabel, ylabel):
+    plt.plot(x, y, 'o')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.savefig(title + '.png', bbox_inches='tight')
+    plt.close()
 
 
 def snapshot():
     print("#Snapshot: ")
     h_input = sess.run(y_pred, feed_dict={X: df.values})
     print('corr', pearsonr(h_input, df.values[:,j:j+1]))
-    # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
+    print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
     df_h_input = pd.DataFrame(data=h_input, columns=df.columns[j:j+1], index=df.index)
-    scimpute.save_hd5(df_h_input, log_dir + "/imputation.step2.hd5")
+    save_hd5(df_h_input, log_dir + "/imputation.step2.hd5")
     # save model
     save_path = saver.save(sess, log_dir + "/step2.ckpt")
     print("Model saved in: %s" % save_path)
@@ -71,6 +137,14 @@ def print_parameters():
     print("input_array:\n", df.values[0:4,0:4], "\n")
 
 
+def refresh_logfolder():
+    if tf.gfile.Exists(log_dir):
+        tf.gfile.DeleteRecursively(log_dir)
+        print (log_dir, "deleted")
+    tf.gfile.MakeDirs(log_dir)
+    print(log_dir, 'created')
+
+
 def epoch_summary():
     run_metadata = tf.RunMetadata()
     train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
@@ -83,51 +157,41 @@ def epoch_summary():
     train_writer.add_summary(summary_train, epoch)
     valid_writer.add_summary(summary_valid, epoch)
 
-    print("cost_batch=", "{:.6f}".format(cost_batch),
-          "cost_train=", "{:.6f}".format(cost_train),
+    print("cost_train=", "{:.6f}".format(cost_train),
           "cost_valid=", "{:.6f}".format(cost_valid))
 
 # read data #
-file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
-file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
-Aname = '(F3.msk)'
-Bname = '(F3)'
+file = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.B.mask90.hd5" #data need imputation
+file_benchmark = "../../data/splat_v1-1-2_norm_log/splat.OneGroup.norm.log.B.hd5"
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
 
-
-# Parameters #
-print ("this is just testing version, superfast and bad")
-j = 800
-learning_rate = 0.002
-training_epochs = 20000 #100
-batch_size = 128
-sd = 0.0001 #stddev for random init
-n_input = n
-n_hidden_1 = 500
-log_dir = './re_train'
-scimpute.refresh_logfolder(log_dir)
-display_step = 100
-snapshot_step = 1000
-
-corr_log = []
-epoch_log = []
-
 # rand split data
-[df_train, df_valid, df_test] = scimpute.split_df(df)
-# filter data
-solid_row_id_train = (df_train.ix[:, j:j+1] > 0).values
-df_train = df_train[solid_row_id_train]
-solid_row_id_valid = (df_valid.ix[:, j:j+1] > 0).values
-df_valid = df_valid[solid_row_id_valid]
+[df_train, df_valid, df_test] = split_df(df)
 
-# df2 benchmark
 df2_train = df2.ix[df_train.index]
 df2_valid = df2.ix[df_valid.index]
 df2_test = df2.ix[df_test.index]
+
+# Parameters #
+print ("this is just testing version, superfast and bad")
+j=3
+learning_rate = 0.0001
+training_epochs = 20
+batch_size = 256
+sd = 0.0001 #stddev for random init
+n_input = n
+n_hidden_1 = 500
+log_dir = './re_train_withZero'
+refresh_logfolder()
+display_step = 1
+snapshot_step = 5
+
 print_parameters()
 
+corr_log = []
+epoch_log = []
 
 # Define model #
 X = tf.placeholder(tf.float32, [None, n_input])  # input
@@ -167,7 +231,6 @@ sess = tf.Session()
 saver = tf.train.Saver()
 saver.restore(sess, "./pre_train/step1.ckpt")
 
-tf.set_random_seed(4)  # seed
 focusFnn_params = {
     'w1': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev=sd), name='focusFnn_w1'),
     'b1': tf.Variable(tf.random_normal([1], mean=30*sd, stddev=sd), name='focusFnn_b1')
@@ -181,7 +244,7 @@ def focusFnn(x):
         # Encoder Hidden layer with sigmoid activation #1
         layer_1 = tf.nn.relu(tf.add(tf.matmul(x, focusFnn_params['w1']),
                                        focusFnn_params['b1']))
-        variable_summaries('fnn_w1', focusFnn_params['w1'])
+        variable_summaries('fnn_wq', focusFnn_params['w1'])
         variable_summaries('fnn_b1', focusFnn_params['b1'])
         variable_summaries('fnn_a1', layer_1)
     return layer_1
@@ -204,10 +267,10 @@ train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost, var_l
 train_writer = tf.summary.FileWriter(log_dir+'/train', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
 
-evaluate_epoch0()
+epoch = 0
+epoch_summary()
 
 total_batch = int(math.floor(len(df_train)//batch_size))  # floor
-
 # Training cycle
 for epoch in range(1, training_epochs+1):
     tic_cpu = time.clock()
@@ -227,18 +290,6 @@ for epoch in range(1, training_epochs+1):
               round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
               round(toc_wall - tic_wall, 2), "Wall seconds")
         epoch_summary()
-
-        # log corr
-        h_train = sess.run(y_pred, feed_dict={X: df_train.values})
-        h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
-        # print("prediction_train:\n", h_train[0:5,:], "\ntruth_train:\n", df2_train.values[0:5, j:j + 1])
-        # print("prediction_valid:\n", h_valid[0:5,:], "\ntruth_valid:\n", df2_valid.values[0:5, j:j + 1])
-        corr_train = scimpute.corr_one_gene(df2_train.values[:,j:j+1], h_train)
-        corr_valid = scimpute.corr_one_gene(df2_valid.values[:,j:j+1], h_valid)
-        corr_log.append(corr_valid)
-        epoch_log.append(epoch)
-
-
         toc_log=time.time()
         print('log time for each epoch:', round(toc_log-tic_log, 1))
 
@@ -246,74 +297,15 @@ for epoch in range(1, training_epochs+1):
     if (epoch == 1) or (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
         snapshot()
-        # vis
-        encoder_w1 = sess.run(encoder_params['w1'])
-        encoder_b1 = sess.run(encoder_params['b1'])
-        encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
-
-        focusFnn_w1 = sess.run(focusFnn_params['w1'])
-        focusFnn_w1 = focusFnn_w1.reshape(len(focusFnn_w1), 1)
-        focusFnn_b1 = sess.run(focusFnn_params['b1'])
-        focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
-
         toc_log2 = time.time()
         print ('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
 train_writer.close()
 valid_writer.close()
 
-# summaries and plots #
-# calculation
+scatterplot(epoch_log, corr_log, 'correlation_metrics.step1', 'epoch', 'Pearson corr with ground truth')
 h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
-h = sess.run(y_pred, feed_dict={X: df.values})
-code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
-
-# learning curve
-scimpute.curveplot(epoch_log, corr_log,
-                     title='learning_curve_pearsonr.step2',
-                     xlabel='epoch',
-                     ylabel='Pearson corr (predction vs ground truth, valid)')
-
-
-# gene-correlation for gene-j
-scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:,0],
-                      title=str('scatterplot, gene-' + str(j) + ', valid, step2'),
-                      xlabel='Ground Truth ' + Aname,
-                      ylabel='Prediction ' + Bname
-                      )
-
-# visualization of weights (new way)
-encoder_w1 = sess.run(encoder_params['w1'])  #1000, 500
-encoder_b1 = sess.run(encoder_params['b1'])  #500, (do T)
-encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
-encoder_b1_T = encoder_b1.T
-
-scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
-
-# problem
-focusFnn_w1 = sess.run(focusFnn_params['w1'])  #500, 1
-focusFnn_b1 = sess.run(focusFnn_params['b1'])  #1
-focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
-focusFnn_b1_T = focusFnn_b1.T
-
-scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1')
-
-# old way
-# scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
-# scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
-# scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
-# scimpute.heatmap_vis2(decoder_b1, title='decoder_b1')
-
-# vis df
-def visualization_of_dfs():
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values, df2.values])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df2.values, title='df2'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-
-visualization_of_dfs()
+scatterplot2(df2_valid.values[:,j:j+1], h_valid, 'Ground Truth vs Prediction in Validation set, with zeros', 'Ground Truth B', 'Prediction from B.msk (with zeros)')
 
 print("Finished!")
 

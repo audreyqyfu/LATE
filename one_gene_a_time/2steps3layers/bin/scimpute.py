@@ -141,9 +141,9 @@ def bone_marrow_biaxial_plots(scdata):
     genescatterplot('Elane', 'Cebpe', scdata)
 
 
-def heatmap_vis(arr, title='visualization of matrix', cmap="rainbow",
-    vmin = None, vmax = None, xlab = '', ylab = ''):
-    '''heatmap visualization of 2D matrix
+def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="rainbow",
+    vmin=None, vmax=None, xlab='', ylab=''):
+    '''heatmap visualization of 2D matrix, with plt.imshow(), in a square manner
     cmap options PiYG for [neg, 0, posi]
     Greys Reds for [0, max]
     rainbow for [0,middle,max]'''
@@ -157,7 +157,7 @@ def heatmap_vis(arr, title='visualization of matrix', cmap="rainbow",
         vmax = np.max(arr)
 
     fig = plt.figure(figsize=(9, 9))
-    plt.imshow(arr, cmap=cmap, vmin = vmin, vmax = vmax)
+    plt.imshow(arr, cmap=cmap, vmin=vmin, vmax=vmax, aspect='auto')
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel(ylab)
@@ -166,9 +166,10 @@ def heatmap_vis(arr, title='visualization of matrix', cmap="rainbow",
     plt.close(fig)
     print('heatmap vis ', title, ' done')
 
+
 def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
     vmin = None, vmax = None, xlab = '', ylab = ''):
-    '''heatmap visualization of 2D matrix
+    '''heatmap visualization of 2D matrix, with plt.pcolor()
     cmap options PiYG for [neg, 0, posi]
     Greys Reds for [0, max]
     rainbow for [0,middle,max]'''
@@ -190,9 +191,6 @@ def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
     plt.savefig(fname, bbox_inches='tight')
     plt.close(fig)
     print('heatmap vis ', title, ' done')
-
-
-
 
 
 def hist_arr_flat (arr, title='', xlab='', ylab=''):
@@ -276,9 +274,10 @@ def curveplot(x, y, title, xlabel, ylabel):
     plt.close()
 
 
-def scatterplot2(x, y, title=None, xlabel=None, ylabel=None):
+def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range=None):
     '''x is slice, y is a slice
-    have to be slice to help pearsonr(x,y)[0] work'''
+    have to be slice to help pearsonr(x,y)[0] work
+    range=[min, max]'''
     # create plots directory
     if not os.path.exists("plots"):
         os.makedirs("plots")
@@ -290,8 +289,14 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None):
     plt.title(str(title+"\ncorr: "+corr))
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.xlim(0, 5)
-    plt.ylim(0, 5)
+    if range is None:
+        max, min = max_min_element_in_arrs([x,y])
+        plt.xlim(min, max)
+        plt.ylim(min,max)
+    else:
+        plt.xlim(range[0], range[1])
+        plt.ylim(range[0], range[1])
+
     plt.savefig(fprefix + '.png', bbox_inches='tight')
     plt.close()
 

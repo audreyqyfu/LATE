@@ -54,11 +54,11 @@ def variable_summaries(name, var):
 
 
 def evaluate_epoch0():
-    cost_train = sess.run(cost, feed_dict={X: df_train.values})
-    cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
+    cost_train = sess.run(cost, feed_dict={X: df_train.values, keep_prob_input: 1, keep_prob_hidden: 1})
+    cost_valid = sess.run(cost, feed_dict={X: df_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
     print("\nEpoch 0: cost_train=", round(cost_train, 3), "cost_valid=", round(cost_valid, 3))
-    h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100]})
-    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100]})
+    h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100], keep_prob_input: 1, keep_prob_hidden: 1})
+    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100], keep_prob_input: 1, keep_prob_hidden: 1})
     print("medium benchmark-cell-pearsonr in first 100 train cells, between prediction and ground truth: ",
           scimpute.medium_corr(df2_train.values, h_train))
     print("medium benchmark-cell-pearsonr in first 100 valid cells: between prediction and ground truth:",
@@ -69,8 +69,8 @@ def epoch_summary():
     run_metadata = tf.RunMetadata()
     train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
 
-    h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100]})
-    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100]})
+    h_train = sess.run(y_pred, feed_dict={X: df_train.values[:100], keep_prob_input: 1, keep_prob_hidden: 1})
+    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values[:100], keep_prob_input: 1, keep_prob_hidden: 1})
     corr_train = scimpute.medium_corr(df2_train.values, h_train)
     corr_valid = scimpute.medium_corr(df2_valid.values, h_valid)
     print("medium cell-pearsonr in first 100 train cells: ", corr_train)
@@ -80,8 +80,8 @@ def epoch_summary():
 
     # Summary
     merged = tf.summary.merge_all()
-    [summary_train, cost_train] = sess.run([merged, cost], feed_dict={X: df_train.values, M: df2_train.values})
-    [summary_valid, cost_valid] = sess.run([merged, cost], feed_dict={X: df_valid.values, M: df2_valid.values})
+    [summary_train, cost_train] = sess.run([merged, cost], feed_dict={X: df_train.values, M: df2_train.values, keep_prob_input: 1, keep_prob_hidden: 1})
+    [summary_valid, cost_valid] = sess.run([merged, cost], feed_dict={X: df_valid.values, M: df2_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
     train_writer.add_summary(summary_train, epoch)
     valid_writer.add_summary(summary_valid, epoch)
 
@@ -92,12 +92,12 @@ def epoch_summary():
 def snapshot():
     print("#Snapshot: ")
     # show full data-set corr
-    h_train = sess.run(y_pred, feed_dict={X: df_train.values})  # np.array [len(df_train),1]
-    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+    h_train = sess.run(y_pred, feed_dict={X: df_train.values, keep_prob_input: 1, keep_prob_hidden: 1})  # np.array [len(df_train),1]
+    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
     print("medium cell-pearsonr in all train data: ", scimpute.medium_corr(df2_train.values, h_train, num=len(df_train)))
     print("medium cell-pearsonr in all valid data: ", scimpute.medium_corr(df2_valid.values, h_valid, num=len(df_valid)))
     # save predictions
-    h_input = sess.run(y_pred, feed_dict={X: df.values})
+    h_input = sess.run(y_pred, feed_dict={X: df.values, keep_prob_input: 1, keep_prob_hidden: 1})
     print("medium cell-pearsonr in all imputation cells: ", scimpute.medium_corr(df2.values, h_input, num=m))
     df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
     scimpute.save_hd5(df_h_input, log_dir + "/imputation.step1.hd5")
@@ -132,6 +132,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0001
+# todo change epochs
 training_epochs = 150
 batch_size = 256
 sd = 0.0001  # stddev for random init
@@ -171,8 +172,8 @@ keep_prob_hidden = tf.placeholder(tf.float32)
 def encoder(x):
     with tf.name_scope("Encoder"):
         # Encoder Hidden layer with sigmoid activation #1
-        # x_drop = tf.nn.dropout(x, 0.2)
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, encoder_params['w1']),
+        x_drop = tf.nn.dropout(x, keep_prob_input)
+        layer_1 = tf.nn.relu(tf.add(tf.matmul(x_drop, encoder_params['w1']),
                                     encoder_params['b1']))
         variable_summaries('encoder_w1', encoder_params['w1'])
         variable_summaries('encoder_b1', encoder_params['b1'])
@@ -183,7 +184,8 @@ def encoder(x):
 def decoder(x):
     with tf.name_scope("Decoder"):
         # Encoder Hidden layer with sigmoid activation #1
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, decoder_params['w1']),
+        x_drop = tf.nn.dropout(x, keep_prob_hidden)
+        layer_1 = tf.nn.relu(tf.add(tf.matmul(x_drop, decoder_params['w1']),
                                     decoder_params['b1']))
         variable_summaries('decoder_w1', decoder_params['w1'])
         variable_summaries('decoder_b1', decoder_params['b1'])
@@ -233,7 +235,8 @@ for epoch in range(1, training_epochs + 1):
     for i in range(total_batch):
         indices = np.arange(batch_size * i, batch_size * (i + 1))
         batch_xs = df_train.values[indices, :]
-        _, cost_batch = sess.run([train_op, cost], feed_dict={X: batch_xs})
+        _, cost_batch = sess.run([train_op, cost], feed_dict={X: batch_xs,
+                                                              keep_prob_input: 0.8, keep_prob_hidden: 0.5})
     toc_cpu = time.clock()
     toc_wall = time.time()
 
@@ -260,9 +263,9 @@ valid_writer.close()
 
 # summaries and plots #
 # calculation
-h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
-h = sess.run(y_pred, feed_dict={X: df.values})
-code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
+h_valid = sess.run(y_pred, feed_dict={X: df_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
+h = sess.run(y_pred, feed_dict={X: df.values, keep_prob_input: 1, keep_prob_hidden: 1})
+code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
 
 # learning curve
 scimpute.curveplot(epoch_log, corr_log,
