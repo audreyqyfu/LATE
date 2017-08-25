@@ -270,10 +270,13 @@ for epoch in range(1, training_epochs+1):
 train_writer.close()
 valid_writer.close()
 
+
 # summaries and plots #
-# calculation
+h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
 h_valid_solid = sess.run(y_pred, feed_dict={X: df_valid_solid.values})
 h = sess.run(y_pred, feed_dict={X: df.values})
+
+# code_neck_valid_solid = sess.run(encoder_op, feed_dict={X: df_valid_solid.values})
 code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
 
 # learning curve
@@ -282,9 +285,8 @@ scimpute.curveplot(epoch_log, corr_log,
                      xlabel='epoch',
                      ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
 
-
 # gene-correlation for gene-j
-scimpute.scatterplot2(df2_valid_solid.values[:, j], h_valid_solid[:,0],
+scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:,0],
                       title=str('scatterplot, gene-' + str(j) + ', valid, step2'),
                       xlabel='Ground Truth ' + Aname,
                       ylabel='Prediction ' + Bname
@@ -305,12 +307,7 @@ focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
 focusFnn_b1_T = focusFnn_b1.T
 
 scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1')
-
-# old way
-# scimpute.heatmap_vis(encoder_w1, title='encoder_w1')
-# scimpute.heatmap_vis(decoder_w1.T, title='decoder_w1.T')
-# scimpute.heatmap_vis2(encoder_b1.T, title='encoder_b1.T')
-# scimpute.heatmap_vis2(decoder_b1, title='decoder_b1')
+scimpute.heatmap_vis(code_neck_valid, title='code_neck_valid, all cells' + Bname, xlab='', ylab='', vmax=max, vmin=min)
 
 # vis df
 def visualization_of_dfs():
