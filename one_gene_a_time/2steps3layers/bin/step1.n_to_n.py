@@ -132,7 +132,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0001
-training_epochs = 1
+training_epochs = 1  #todo change epochs
 batch_size = 256
 sd = 0.0001  # stddev for random init
 n_input = n

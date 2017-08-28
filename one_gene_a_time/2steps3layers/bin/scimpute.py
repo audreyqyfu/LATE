@@ -142,14 +142,14 @@ def bone_marrow_biaxial_plots(scdata):
 
 
 def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="rainbow",
-    vmin=None, vmax=None, xlab='', ylab=''):
+    vmin=None, vmax=None, xlab='', ylab='', dir='plots'):
     '''heatmap visualization of 2D matrix, with plt.imshow(), in a square manner
     cmap options PiYG for [neg, 0, posi]
     Greys Reds for [0, max]
     rainbow for [0,middle,max]'''
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fname = "./plots/" + title + '.vis.png'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fname = './' + dir + '/' + title + '.vis.png'
 
     if (vmin is None):
         vmin = np.min(arr)
@@ -168,14 +168,14 @@ def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="r
 
 
 def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
-    vmin = None, vmax = None, xlab = '', ylab = ''):
+    vmin = None, vmax = None, xlab = '', ylab = '', dir='plots'):
     '''heatmap visualization of 2D matrix, with plt.pcolor()
     cmap options PiYG for [neg, 0, posi]
     Greys Reds for [0, max]
     rainbow for [0,middle,max]'''
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fname = "./plots/" + title + '.vis.png'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fname = './' + dir + '/' + title + '.vis.png'
 
     if (vmin is None):
         vmin = np.min(arr)
