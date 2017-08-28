@@ -132,7 +132,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0001
-training_epochs = 1  #todo change epochs
+training_epochs = 150
 batch_size = 256
 sd = 0.0001  # stddev for random init
 n_input = n
@@ -308,6 +308,8 @@ visualization_of_dfs()
 
 # visualizing activations
 scimpute.heatmap_vis(code_neck_valid, title='code bottle-neck, valid', xlab='nodes', ylab='cells')
+# save activations
+np.save('code_neck_valid', code_neck_valid)
 
 sess.close()
 print("Finished!")
