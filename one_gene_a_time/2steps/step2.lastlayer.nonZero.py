@@ -256,8 +256,8 @@ weights2 = {
     'fnn_w2': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev= sd), name='fnn_w2')
 }
 biases2 = {
-    'fnn_b1': tf.Variable(tf.random_normal([n_hidden_1], mean=30*sd, stddev=sd), name='fnn_b1'),
-    'fnn_b2': tf.Variable(tf.random_normal([1], mean=30 * sd, stddev=sd), name='fnn_b2')
+    'fnn_b1': tf.Variable(tf.random_normal([n_hidden_1], mean=100*sd, stddev=sd), name='fnn_b1'),
+    'fnn_b2': tf.Variable(tf.random_normal([1], mean=100 * sd, stddev=sd), name='fnn_b2')
 
 }
 parameters2 = {**weights2, **biases2}
