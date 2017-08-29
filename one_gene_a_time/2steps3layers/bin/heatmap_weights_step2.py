@@ -16,6 +16,7 @@ import time
 
 print ('python version:', sys.version)
 print('tf.__version__', tf.__version__)
+raise Exception("not finished")
 
 # read data #
 file = "../../data/v1-1-5-2/v1-1-5-2.F2.msk.hd5" #data need imputation

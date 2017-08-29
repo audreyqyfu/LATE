@@ -1,6 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+raise Exception("not finished")
 
 m = np.random.rand(10,10)
 x = np.random.rand(1,m.shape[1])
