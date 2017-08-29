@@ -309,7 +309,7 @@ visualization_of_dfs()
 # visualizing activations
 scimpute.heatmap_vis(code_neck_valid, title='code bottle-neck, valid', xlab='nodes', ylab='cells')
 # save activations
-np.save('code_neck_valid', code_neck_valid)
+np.save(log_dir + '/code_neck_valid', code_neck_valid)
 
 sess.close()
 print("Finished!")
