@@ -32,8 +32,10 @@ def print_parameters():
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
-          "\nkeep_prob_input: ", pIn, "\n",
+          "\nkeep_prob_input: ", pIn,
           "\nkeep_prob_hidden: ", pHidden, "\n",
+          "\nfile: ", file,
+          "\nfile_benchmark: ", file_benchmark, "\n",
           "\ndf_train.values.shape", df_train.values.shape,
           "\ndf_valid.values.shape", df_valid.values.shape,
           "\ndf2_train.shape", df2_train.shape,
@@ -140,8 +142,8 @@ df2_test = df2.ix[df_test.index]
 learning_rate = 0.0001
 training_epochs = 300  # todo change epochs
 batch_size = 256
-pIn = 0.5
-pHidden = 0.5
+pIn = 0.1
+pHidden = 1
 sd = 0.0001  # stddev for random init
 n_input = n
 n_hidden_1 = 500

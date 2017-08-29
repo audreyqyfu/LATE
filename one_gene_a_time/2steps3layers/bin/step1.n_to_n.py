@@ -32,6 +32,8 @@ def print_parameters():
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
+          "\nfile: ", file,
+          "\nfile_benchmark: ", file_benchmark, "\n",
           "\ndf_train.values.shape", df_train.values.shape,
           "\ndf_valid.values.shape", df_valid.values.shape,
           "\ndf2_train.shape", df2_train.shape,
