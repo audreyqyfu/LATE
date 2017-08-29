@@ -75,9 +75,9 @@ def print_parameters():
 
 
 # read data #
-file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
+file = "../data/v1-1-5-3/v1-1-5-3.F3.hd5" #data need imputation
 file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
-Aname = '(F3.msk)'
+Aname = '(F3)'
 Bname = '(F3)'
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
