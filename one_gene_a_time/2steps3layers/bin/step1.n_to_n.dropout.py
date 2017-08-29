@@ -80,8 +80,10 @@ def epoch_summary():
 
     # Summary
     merged = tf.summary.merge_all()
-    [summary_train, cost_train] = sess.run([merged, cost], feed_dict={X: df_train.values, M: df2_train.values, keep_prob_input: 1, keep_prob_hidden: 1})
-    [summary_valid, cost_valid] = sess.run([merged, cost], feed_dict={X: df_valid.values, M: df2_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
+    [summary_train, cost_train] = sess.run([merged, cost], feed_dict={X: df_train.values, M: df2_train.values,
+                                                                      keep_prob_input: 1, keep_prob_hidden: 1})
+    [summary_valid, cost_valid] = sess.run([merged, cost], feed_dict={X: df_valid.values, M: df2_valid.values,
+                                                                      keep_prob_input: 1, keep_prob_hidden: 1})
     train_writer.add_summary(summary_train, epoch)
     valid_writer.add_summary(summary_valid, epoch)
 
@@ -94,8 +96,10 @@ def snapshot():
     # show full data-set corr
     h_train = sess.run(y_pred, feed_dict={X: df_train.values, keep_prob_input: 1, keep_prob_hidden: 1})  # np.array [len(df_train),1]
     h_valid = sess.run(y_pred, feed_dict={X: df_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
-    print("medium cell-pearsonr in all train data: ", scimpute.medium_corr(df2_train.values, h_train, num=len(df_train)))
-    print("medium cell-pearsonr in all valid data: ", scimpute.medium_corr(df2_valid.values, h_valid, num=len(df_valid)))
+    print("medium cell-pearsonr in all train data: ",
+          scimpute.medium_corr(df2_train.values, h_train, num=len(df_train)))
+    print("medium cell-pearsonr in all valid data: ",
+          scimpute.medium_corr(df2_valid.values, h_valid, num=len(df_valid)))
     # save predictions
     h_input = sess.run(y_pred, feed_dict={X: df.values, keep_prob_input: 1, keep_prob_hidden: 1})
     print("medium cell-pearsonr in all imputation cells: ", scimpute.medium_corr(df2.values, h_input, num=m))
@@ -118,7 +122,7 @@ def visualization_of_dfs():
 file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
 file_benchmark = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"
 Aname = '(E3)'
-Bname = '(F3)'
+Bname = '(E3)'  # careful
 df = pd.read_hdf(file).transpose()  # [cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
@@ -132,9 +136,10 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0001
-# todo change epochs
-training_epochs = 1
+training_epochs = 300  # todo change epochs
 batch_size = 256
+pIn = 0.5
+pHidden = 0.5
 sd = 0.0001  # stddev for random init
 n_input = n
 n_hidden_1 = 500
@@ -154,6 +159,9 @@ epoch_log = []
 X = tf.placeholder(tf.float32, [None, n_input])  # input
 M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 
+keep_prob_input = tf.placeholder(tf.float32)
+keep_prob_hidden = tf.placeholder(tf.float32)
+
 tf.set_random_seed(3)  # seed
 encoder_params = {
     'w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev=sd), name='encoder_w1'),
@@ -166,8 +174,9 @@ decoder_params = {
 }
 parameters = {**encoder_params, **decoder_params}
 
-keep_prob_input = tf.placeholder(tf.float32)
-keep_prob_hidden = tf.placeholder(tf.float32)
+
+
+
 
 def encoder(x):
     with tf.name_scope("Encoder"):
@@ -236,7 +245,7 @@ for epoch in range(1, training_epochs + 1):
         indices = np.arange(batch_size * i, batch_size * (i + 1))
         batch_xs = df_train.values[indices, :]
         _, cost_batch = sess.run([train_op, cost], feed_dict={X: batch_xs,
-                                                              keep_prob_input: 0.8, keep_prob_hidden: 0.5})
+                                                              keep_prob_input: pIn, keep_prob_hidden: pHidden})
     toc_cpu = time.clock()
     toc_wall = time.time()
 
@@ -270,7 +279,7 @@ code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values, keep_prob_
 # learning curve
 scimpute.curveplot(epoch_log, corr_log,
                      title='learning_curve_pearsonr.step1',
-                     xlabel='epoch',
+                     xlabel='epoch'+' (final corr = ' + str(corr_log[-1]) + ')',
                      ylabel='Pearson corr (predction vs ground truth, valid)')
 
 # gene-corr hist
@@ -311,6 +320,8 @@ visualization_of_dfs()
 
 # visualizing activations
 scimpute.heatmap_vis(code_neck_valid, title='code bottle-neck, valid', xlab='nodes', ylab='cells')
+# save activations
+np.save(log_dir + '/code_neck_valid', code_neck_valid)
 
 sess.close()
 print("Finished!")
