@@ -75,9 +75,9 @@ def print_parameters():
 
 
 # read data #
-file = "../data/v1-1-5-3/v1-1-5-3.F3.hd5" # todo change to F3.msk
+file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
 file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
-Aname = '(F3)' #  todo F3.msk
+Aname = '(F3.msk)'
 Bname = '(F3)'
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
@@ -90,14 +90,14 @@ j = 400
 print("\n\n>>> for gene", j)
 
 learning_rate = 0.002
-training_epochs = 5  # todo change to 10000
+training_epochs = 10000  # change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
 log_dir = './re_train' + '_j' + str(j)
 scimpute.refresh_logfolder(log_dir)
-display_step = 1  # todo change to 100
+display_step = 100  # change to 100
 snapshot_step = 1000
 
 corr_log = []
