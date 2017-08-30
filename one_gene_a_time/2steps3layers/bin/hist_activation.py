@@ -32,6 +32,9 @@ for j in index_decreasing[0:5]:
     activations = arr[:, j]
     scimpute.hist_arr_flat(activations, title='max-variance num'+ str(i) +', node' + str(j), xlab='activation value', ylab='freq')
 
+a_top1 = arr[:, index_decreasing[0]]
+a_top2 = arr[:, index_decreasing[1]]
+scimpute.scatterplot2(a_top1, a_top2, title="top1 vs top2", xlab='node_var_top1', ylab='node_var_top2')
 # a random node
 i = 100
 scimpute.hist_arr_flat(arr[:, i], title='activation ' + str(i), xlab='activation value', ylab='frequency')
