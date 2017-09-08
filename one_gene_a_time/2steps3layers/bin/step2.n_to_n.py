@@ -178,7 +178,7 @@ def epoch_summary():
 
 # read data #
 file = "../../../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
-file_benchmark = "../../../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5"
+file_benchmark = "../../../data/v1-1-5-3/v1-1-5-3.F3.hd5"
 df = pd.read_hdf(file).transpose() #[cells,genes]
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
