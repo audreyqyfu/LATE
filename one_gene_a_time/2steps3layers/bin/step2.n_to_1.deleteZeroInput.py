@@ -89,8 +89,8 @@ print ("this is just testing version, superfast and bad")
 j = 400
 print("\n\n>>> for gene", j)
 
-learning_rate = 0.002
-training_epochs = 10000  # change to 10000
+learning_rate = 0.0  # todo: was 0.002
+training_epochs = 0  # todo: change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
