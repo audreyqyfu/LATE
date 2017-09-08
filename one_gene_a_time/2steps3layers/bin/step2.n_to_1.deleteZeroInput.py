@@ -293,8 +293,8 @@ scimpute.curveplot(epoch_log, corr_log,
 # gene-correlation for gene-j
 scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:,0],
                       title=str('scatterplot, gene-' + str(j) + ', valid, step2'),
-                      xlabel='Ground Truth ' + Aname,
-                      ylabel='Prediction ' + Bname
+                      xlabel='Ground Truth ' + Bname,
+                      ylabel='Prediction ' + Aname
                       )
 
 # visualization of weights (new way)
