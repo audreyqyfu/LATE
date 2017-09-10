@@ -261,6 +261,10 @@ def medium_corr(arr1, arr2, num=100, accuracy=3):
 
 
 def curveplot(x, y, title, xlabel, ylabel):
+    # scimpute.curveplot(epoch_log, corr_log_valid,
+    #                      title='learning_curve_pearsonr.step2.gene'+str(j)+", valid",
+    #                      xlabel='epoch',
+    #                      ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
     # create plots directory
     if not os.path.exists("plots"):
         os.makedirs("plots")
@@ -276,6 +280,10 @@ def curveplot(x, y, title, xlabel, ylabel):
 
 def curveplot2(x, y, z, title, xlabel, ylabel):
     '''curveplot2(epoch_log, train_log, valid_log, title="t", xlabel="x", ylabel="y")'''
+    # scimpute.curveplot2(epoch_log, corr_log_train, corr_log_valid,
+    #                      title='learning_curve_pearsonr.step2.gene'+str(j)+", train_valid",
+    #                      xlabel='epoch',
+    #                      ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
     # create plots directory
     if not os.path.exists("plots"):
         os.makedirs("plots")

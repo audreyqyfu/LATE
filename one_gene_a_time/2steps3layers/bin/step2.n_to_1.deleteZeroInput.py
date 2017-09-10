@@ -310,19 +310,10 @@ for j in j_lst:
     # code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
 
     # learning curve for gene-j
-    scimpute.curveplot(epoch_log, corr_log_valid,
-                         title='learning_curve_pearsonr.step2.gene'+str(j)+", valid",
-                         xlabel='epoch',
-                         ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
-    scimpute.curveplot(epoch_log, corr_log_train,
-                         title='learning_curve_pearsonr.step2.gene'+str(j)+", train",
-                         xlabel='epoch',
-                         ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
     scimpute.curveplot2(epoch_log, corr_log_train, corr_log_valid,
-                         title='learning_curve_pearsonr.step2.gene'+str(j)+", train_valid",
+                         title='learning_curve_pearsonr.step2.gene'+str(j),
                          xlabel='epoch',
                          ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
-
 
     # gene-correlation for gene-j
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid_j[:,0],
