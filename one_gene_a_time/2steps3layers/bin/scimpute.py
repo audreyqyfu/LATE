@@ -287,8 +287,8 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range=None):
     corr = str(round(corr, 4))
     plt.plot(x, y, 'o')
     plt.title(str(title+"\ncorr: "+corr))
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
+    plt.xlabel(xlabel+"\nmean: "+str(round(np.mean(x), 2)) )
+    plt.ylabel(ylabel+"\nmean: "+str(round(np.mean(y), 2)) )
     if range is None:
         max, min = max_min_element_in_arrs([x,y])
         plt.xlim(min, max)
