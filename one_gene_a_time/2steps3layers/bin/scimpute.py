@@ -274,6 +274,23 @@ def curveplot(x, y, title, xlabel, ylabel):
     plt.close()
 
 
+def curveplot2(x, y, z, title, xlabel, ylabel):
+    '''curveplot2(epoch_log, train_log, valid_log, title="t", xlabel="x", ylabel="y")'''
+    # create plots directory
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
+    fprefix = "./plots/" + title
+    # plot
+    plt.plot(x, y, label='train')
+    plt.plot(x, z, label='valid')
+    plt.legend()
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.savefig(fprefix + '.png', bbox_inches='tight')
+    plt.close()
+
+
 def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range=None):
     '''x is slice, y is a slice
     have to be slice to help pearsonr(x,y)[0] work

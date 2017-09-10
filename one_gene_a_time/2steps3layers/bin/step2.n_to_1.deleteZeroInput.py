@@ -120,10 +120,12 @@ m, n = df.shape  # m: n_cells; n: n_genes
 # Parameters #
 print("this is just testing version, superfast and bad")
 j_lst = [800, 600, 400, 200, 0]
+j_lst = [800, 600]  # todo
+# j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.002  # todo: was 0.002 for SGD
-training_epochs = 10000  # todo: change to 10000
+training_epochs = 10  # todo: change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
@@ -131,7 +133,7 @@ n_hidden_1 = 500
 # log_dir = './re_train' + '_j' + str(j)
 # scimpute.refresh_logfolder(log_dir)
 display_step = 1  # todo: change to 100
-snapshot_step = 1000
+snapshot_step = 5000
 
 
 # Define model #
@@ -161,7 +163,8 @@ init_focusFnn = tf.variables_initializer(list(focusFnn_params.values()))
 for j in j_lst:
     print("\n>>> for gene", j)
     # prep #
-    corr_log = []
+    corr_log_train = []
+    corr_log_valid = []
     epoch_log = []
     log_dir = './re_train' + '_j' + str(j)
     scimpute.refresh_logfolder(log_dir)
@@ -236,9 +239,9 @@ for j in j_lst:
                 # Summary
                 merged = tf.summary.merge_all()
 
-                [summary_train, cost_train] = sess.run([merged, cost],
+                [summary_train, cost_train, cost_train_m] = sess.run([merged, cost, cost_benchmark],
                                                        feed_dict={X: df_train_solid.values, M: df2_train_solid.values})
-                [summary_valid, cost_valid] = sess.run([merged, cost],
+                [summary_valid, cost_valid, cost_valid_m] = sess.run([merged, cost, cost_benchmark],
                                                        feed_dict={X: df_valid_solid.values, M: df2_valid_solid.values})
                 train_writer.add_summary(summary_train, epoch)
                 valid_writer.add_summary(summary_valid, epoch)
@@ -250,13 +253,14 @@ for j in j_lst:
             epoch_summary()
 
             # log corr
-            h_train = sess.run(y_pred, feed_dict={X: df_train.values})
-            h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
+            h_train_j = sess.run(y_pred, feed_dict={X: df_train.values})
+            h_valid_j = sess.run(y_pred, feed_dict={X: df_valid.values})
             # print("prediction_train:\n", h_train[0:5,:], "\ntruth_train:\n", df2_train_solid.values[0:5, j:j + 1])
             # print("prediction_valid:\n", h_valid[0:5,:], "\ntruth_valid:\n", df2_valid_solid.values[0:5, j:j + 1])
-            corr_train = scimpute.corr_one_gene(df2_train.values[:,j:j+1], h_train)
-            corr_valid = scimpute.corr_one_gene(df2_valid.values[:,j:j+1], h_valid)
-            corr_log.append(corr_valid)
+            corr_train = scimpute.corr_one_gene(df2_train.values[:,j:j+1], h_train_j)
+            corr_valid = scimpute.corr_one_gene(df2_valid.values[:,j:j+1], h_valid_j)
+            corr_log_valid.append(corr_valid)
+            corr_log_train.append(corr_train)
             epoch_log.append(epoch)
 
 
@@ -289,28 +293,36 @@ for j in j_lst:
     h_valid_solid_j = sess.run(y_pred, feed_dict={X: df_valid_solid.values})
     h_j = sess.run(y_pred, feed_dict={X: df.values})
     try:
-        h
+        H
     except NameError:
-        print('h not defined')
-        h = h_j
-        h_valid = h_valid_j
+        print('H not defined')
+        H = h_j
+        H_valid = h_valid_j
     else:
-        print('h is defined')
-        h = np.column_stack((h, h_j))
-        h_valid = np.column_stack((h_valid, h_valid_j))
+        print('H is defined')
+        H = np.column_stack((H, h_j))
+        H_valid = np.column_stack((H_valid, h_valid_j))
 
-    print('h:', h.shape, h)
+    print('H:', H.shape, H)
 
 
-    # h_valid = np.concatenate((h_valid, h_valid_j), axis=1)
     # code_neck_valid_solid = sess.run(encoder_op, feed_dict={X: df_valid_solid.values})
     # code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
 
     # learning curve for gene-j
-    scimpute.curveplot(epoch_log, corr_log,
-                         title='learning_curve_pearsonr.step2.gene'+str(j),
+    scimpute.curveplot(epoch_log, corr_log_valid,
+                         title='learning_curve_pearsonr.step2.gene'+str(j)+", valid",
                          xlabel='epoch',
                          ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
+    scimpute.curveplot(epoch_log, corr_log_train,
+                         title='learning_curve_pearsonr.step2.gene'+str(j)+", train",
+                         xlabel='epoch',
+                         ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
+    scimpute.curveplot2(epoch_log, corr_log_train, corr_log_valid,
+                         title='learning_curve_pearsonr.step2.gene'+str(j)+", train_valid",
+                         xlabel='epoch',
+                         ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
+
 
     # gene-correlation for gene-j
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid_j[:,0],
@@ -339,14 +351,14 @@ scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
 # vis df
 def visualization_of_dfs():
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values, df2.values,
-                                                 h, h_valid])
+                                                 H, H_valid])
     scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     # scimpute.heatmap_vis(df_valid_solid.values, title='df.valid.solid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(df.values, title='df.all'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(df2.values, title='df2.all'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     # scimpute.heatmap_vis(h_valid_solid, title='h.valid.solid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h, title='h.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(H_valid, title='h.valid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(H, title='h.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
 visualization_of_dfs()
 
 
