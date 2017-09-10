@@ -119,20 +119,19 @@ m, n = df.shape  # m: n_cells; n: n_genes
 
 # Parameters #
 print("this is just testing version, superfast and bad")
-j_lst = [800, 600, 400, 200, 0]
-j_lst = [800, 600]  # todo
+j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]  # todo
 # j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.002  # todo: was 0.002 for SGD
-training_epochs = 10  # todo: change to 10000
+training_epochs = 10000  # todo: change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
 # log_dir = './re_train' + '_j' + str(j)
 # scimpute.refresh_logfolder(log_dir)
-display_step = 1  # todo: change to 100
+display_step = 100  # todo: change to 100
 snapshot_step = 5000
 
 
@@ -165,6 +164,10 @@ for j in j_lst:
     # prep #
     corr_log_train = []
     corr_log_valid = []
+    mse_train = []
+    mse_valid = []
+    mse_bench_train = []
+    mse_bench_valid = []
     epoch_log = []
     log_dir = './re_train' + '_j' + str(j)
     scimpute.refresh_logfolder(log_dir)
@@ -198,7 +201,7 @@ for j in j_lst:
     y_benchmark = M[:, j:j+1]
     y_pred = fnn_op
 
-    with tf.name_scope("Metrics"):
+    with tf.name_scope("Metrics"):  # todo: reinit metrics for each gene in the j loop
         cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
         cost_benchmark = tf.reduce_mean(tf.pow(y_benchmark - y_pred, 2))
         tf.summary.scalar('cost', cost)
@@ -243,6 +246,10 @@ for j in j_lst:
                                                        feed_dict={X: df_train_solid.values, M: df2_train_solid.values})
                 [summary_valid, cost_valid, cost_valid_m] = sess.run([merged, cost, cost_benchmark],
                                                        feed_dict={X: df_valid_solid.values, M: df2_valid_solid.values})
+                mse_bench_train.append(cost_train_m)
+                mse_bench_valid.append(cost_valid_m)
+                mse_train.append(cost_train)
+                mse_valid.append(cost_valid)
                 train_writer.add_summary(summary_train, epoch)
                 valid_writer.add_summary(summary_valid, epoch)
 
@@ -311,9 +318,17 @@ for j in j_lst:
 
     # learning curve for gene-j
     scimpute.curveplot2(epoch_log, corr_log_train, corr_log_valid,
-                         title='learning_curve_pearsonr.step2.gene'+str(j),
+                         title='learning_curve_pearsonr_bench.step2.gene'+str(j),
                          xlabel='epoch',
-                         ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
+                         ylabel='Pearson corr (predction vs ground truth)')
+    scimpute.curveplot2(epoch_log, mse_bench_train, mse_bench_valid,
+                         title='learning_curve_MSE_bench.step2.gene'+str(j),
+                         xlabel='epoch',
+                         ylabel='MSE (predction vs ground truth)')
+    scimpute.curveplot2(epoch_log, mse_train, mse_valid,
+                         title='learning_curve_MSE_input.step2.gene'+str(j),
+                         xlabel='epoch',
+                         ylabel='MSE (predction vs input)')
 
     # gene-correlation for gene-j
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid_j[:,0],
