@@ -118,12 +118,12 @@ m, n = df.shape  # m: n_cells; n: n_genes
 
 
 # Parameters #
-print ("this is just testing version, superfast and bad")
-j_lst = [1, 200, 400, 600, 800]
+print("this is just testing version, superfast and bad")
+j_lst = [800, 600, 400, 200, 0]
 # j = 400
 # print("\n\n>>> for gene", j)
-learning_rate = 0.002
-training_epochs = 10  # todo: change to 10000
+learning_rate = 0.002  # todo: was 0.002 for SGD
+training_epochs = 10000  # todo: change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
@@ -285,58 +285,71 @@ for j in j_lst:
 
 
     # summaries and plots #
-    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values})
-    h_valid_solid = sess.run(y_pred, feed_dict={X: df_valid_solid.values})
-    h = sess.run(y_pred, feed_dict={X: df.values})
+    h_valid_j = sess.run(y_pred, feed_dict={X: df_valid.values})
+    h_valid_solid_j = sess.run(y_pred, feed_dict={X: df_valid_solid.values})
+    h_j = sess.run(y_pred, feed_dict={X: df.values})
+    try:
+        h
+    except NameError:
+        print('h not defined')
+        h = h_j
+        h_valid = h_valid_j
+    else:
+        print('h is defined')
+        h = np.column_stack((h, h_j))
+        h_valid = np.column_stack((h_valid, h_valid_j))
 
+    print('h:', h.shape, h)
+
+
+    # h_valid = np.concatenate((h_valid, h_valid_j), axis=1)
     # code_neck_valid_solid = sess.run(encoder_op, feed_dict={X: df_valid_solid.values})
     # code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
 
-    # learning curve
+    # learning curve for gene-j
     scimpute.curveplot(epoch_log, corr_log,
                          title='learning_curve_pearsonr.step2.gene'+str(j),
                          xlabel='epoch',
                          ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
 
     # gene-correlation for gene-j
-    scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:,0],
-                          title=str('scatterplot, gene-' + str(j) + ', valid, step2'),
+    scimpute.scatterplot2(df2_valid.values[:, j], h_valid_j[:,0],
+                          title=str('gene-' + str(j) + ', valid, step2'),
                           xlabel='Ground Truth ' + Bname,
                           ylabel='Prediction ' + Aname
                           )
 
-    # visualization of weights (new way)
-    encoder_w1 = sess.run(encoder_params['w1'])  #1000, 500
-    encoder_b1 = sess.run(encoder_params['b1'])  #500, (do T)
-    encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
-    encoder_b1_T = encoder_b1.T
-
-    scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
-
-    # problem
+    # todo: better vis of focusFnn
     focusFnn_w1 = sess.run(focusFnn_params['w1'])  #500, 1
     focusFnn_b1 = sess.run(focusFnn_params['b1'])  #1
     focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
     focusFnn_b1_T = focusFnn_b1.T
-
-    scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1')
+    scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1, '+'gene-'+str(j))
     # scimpute.heatmap_vis(code_neck_valid, title='code_neck_valid, all cells' + Bname, xlab='', ylab='', vmax=max, vmin=min)
 
-    # vis df
-    def visualization_of_dfs():
-        max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid_solid, h, df.values, df2.values])
-        scimpute.heatmap_vis(df_valid_solid.values, title='df.valid.solid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(h_valid_solid, title='h.valid.solid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(df_valid.values, title='df.valid.all'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(h_valid, title='h.valid.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(df.values, title='df.all'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(df2.values, title='df2.all'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(h, title='h.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+    print("<<< Finished gene", j)
 
-    visualization_of_dfs()
+# out of loop #
+# visualization of weights
+encoder_w1 = sess.run(encoder_params['w1'])  #1000, 500
+encoder_b1 = sess.run(encoder_params['b1'])  #500, (do T)
+encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
+encoder_b1_T = encoder_b1.T
+scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
+# vis df
+def visualization_of_dfs():
+    max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values, df2.values,
+                                                 h, h_valid])
+    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df_valid_solid.values, title='df.valid.solid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df.values, title='df.all'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2.values, title='df2.all'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(h_valid_solid, title='h.valid.solid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h, title='h.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+visualization_of_dfs()
 
 
-    print("Finished gene", j)
 sess.close()
 
 
