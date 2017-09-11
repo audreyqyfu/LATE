@@ -44,8 +44,6 @@ batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
-keep_prob_input = tf.placeholder(tf.float32)
-keep_prob_hidden = tf.placeholder(tf.float32)
 pIn = 1.0
 pHidden = 0.1
 # log_dir = './re_train' + '_j' + str(j)
@@ -55,6 +53,10 @@ snapshot_step = 5000
 
 # loop over j_lst, init focusFnn w/b, keep encoder w/b same
 for j in j_lst:
+
+    keep_prob_input = tf.placeholder(tf.float32)
+    keep_prob_hidden = tf.placeholder(tf.float32)
+
     def encoder(x):
         with tf.name_scope("Encoder"):
             # Encoder Hidden layer with sigmoid activation #1
