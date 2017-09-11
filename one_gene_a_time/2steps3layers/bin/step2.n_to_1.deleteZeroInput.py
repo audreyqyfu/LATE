@@ -26,6 +26,7 @@ file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
 Aname = '(F3.msk)'
 Bname = '(F3)'
 df = pd.read_hdf(file).transpose() #[cells,genes]
+print("input_array:\n", df.values[0:4, 0:4], "\n")
 df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
 m, n = df.shape  # m: n_cells; n: n_genes
 
@@ -33,12 +34,12 @@ m, n = df.shape  # m: n_cells; n: n_genes
 # Parameters #
 print("this is just testing version, superfast and bad")
 j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]  # todo
-j_lst = [0, 800]  # todo
+# j_lst = [0, 800]  # todo
 # j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.002  # todo: was 0.002 for SGD
-training_epochs = 2  # todo: change to 10000
+training_epochs = 10000  # todo: change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
@@ -127,13 +128,14 @@ for j in j_lst:
               "\nepoches: ", training_epochs, "\n",
               "\ndf_train.shape", df_train.values.shape,
               "\ndf_valid.shape", df_valid.values.shape,
-              "\ndf2_train.shape", df2_train.values.shape,
-              "\ndf2_valid.shape", df2_valid.values.shape,
-              "\ndf2_train_solid.shape", df2_train_solid.shape,
-              "\ndf2_valid_solid.values.shape", df2_valid_solid.values.shape,
               "\ndf_train_solid.shape", df_train_solid.values.shape,
-              "\ndf_valid_solid.shape", df_valid_solid.values.shape)
-        print("input_array:\n", df.values[0:4, 0:4], "\n")
+              "\ndf_valid_solid.shape", df_valid_solid.values.shape,
+              # "\ndf2_train.shape", df2_train.values.shape,
+              # "\ndf2_valid.shape", df2_valid.values.shape,
+              # "\ndf2_train_solid.shape", df2_train_solid.shape,
+              "\ndf2_valid_solid.values.shape", df2_valid_solid.values.shape
+              )
+
 
     # Define model #
     X = tf.placeholder(tf.float32, [None, n_input])  # input
@@ -301,15 +303,16 @@ for j in j_lst:
     try:
         H
     except NameError:
-        print('H not defined')
+        # print('H not defined')
         H = h_j
         H_valid = h_valid_j
     else:
-        print('H is defined')
+        # print('H is defined')
         H = np.column_stack((H, h_j))
         H_valid = np.column_stack((H_valid, h_valid_j))
 
     print('H:', H.shape, H)
+    time.sleep(1)
 
 
     # code_neck_valid_solid = sess.run(encoder_op, feed_dict={X: df_valid_solid.values})
@@ -355,20 +358,33 @@ for j in j_lst:
     scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
 
 
-    # vis df
-    def visualization_of_dfs():
-        max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values, df2.values,
-                                                     H, H_valid])
-        scimpute.heatmap_vis(df_valid.values, title='df.valid' + Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        # scimpute.heatmap_vis(df_valid_solid.values, title='df.valid.solid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(df.values, title='df.all' + Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(df2.values, title='df2.all' + Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-        # scimpute.heatmap_vis(h_valid_solid, title='h.valid.solid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(H_valid, title='h.valid' + Aname + '.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-        scimpute.heatmap_vis(H, title='h.all' + Aname + '.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-
-    visualization_of_dfs()
-
     sess.close()
     tf.reset_default_graph()
 
+
+# out loop #
+# only after all genes processed, do that dim match (df, H[:,j_lst])
+H_df = pd.DataFrame(data=H, columns=df.ix[:, j_lst].columns, index=df.ix[:, j_lst].index)
+scimpute.save_hd5(H_df, "./plots/imputation.step2.hd5")
+H_valid_df = pd.DataFrame(data=H_valid, columns=df_valid.ix[:, j_lst].columns, index=df_valid.ix[:, j_lst].index)
+scimpute.save_hd5(H_valid_df, "./plots/imputation.step2.valid.hd5")
+
+# vis df
+def visualization_of_dfs():
+    max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values,
+                                                 df2.values, df2_valid.values,
+                                                 H_df.values, H_valid_df.values])
+    scimpute.heatmap_vis(df_valid.values, title='df.valid' + Aname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df.values, title='df.all' + Aname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2_valid.values, title='df2.valid' + Bname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2.values, title='df2.all' + Bname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(H_valid_df, title='h.valid' + Aname + '.pred',
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(H_df, title='h.all' + Aname + '.pred',
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+
+visualization_of_dfs()
