@@ -44,6 +44,10 @@ batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 500
+keep_prob_input = tf.placeholder(tf.float32)
+keep_prob_hidden = tf.placeholder(tf.float32)
+pIn = 1.0
+pHidden = 0.1
 # log_dir = './re_train' + '_j' + str(j)
 # scimpute.refresh_logfolder(log_dir)
 display_step = 100  # todo: change to 100
@@ -76,7 +80,8 @@ for j in j_lst:
     def focusFnn(x):
         with tf.name_scope("Decoder"):
             # Encoder Hidden layer with sigmoid activation #1
-            layer_1 = tf.nn.relu(tf.add(tf.matmul(x, focusFnn_params['w1']),
+            x_drop = tf.nn.dropout(x, keep_prob_hidden)
+            layer_1 = tf.nn.relu(tf.add(tf.matmul(x_drop, focusFnn_params['w1']),
                                         focusFnn_params['b1']))
             variable_summaries('fnn_w1', focusFnn_params['w1'])
             variable_summaries('fnn_b1', focusFnn_params['b1'])
@@ -98,17 +103,21 @@ for j in j_lst:
 
 
     def evaluate_epoch0():
-        cost_train = sess.run(cost, feed_dict={X: df_train.values})
-        cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
+        cost_train = sess.run(cost, feed_dict={X: df_train.values,
+                                               keep_prob_input: 1, keep_prob_hidden: 1})
+        cost_valid = sess.run(cost, feed_dict={X: df_valid.values,
+                                               keep_prob_input: 1, keep_prob_hidden: 1})
         print("\nEpoch 0: cost_train=", round(cost_train, 3), "cost_valid=", round(cost_valid, 3))
-        h_input = sess.run(y_pred, feed_dict={X: df.values})
+        h_input = sess.run(y_pred, feed_dict={X: df.values,
+                                              keep_prob_input: 1, keep_prob_hidden: 1})
         print('corr', pearsonr(h_input, df.values[:, j:j + 1]))
         # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
 
 
     def snapshot():
         print("#Snapshot: ")
-        h_input = sess.run(y_pred, feed_dict={X: df.values})
+        h_input = sess.run(y_pred, feed_dict={X: df.values,
+                                              keep_prob_input: 1, keep_prob_hidden: 1})
         print('corr', pearsonr(h_input, df.values[:, j:j + 1]))
         # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
         df_h_input = pd.DataFrame(data=h_input, columns=df.columns[j:j + 1], index=df.index)
@@ -225,7 +234,8 @@ for j in j_lst:
         for i in range(total_batch):
             indices = np.arange(batch_size*i, batch_size*(i+1))
             batch_xs = df_train_solid.values[indices,:]
-            _, cost_batch = sess.run([train_op, cost], feed_dict={X: batch_xs})
+            _, cost_batch = sess.run([train_op, cost], feed_dict={X: batch_xs,
+                                                                  keep_prob_input: pIn, keep_prob_hidden: pHidden})
         toc_cpu = time.clock()
         toc_wall = time.time()
 
@@ -244,9 +254,11 @@ for j in j_lst:
                 merged = tf.summary.merge_all()
 
                 [summary_train, cost_train, cost_train_m] = sess.run([merged, cost, cost_benchmark],
-                                                       feed_dict={X: df_train_solid.values, M: df2_train_solid.values})
+                                                       feed_dict={X: df_train_solid.values, M: df2_train_solid.values,
+                                                                  keep_prob_input: 1, keep_prob_hidden: 1})
                 [summary_valid, cost_valid, cost_valid_m] = sess.run([merged, cost, cost_benchmark],
-                                                       feed_dict={X: df_valid_solid.values, M: df2_valid_solid.values})
+                                                       feed_dict={X: df_valid_solid.values, M: df2_valid_solid.values,
+                                                                  keep_prob_input: 1, keep_prob_hidden: 1})
                 mse_bench_train.append(cost_train_m)
                 mse_bench_valid.append(cost_valid_m)
                 mse_train.append(cost_train)
@@ -261,8 +273,10 @@ for j in j_lst:
             epoch_summary()
 
             # log corr
-            h_train_j = sess.run(y_pred, feed_dict={X: df_train.values})
-            h_valid_j = sess.run(y_pred, feed_dict={X: df_valid.values})
+            h_train_j = sess.run(y_pred, feed_dict={X: df_train.values,
+                                                    keep_prob_input: 1, keep_prob_hidden: 1})
+            h_valid_j = sess.run(y_pred, feed_dict={X: df_valid.values,
+                                                    keep_prob_input: 1, keep_prob_hidden: 1})
             # print("prediction_train:\n", h_train[0:5,:], "\ntruth_train:\n", df2_train_solid.values[0:5, j:j + 1])
             # print("prediction_valid:\n", h_valid[0:5,:], "\ntruth_valid:\n", df2_valid_solid.values[0:5, j:j + 1])
             corr_train = scimpute.corr_one_gene(df2_train.values[:,j:j+1], h_train_j)
@@ -297,9 +311,12 @@ for j in j_lst:
 
 
     # summaries and plots #
-    h_valid_j = sess.run(y_pred, feed_dict={X: df_valid.values})
-    h_valid_solid_j = sess.run(y_pred, feed_dict={X: df_valid_solid.values})
-    h_j = sess.run(y_pred, feed_dict={X: df.values})
+    h_valid_j = sess.run(y_pred, feed_dict={X: df_valid.values,
+                                            keep_prob_input: 1, keep_prob_hidden: 1})
+    h_valid_solid_j = sess.run(y_pred, feed_dict={X: df_valid_solid.values,
+                                                  keep_prob_input: 1, keep_prob_hidden: 1})
+    h_j = sess.run(y_pred, feed_dict={X: df.values,
+                                      keep_prob_input: 1, keep_prob_hidden: 1})
     try:
         H
     except NameError:
