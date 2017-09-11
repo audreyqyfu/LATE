@@ -20,93 +20,6 @@ import scimpute
 print ('python version:', sys.version)
 print('tf.__version__', tf.__version__)
 
-
-def variable_summaries(name, var):
-    """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
-    with tf.name_scope(name):
-        mean = tf.reduce_mean(var)
-        tf.summary.scalar('mean', mean)
-        with tf.name_scope('stddev'):
-            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
-        tf.summary.scalar('stddev', stddev)
-        tf.summary.scalar('max', tf.reduce_max(var))
-        tf.summary.scalar('min', tf.reduce_min(var))
-        tf.summary.histogram('histogram', var)
-
-
-def evaluate_epoch0():
-    cost_train = sess.run(cost, feed_dict={X: df_train.values})
-    cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
-    print("\nEpoch 0: cost_train=", round(cost_train,3), "cost_valid=", round(cost_valid,3))
-    h_input = sess.run(y_pred, feed_dict={X: df.values})
-    print('corr', pearsonr(h_input, df.values[:,j:j+1]))
-    # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
-
-
-def snapshot():
-    print("#Snapshot: ")
-    h_input = sess.run(y_pred, feed_dict={X: df.values})
-    print('corr', pearsonr(h_input, df.values[:,j:j+1]))
-    # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
-    df_h_input = pd.DataFrame(data=h_input, columns=df.columns[j:j+1], index=df.index)
-    scimpute.save_hd5(df_h_input, log_dir + "/imputation.step2.hd5")
-    # save model
-    save_path = saver.save(sess, log_dir + "/step2.ckpt")
-    print("Model saved in: %s" % save_path)
-
-
-def print_parameters():
-    print(os.getcwd(),"\n",
-        "\n# Hyper parameters:",
-        "\nn_features: ", n,
-        "\nn_hidden1: ", n_hidden_1,
-        "\nlearning_rate :", learning_rate,
-        "\nbatch_size: ", batch_size,
-        "\nepoches: ", training_epochs, "\n",
-        "\ndf_train.shape", df_train.values.shape,
-        "\ndf_valid.shape", df_valid.values.shape,
-        "\ndf2_train.shape", df2_train.values.shape,
-        "\ndf2_valid.shape", df2_valid.values.shape,
-        "\ndf2_train_solid.shape", df2_train_solid.shape,
-        "\ndf2_valid_solid.values.shape", df2_valid_solid.values.shape,
-        "\ndf_train_solid.shape", df_train_solid.values.shape,
-        "\ndf_valid_solid.shape", df_valid_solid.values.shape)
-    print("input_array:\n", df.values[0:4,0:4], "\n")
-
-
-def encoder(x) :
-    with tf.name_scope("Encoder"):
-        # Encoder Hidden layer with sigmoid activation #1
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, encoder_params['w1']),
-                                       encoder_params['b1']))
-        variable_summaries('encoder_w1', encoder_params['w1'])
-        variable_summaries('encoder_b1', encoder_params['b1'])
-        variable_summaries('encoder_a1', layer_1)
-    return layer_1
-
-
-def decoder(x):
-    with tf.name_scope("Decoder"):
-        # Encoder Hidden layer with sigmoid activation #1
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, decoder_params['w1']),
-                                       decoder_params['b1']))
-        variable_summaries('decoder_w1', decoder_params['w1'])
-        variable_summaries('decoder_b1', decoder_params['b1'])
-        variable_summaries('decoder_a1', layer_1)
-    return layer_1
-
-
-def focusFnn(x):
-    with tf.name_scope("Decoder"):
-        # Encoder Hidden layer with sigmoid activation #1
-        layer_1 = tf.nn.relu(tf.add(tf.matmul(x, focusFnn_params['w1']),
-                                       focusFnn_params['b1']))
-        variable_summaries('fnn_w1', focusFnn_params['w1'])
-        variable_summaries('fnn_b1', focusFnn_params['b1'])
-        variable_summaries('fnn_a1', layer_1)
-    return layer_1
-
-
 # read data #
 file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
 file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
@@ -120,11 +33,12 @@ m, n = df.shape  # m: n_cells; n: n_genes
 # Parameters #
 print("this is just testing version, superfast and bad")
 j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]  # todo
+j_lst = [0, 800]  # todo
 # j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.002  # todo: was 0.002 for SGD
-training_epochs = 10000  # todo: change to 10000
+training_epochs = 2  # todo: change to 10000
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
@@ -134,32 +48,117 @@ n_hidden_1 = 500
 display_step = 100  # todo: change to 100
 snapshot_step = 5000
 
-
-# Define model #
-X = tf.placeholder(tf.float32, [None, n_input])  # input
-M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
-encoder_params = {
-    'w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev=sd), name='encoder_w1'),
-    'b1': tf.Variable(tf.random_normal([n_hidden_1], mean=30*sd, stddev=sd), name='encoder_b1')
-}
-
-
-# Launch Session #
-sess = tf.Session()
-# restore encoder w/b, frozen, outsize j-loop
-saver = tf.train.Saver()
-saver.restore(sess, "./pre_train/step1.ckpt")
-
-# define fucusFnn_params only after restore, or error, because it's not in ckpt
-tf.set_random_seed(4)  # seed
-focusFnn_params = {
-    'w1': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev=sd), name='focusFnn_w1'),
-    'b1': tf.Variable(tf.random_normal([1], mean=30 * sd, stddev=sd), name='focusFnn_b1')
-}
-init_focusFnn = tf.variables_initializer(list(focusFnn_params.values()))
-
 # loop over j_lst, init focusFnn w/b, keep encoder w/b same
 for j in j_lst:
+    def encoder(x):
+        with tf.name_scope("Encoder"):
+            # Encoder Hidden layer with sigmoid activation #1
+            layer_1 = tf.nn.relu(tf.add(tf.matmul(x, encoder_params['w1']),
+                                        encoder_params['b1']))
+            variable_summaries('encoder_w1', encoder_params['w1'])
+            variable_summaries('encoder_b1', encoder_params['b1'])
+            variable_summaries('encoder_a1', layer_1)
+        return layer_1
+
+
+    def decoder(x):
+        with tf.name_scope("Decoder"):
+            # Encoder Hidden layer with sigmoid activation #1
+            layer_1 = tf.nn.relu(tf.add(tf.matmul(x, decoder_params['w1']),
+                                        decoder_params['b1']))
+            variable_summaries('decoder_w1', decoder_params['w1'])
+            variable_summaries('decoder_b1', decoder_params['b1'])
+            variable_summaries('decoder_a1', layer_1)
+        return layer_1
+
+
+    def focusFnn(x):
+        with tf.name_scope("Decoder"):
+            # Encoder Hidden layer with sigmoid activation #1
+            layer_1 = tf.nn.relu(tf.add(tf.matmul(x, focusFnn_params['w1']),
+                                        focusFnn_params['b1']))
+            variable_summaries('fnn_w1', focusFnn_params['w1'])
+            variable_summaries('fnn_b1', focusFnn_params['b1'])
+            variable_summaries('fnn_a1', layer_1)
+        return layer_1
+
+
+    def variable_summaries(name, var):
+        """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+        with tf.name_scope(name):
+            mean = tf.reduce_mean(var)
+            tf.summary.scalar('mean', mean)
+            with tf.name_scope('stddev'):
+                stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+            tf.summary.scalar('stddev', stddev)
+            tf.summary.scalar('max', tf.reduce_max(var))
+            tf.summary.scalar('min', tf.reduce_min(var))
+            tf.summary.histogram('histogram', var)
+
+
+    def evaluate_epoch0():
+        cost_train = sess.run(cost, feed_dict={X: df_train.values})
+        cost_valid = sess.run(cost, feed_dict={X: df_valid.values})
+        print("\nEpoch 0: cost_train=", round(cost_train, 3), "cost_valid=", round(cost_valid, 3))
+        h_input = sess.run(y_pred, feed_dict={X: df.values})
+        print('corr', pearsonr(h_input, df.values[:, j:j + 1]))
+        # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
+
+
+    def snapshot():
+        print("#Snapshot: ")
+        h_input = sess.run(y_pred, feed_dict={X: df.values})
+        print('corr', pearsonr(h_input, df.values[:, j:j + 1]))
+        # print("prediction:\n", h_input, "\ntruth:\n", df2.values[:,j:j+1])
+        df_h_input = pd.DataFrame(data=h_input, columns=df.columns[j:j + 1], index=df.index)
+        scimpute.save_hd5(df_h_input, log_dir + "/imputation.step2.hd5")
+        # save model
+        save_path = saver.save(sess, log_dir + "/step2.ckpt")
+        print("Model saved in: %s" % save_path)
+
+
+    def print_parameters():
+        print(os.getcwd(), "\n",
+              "\n# Hyper parameters:",
+              "\nn_features: ", n,
+              "\nn_hidden1: ", n_hidden_1,
+              "\nlearning_rate :", learning_rate,
+              "\nbatch_size: ", batch_size,
+              "\nepoches: ", training_epochs, "\n",
+              "\ndf_train.shape", df_train.values.shape,
+              "\ndf_valid.shape", df_valid.values.shape,
+              "\ndf2_train.shape", df2_train.values.shape,
+              "\ndf2_valid.shape", df2_valid.values.shape,
+              "\ndf2_train_solid.shape", df2_train_solid.shape,
+              "\ndf2_valid_solid.values.shape", df2_valid_solid.values.shape,
+              "\ndf_train_solid.shape", df_train_solid.values.shape,
+              "\ndf_valid_solid.shape", df_valid_solid.values.shape)
+        print("input_array:\n", df.values[0:4, 0:4], "\n")
+
+    # Define model #
+    X = tf.placeholder(tf.float32, [None, n_input])  # input
+    M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
+    encoder_params = {
+        'w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev=sd), name='encoder_w1'),
+        'b1': tf.Variable(tf.random_normal([n_hidden_1], mean=30 * sd, stddev=sd), name='encoder_b1')
+    }
+
+    # Launch Session #
+    sess = tf.Session()
+    # restore encoder w/b, frozen, outsize j-loop
+    saver = tf.train.Saver()
+    saver.restore(sess, "./pre_train/step1.ckpt")
+
+    # define fucusFnn_params only after restore, or error, because it's not in ckpt
+    tf.set_random_seed(4)  # seed
+    focusFnn_params = {
+        'w1': tf.Variable(tf.random_normal([n_hidden_1, 1], stddev=sd), name='focusFnn_w1'),
+        'b1': tf.Variable(tf.random_normal([1], mean=30 * sd, stddev=sd), name='focusFnn_b1')
+    }
+    init_focusFnn = tf.variables_initializer(list(focusFnn_params.values()))
+
+
+
     print("\n>>> for gene", j)
     # prep #
     corr_log_train = []
@@ -347,27 +346,29 @@ for j in j_lst:
 
     print("<<< Finished gene", j)
 
-# out of loop #
-# visualization of weights
-encoder_w1 = sess.run(encoder_params['w1'])  #1000, 500
-encoder_b1 = sess.run(encoder_params['b1'])  #500, (do T)
-encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
-encoder_b1_T = encoder_b1.T
-scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
-# vis df
-def visualization_of_dfs():
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values, df2.values,
-                                                 H, H_valid])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(df_valid_solid.values, title='df.valid.solid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df.values, title='df.all'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df2.values, title='df2.all'+Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(h_valid_solid, title='h.valid.solid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(H_valid, title='h.valid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(H, title='h.all'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
-visualization_of_dfs()
+    # out of loop #
+    # visualization of weights
+    encoder_w1 = sess.run(encoder_params['w1'])  # 1000, 500
+    encoder_b1 = sess.run(encoder_params['b1'])  # 500, (do T)
+    encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
+    encoder_b1_T = encoder_b1.T
+    scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
 
 
-sess.close()
+    # vis df
+    def visualization_of_dfs():
+        max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values, df2.values,
+                                                     H, H_valid])
+        scimpute.heatmap_vis(df_valid.values, title='df.valid' + Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+        # scimpute.heatmap_vis(df_valid_solid.values, title='df.valid.solid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+        scimpute.heatmap_vis(df.values, title='df.all' + Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+        scimpute.heatmap_vis(df2.values, title='df2.all' + Bname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+        # scimpute.heatmap_vis(h_valid_solid, title='h.valid.solid'+Aname+'.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+        scimpute.heatmap_vis(H_valid, title='h.valid' + Aname + '.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
+        scimpute.heatmap_vis(H, title='h.all' + Aname + '.pred', xlab='genes', ylab='cells', vmax=max, vmin=min)
 
+    visualization_of_dfs()
+
+    sess.close()
+    tf.reset_default_graph()
 
