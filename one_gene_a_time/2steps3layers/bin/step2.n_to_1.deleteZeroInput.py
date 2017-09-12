@@ -158,7 +158,7 @@ for j in j_lst:
 
     # Launch Session #
     sess = tf.Session()
-    # restore encoder w/b, frozen, outsize j-loop
+    # restore encoder w/b, frozen
     saver = tf.train.Saver()
     saver.restore(sess, "./pre_train/step1.ckpt")
 
@@ -213,7 +213,7 @@ for j in j_lst:
     y_benchmark = M[:, j:j+1]
     y_pred = fnn_op
 
-    with tf.name_scope("Metrics"):  # todo: reinit metrics for each gene in the j loop
+    with tf.name_scope("Metrics"):
         cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
         cost_benchmark = tf.reduce_mean(tf.pow(y_benchmark - y_pred, 2))
         tf.summary.scalar('cost', cost)
@@ -368,14 +368,12 @@ for j in j_lst:
 
     print("<<< Finished gene", j)
 
-    # out of loop #
     # visualization of weights
     encoder_w1 = sess.run(encoder_params['w1'])  # 1000, 500
     encoder_b1 = sess.run(encoder_params['b1'])  # 500, (do T)
     encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
     encoder_b1_T = encoder_b1.T
     scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
-
 
     sess.close()
     tf.reset_default_graph()
@@ -389,10 +387,21 @@ H_valid_df = pd.DataFrame(data=H_valid, columns=df_valid.ix[:, j_lst].columns, i
 scimpute.save_hd5(H_valid_df, "./plots/imputation.step2.valid.hd5")
 
 # vis df
+# Get same subset of genes(j_lst)/cells(valid set)
+def subset_df (df_big, df_subset):
+    return (df_big.ix[df_subset.index, df_subset.columns])
+df_jlst = subset_df(df, H_df)
+df2_jlst = subset_df(df2, H_df)
+df_valid_jlst = subset_df(df, H_valid_df)
+df2_valid_jlst = subset_df(df2, H_valid_df)
+
 def visualization_of_dfs():
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values,
-                                                 df2.values, df2_valid.values,
+    max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values,  # full data frame
+                                                 df2_valid.values, df2.values,
+                                                 df_valid_jlst.values, df_jlst.values,  # same dim with H
+                                                 df2_valid_jlst.values, df2_jlst.values,
                                                  H_df.values, H_valid_df.values])
+    # df
     scimpute.heatmap_vis(df_valid.values, title='df.valid' + Aname,
                          xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(df.values, title='df.all' + Aname,
@@ -401,6 +410,16 @@ def visualization_of_dfs():
                          xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(df2.values, title='df2.all' + Bname,
                          xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # df_jlst
+    scimpute.heatmap_vis(df_valid_jlst.values, title='DF_jlst.valid' + Aname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df_jlst.values, title='DF_jlst.all' + Aname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2_valid_jlst.values, title='DF2_jlst.valid' + Bname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df2_jlst.values, title='DF2_jlst.all' + Bname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # H
     scimpute.heatmap_vis(H_valid_df, title='h.valid' + Aname + '.pred',
                          xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(H_df, title='h.all' + Aname + '.pred',
