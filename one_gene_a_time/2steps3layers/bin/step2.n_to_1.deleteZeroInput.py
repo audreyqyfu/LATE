@@ -34,12 +34,12 @@ m, n = df.shape  # m: n_cells; n: n_genes
 # Parameters #
 print("this is just testing version, superfast and bad")
 j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]  # todo
-# j_lst = [0, 800]  # todo
+# j_lst = [0, 1, 800]  # todo
 # j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.002  # todo: was 0.002 for SGD
-training_epochs = 10000  # todo: change to 10000
+training_epochs = 10000  # todo: 10000 for show, 1600 for early stop
 batch_size = 128
 sd = 0.0001 #stddev for random init
 n_input = n
@@ -141,6 +141,8 @@ for j in j_lst:
               "\ndf_valid.shape", df_valid.values.shape,
               "\ndf_train_solid.shape", df_train_solid.values.shape,
               "\ndf_valid_solid.shape", df_valid_solid.values.shape,
+              "\npIn", pIn,
+              "\npHidden", pHidden,
               # "\ndf2_train.shape", df2_train.values.shape,
               # "\ndf2_valid.shape", df2_valid.values.shape,
               # "\ndf2_train_solid.shape", df2_train_solid.shape,
@@ -385,6 +387,8 @@ H_df = pd.DataFrame(data=H, columns=df.ix[:, j_lst].columns, index=df.ix[:, j_ls
 scimpute.save_hd5(H_df, "./plots/imputation.step2.hd5")
 H_valid_df = pd.DataFrame(data=H_valid, columns=df_valid.ix[:, j_lst].columns, index=df_valid.ix[:, j_lst].index)
 scimpute.save_hd5(H_valid_df, "./plots/imputation.step2.valid.hd5")
+scimpute.save_hd5(df_valid, "./plots/df_valid.hd5")
+scimpute.save_hd5(df2_valid, "./plots/df2_valid.hd5")
 
 # vis df
 # Get same subset of genes(j_lst)/cells(valid set)
@@ -426,3 +430,45 @@ def visualization_of_dfs():
                          xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 visualization_of_dfs()
+
+# corr_heatmap
+def corrcoef_matrix_vis (df, title='xxx.imputation.corr_gene_wise'):
+    corrcoef_matrix_gene_wise = np.corrcoef(df, rowvar=False)
+    scimpute.hist_arr_flat(corrcoef_matrix_gene_wise,
+                           title=title+"hist.png")
+    scimpute.heatmap_vis(corrcoef_matrix_gene_wise,
+                         title=title+".heatmap.png", vmin=-1, vmax=1)
+
+corrcoef_matrix_vis(H_df, title="step2(focusFnn).imputation.corr_gene_wise")
+corrcoef_matrix_vis(df_jlst, title="DF.corr_gene_wise")
+corrcoef_matrix_vis(df2_jlst, title="DF2.corr_gene_wise")
+
+corrcoef_matrix_vis(H_valid_df, title="step2(focusFnn).valid.imputation.corr_gene_wise")
+corrcoef_matrix_vis(df_valid_jlst, title="DF.valid.corr_gene_wise")
+corrcoef_matrix_vis(df2_valid_jlst, title="DF2.valid.corr_gene_wise")
+
+
+# Gene-Gene relationships #
+list = [[0, 1],
+        [200, 201],
+        [400, 401],
+        [600, 601],
+        [800, 801],
+        [200, 800]
+        ]  # todo: this list only validated for splatter dataset E/F
+
+# GroundTruth
+for i, j in list:
+    scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
+                          title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Bname,
+                          xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
+# Input
+for i, j in list:
+    scimpute.scatterplot2(df.ix[:, i], df.ix[:, j], title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Aname,
+                          xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
+# Prediction
+for i, j in list:
+    i = 'Gene'+str(i+1)  # todo: naming pattern only for splatter data
+    j = 'Gene'+str(j+1)
+    scimpute.scatterplot2(H_df[i], H_df[j], title= i + ' vs ' + j + ' (step2 [focusFnn], prediction)',
+                          xlabel=i, ylabel=j)
