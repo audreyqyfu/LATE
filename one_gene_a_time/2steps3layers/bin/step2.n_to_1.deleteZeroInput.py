@@ -75,12 +75,12 @@ training_epochs = 1000  # todo: 10000 for show, 1600 for early stop
 batch_size = 256  # todo: can be too large if solid cells < 256
 sd = 0.0001 #stddev for random init
 n_input = n
-n_hidden_1 = 200
+n_hidden_1 = 200  # for magic data, only < 100 dims in PCA
 pIn = 0.8
 pHidden = 0.5
 # log_dir = './re_train' + '_j' + str(j)
 # scimpute.refresh_logfolder(log_dir)
-display_step = 1  # todo: change to 100
+display_step = 10  # todo: change to 100
 snapshot_step = 5000
 
 # loop over j_lst, init focusFnn w/b, keep encoder w/b same
@@ -321,6 +321,9 @@ for j in j_lst:
             corr_log_valid.append(corr_valid)
             corr_log_train.append(corr_train)
             epoch_log.append(epoch)
+            print("corr_train: ", corr_train, "\n",
+                  "corr_valid: ", corr_valid, "\n"
+                  )
 
 
             toc_log=time.time()
