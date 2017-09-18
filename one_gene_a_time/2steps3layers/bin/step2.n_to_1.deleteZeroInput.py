@@ -21,7 +21,7 @@ print ('python version:', sys.version)
 print('tf.__version__', tf.__version__)
 
 # read data #
-data = 'EMT9k_log_msk50'  # EMT2730 or splatter
+data = 'EMT9k_log_msk90'  # EMT2730 or splatter
 
 if data is 'splatter':  # only this mode creates gene-gene plot
     file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
@@ -59,6 +59,15 @@ elif data is 'EMT9k_log_msk50':  # magic imputation using 8.7k cells > 300 reads
     print("input_array:\n", df.values[0:4, 0:4], "\n")
     df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
     m, n = df.shape  # m: n_cells; n: n_genes
+elif data is 'EMT9k_log_msk90':  # magic imputation using 8.7k cells > 300 reads/cell
+    file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
+    file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"
+    Aname = '(EMT9kLog_Bmsk90)'
+    Bname = '(EMT9kLog_B)'
+    df = pd.read_hdf(file).transpose()  # [cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
 else:
     raise Warning("data name not recognized!")
 
@@ -67,12 +76,12 @@ else:
 print("this is just testing version, superfast and bad")
 j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]  # todo
 j_lst = [0, 1, 800]  # todo
-# j_lst = range(n)
+j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.01  # todo: was 0.002 for SGD
-training_epochs = 100  # todo: 10000 for show, 1600 for early stop
-batch_size = 256  # todo: can be too large if solid cells < 256
+training_epochs = 1000  # todo: 10000 for show, 1600 for early stop
+batch_size = 128  # todo: can be too large if solid cells < 256
 sd = 0.0001 #stddev for random init
 n_input = n
 n_hidden_1 = 200  # for magic data, only < 100 dims in PCA
@@ -475,9 +484,11 @@ def visualization_of_dfs():
                          xlab='genes', ylab='cells', vmax=max, vmin=min)
     # H
     scimpute.heatmap_vis(H_valid_df, title='h.valid' + Aname + '.pred',
-                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+                         xlab='genes\n' + "MatrixMSE_Valid" + str(round(Matrix_MSE_Valid, 4)),
+                         ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(H_df, title='h.all' + Aname + '.pred',
-                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+                         xlab='genes\n' + "MatrixMSE_All" + str(round(Matrix_MSE_all, 4)) ,
+                         ylab='cells', vmax=max, vmin=min)
 
 visualization_of_dfs()
 
