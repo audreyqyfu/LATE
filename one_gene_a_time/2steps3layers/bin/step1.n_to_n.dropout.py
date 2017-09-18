@@ -123,13 +123,38 @@ def visualization_of_dfs():
 
 
 # read data #
-file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
-file_benchmark = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"
-Aname = '(E3)'
-Bname = '(E3)'  # careful
-df = pd.read_hdf(file).transpose()  # [cells,genes]
-df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
-m, n = df.shape  # m: n_cells; n: n_genes
+data = 'EMT9k'  # EMT2730 or splatter
+
+if data is 'splatter':  # only this mode creates gene-gene plot
+    file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
+    file_benchmark = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"
+    Aname = '(E3)'
+    Bname = '(E3)'  # careful
+    df = pd.read_hdf(file).transpose()  # [cells,genes]
+    df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+elif data is 'EMT2730':  # 2.7k cells used in magic paper
+    file = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5" #data need imputation
+    file_benchmark = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"
+    Aname = '(EMT2730)'
+    Bname = '(EMT2730)'
+    df = pd.read_hdf(file).transpose() #[cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+elif data is 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
+    file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"  # data need imputation
+    file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"
+    Aname = '(EMT9k)'
+    Bname = '(EMT9k)'
+    df = pd.read_hdf(file).transpose()  # [cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+else:
+    raise Warning("data name not recognized!")
+
+max = max(df.values.max(), df2.values.max())
 
 # rand split data
 [df_train, df_valid, df_test] = scimpute.split_df(df)
@@ -139,14 +164,14 @@ df2_valid = df2.ix[df_valid.index]
 df2_test = df2.ix[df_test.index]
 
 # Parameters #
-learning_rate = 0.00003
+learning_rate = 0.0003
 training_epochs = 10000  # todo change epochs
 batch_size = 256
-pIn = 0.1
-pHidden = 1
+pIn = 0.8
+pHidden = 0.5
 sd = 0.0001  # stddev for random init
 n_input = n
-n_hidden_1 = 500
+n_hidden_1 = 2000
 log_dir = './pre_train'
 
 display_step = 100
@@ -298,7 +323,7 @@ for j in [0, 1, 200, 201, 400, 401, 600, 601, 800, 801, 998, 999]:
                           title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
                           xlabel='Ground Truth ' + Bname,
                           ylabel='Prediction ' + Aname,
-                          range=[0, 6]
+                          range=[0, max]
                           )
 
 # visualization of weights (new way)
