@@ -6,3 +6,5 @@
 # step2.n_to_1.py	test, works, but predicts smaller mean, because of the zeros
 # heatmap_weights_step2.py	underdevelopment
 # step2.n_to_n.py	test, works
+
+# test3: larger alpha

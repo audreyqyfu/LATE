@@ -70,7 +70,7 @@ j_lst = [0, 1, 800]  # todo
 # j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
-learning_rate = 0.003  # todo: was 0.002 for SGD
+learning_rate = 0.01  # todo: was 0.002 for SGD
 training_epochs = 100  # todo: 10000 for show, 1600 for early stop
 batch_size = 256  # todo: can be too large if solid cells < 256
 sd = 0.0001 #stddev for random init
@@ -378,15 +378,18 @@ for j in j_lst:
     # learning curve for gene-j
     scimpute.curveplot2(epoch_log, corr_log_train, corr_log_valid,
                          title='learning_curve_pearsonr_bench.step2.gene'+str(j),
-                         xlabel='epoch',
+                         xlabel='epoch'
+                                + "\nvalid:"+str(corr_log_valid[-1]),
                          ylabel='Pearson corr (predction vs ground truth)')
     scimpute.curveplot2(epoch_log, mse_bench_train, mse_bench_valid,
                          title='learning_curve_MSE_bench.step2.gene'+str(j),
-                         xlabel='epoch',
-                         ylabel='MSE (predction vs ground truth)')
+                         xlabel='epoch'
+                                + "\nvalid:" + str(mse_bench_valid[-1]),
+                        ylabel='MSE (predction vs ground truth)')
     scimpute.curveplot2(epoch_log, mse_train, mse_valid,
                          title='learning_curve_MSE_input.step2.gene'+str(j),
-                         xlabel='epoch',
+                         xlabel='epoch'
+                               + "\nvalid:" + str(mse_valid[-1]),
                          ylabel='MSE (predction vs input)')
 
     # gene-correlation for gene-j
