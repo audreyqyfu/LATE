@@ -21,34 +21,66 @@ print ('python version:', sys.version)
 print('tf.__version__', tf.__version__)
 
 # read data #
-file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
-file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
-Aname = '(F3.msk)'
-Bname = '(F3)'
-df = pd.read_hdf(file).transpose() #[cells,genes]
-print("input_array:\n", df.values[0:4, 0:4], "\n")
-df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
-m, n = df.shape  # m: n_cells; n: n_genes
+data = 'EMT9k_log_msk50'  # EMT2730 or splatter
+
+if data is 'splatter':  # only this mode creates gene-gene plot
+    file = "../data/v1-1-5-3/v1-1-5-3.F3.msk.hd5" #data need imputation
+    file_benchmark = "../data/v1-1-5-3/v1-1-5-3.F3.hd5"
+    Aname = '(F3.msk)'
+    Bname = '(F3)'
+    df = pd.read_hdf(file).transpose() #[cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+elif data is 'EMT2730':
+    file = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5" #data need imputation
+    file_benchmark = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"
+    Aname = '(EMT2730)'
+    Bname = '(EMT2730)'
+    df = pd.read_hdf(file).transpose() #[cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+elif data is 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
+    file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk.hd5"  # data need imputation
+    file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.hd5"
+    Aname = '(EMT9k.B.msk)'
+    Bname = '(EMT9k.B)'
+    df = pd.read_hdf(file).transpose()  # [cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+elif data is 'EMT9k_log_msk50':  # magic imputation using 8.7k cells > 300 reads/cell
+    file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk50.log.hd5"  # data need imputation
+    file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"
+    Aname = '(EMT9kLog_Bmsk50)'
+    Bname = '(EMT9kLog_B)'
+    df = pd.read_hdf(file).transpose()  # [cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+else:
+    raise Warning("data name not recognized!")
 
 
 # Parameters #
 print("this is just testing version, superfast and bad")
 j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]  # todo
-# j_lst = [0, 1, 800]  # todo
+j_lst = [0, 1, 800]  # todo
 # j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
-learning_rate = 0.002  # todo: was 0.002 for SGD
-training_epochs = 10000  # todo: 10000 for show, 1600 for early stop
-batch_size = 128
+learning_rate = 0.003  # todo: was 0.002 for SGD
+training_epochs = 1000  # todo: 10000 for show, 1600 for early stop
+batch_size = 256  # todo: can be too large if solid cells < 256
 sd = 0.0001 #stddev for random init
 n_input = n
-n_hidden_1 = 500
-pIn = 1.0
-pHidden = 0.1
+n_hidden_1 = 200
+pIn = 0.8
+pHidden = 0.5
 # log_dir = './re_train' + '_j' + str(j)
 # scimpute.refresh_logfolder(log_dir)
-display_step = 100  # todo: change to 100
+display_step = 1  # todo: change to 100
 snapshot_step = 5000
 
 # loop over j_lst, init focusFnn w/b, keep encoder w/b same
@@ -183,7 +215,8 @@ for j in j_lst:
     mse_bench_train = []
     mse_bench_valid = []
     epoch_log = []
-    log_dir = './re_train' + '_j' + str(j)
+    # log_dir = './re_train' + '_j' + str(j)
+    log_dir = './re_train_j'
     scimpute.refresh_logfolder(log_dir)
 
     # rand split data
@@ -439,13 +472,15 @@ def corrcoef_matrix_vis (df, title='xxx.imputation.corr_gene_wise'):
     scimpute.heatmap_vis(corrcoef_matrix_gene_wise,
                          title=title+".heatmap.png", vmin=-1, vmax=1)
 
-corrcoef_matrix_vis(H_df, title="step2(focusFnn).imputation.corr_gene_wise")
 corrcoef_matrix_vis(df_jlst, title="DF.corr_gene_wise")
 corrcoef_matrix_vis(df2_jlst, title="DF2.corr_gene_wise")
+corrcoef_matrix_vis(H_df, title="step2(focusFnn).imputation.corr_gene_wise")
 
-corrcoef_matrix_vis(H_valid_df, title="step2(focusFnn).valid.imputation.corr_gene_wise")
+
+
 corrcoef_matrix_vis(df_valid_jlst, title="DF.valid.corr_gene_wise")
 corrcoef_matrix_vis(df2_valid_jlst, title="DF2.valid.corr_gene_wise")
+corrcoef_matrix_vis(H_valid_df, title="step2(focusFnn).valid.imputation.corr_gene_wise")
 
 
 # Gene-Gene relationships #

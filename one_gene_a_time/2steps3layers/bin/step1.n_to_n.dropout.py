@@ -123,7 +123,7 @@ def visualization_of_dfs():
 
 
 # read data #
-data = 'EMT9k'  # EMT2730 or splatter
+data = 'EMT9k_log'  # EMT2730 or splatter
 
 if data is 'splatter':  # only this mode creates gene-gene plot
     file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
@@ -147,6 +147,15 @@ elif data is 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
     file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"
     Aname = '(EMT9k)'
     Bname = '(EMT9k)'
+    df = pd.read_hdf(file).transpose()  # [cells,genes]
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    m, n = df.shape  # m: n_cells; n: n_genes
+elif data is 'EMT9k_log':  # magic imputation using 8.7k cells > 300 reads/cell
+    file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
+    file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"
+    Aname = '(EMT9kLog)'
+    Bname = '(EMT9kLog)'
     df = pd.read_hdf(file).transpose()  # [cells,genes]
     print("input_array:\n", df.values[0:4, 0:4], "\n")
     df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
