@@ -157,7 +157,7 @@ else:
 max = max(df.values.max(), df2.values.max())
 
 # rand split data
-[df_train, df_valid, df_test] = scimpute.split_df(df)
+[df_train, df_valid, df_test] = scimpute.split_df(df, a=0.9, b=0.1, c=0.0)
 
 df2_train = df2.ix[df_train.index]
 df2_valid = df2.ix[df_valid.index]
@@ -165,16 +165,16 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0003
-training_epochs = 10000  # todo change epochs
+training_epochs = 100  # todo change epochs
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
 sd = 0.0001  # stddev for random init
 n_input = n
-n_hidden_1 = 2000
+n_hidden_1 = 200
 log_dir = './pre_train'
 
-display_step = 100
+display_step = 10
 snapshot_step = 2000
 
 scimpute.refresh_logfolder(log_dir)
