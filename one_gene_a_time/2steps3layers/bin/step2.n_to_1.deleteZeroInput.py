@@ -71,7 +71,7 @@ j_lst = [0, 1, 800]  # todo
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.003  # todo: was 0.002 for SGD
-training_epochs = 1000  # todo: 10000 for show, 1600 for early stop
+training_epochs = 100  # todo: 10000 for show, 1600 for early stop
 batch_size = 256  # todo: can be too large if solid cells < 256
 sd = 0.0001 #stddev for random init
 n_input = n
@@ -435,21 +435,32 @@ df2_jlst = subset_df(df2, H_df)
 df_valid_jlst = subset_df(df, H_valid_df)
 df2_valid_jlst = subset_df(df2, H_valid_df)
 
+# matrix MSE
+Matrix_MSE_Valid = np.mean(
+    np.power((df_valid_jlst.values - H_valid_df.values), 2)
+    )  # todo: not finished
+print("Matrix_MSE_valid: ", Matrix_MSE_Valid)
+
+Matrix_MSE_all = np.mean(
+    np.power((df_jlst.values - H_df.values), 2)
+    )  # todo: not finished
+print("Matrix_MSE: ", Matrix_MSE_all)
+
 def visualization_of_dfs():
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, df.values,  # full data frame
                                                  df2_valid.values, df2.values,
                                                  df_valid_jlst.values, df_jlst.values,  # same dim with H
                                                  df2_valid_jlst.values, df2_jlst.values,
                                                  H_df.values, H_valid_df.values])
-    # df
-    scimpute.heatmap_vis(df_valid.values, title='df.valid' + Aname,
-                         xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df.values, title='df.all' + Aname,
-                         xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df2_valid.values, title='df2.valid' + Bname,
-                         xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df2.values, title='df2.all' + Bname,
-                         xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # # df
+    # scimpute.heatmap_vis(df_valid.values, title='df.valid' + Aname,
+    #                      xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df.values, title='df.all' + Aname,
+    #                      xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df2_valid.values, title='df2.valid' + Bname,
+    #                      xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df2.values, title='df2.all' + Bname,
+    #                      xlab='genes', ylab='cells', vmax=max, vmin=min)
     # df_jlst
     scimpute.heatmap_vis(df_valid_jlst.values, title='DF_jlst.valid' + Aname,
                          xlab='genes', ylab='cells', vmax=max, vmin=min)
@@ -495,6 +506,7 @@ list = [[0, 1],
         [200, 800]
         ]  # todo: this list only validated for splatter dataset E/F
 
+
 # GroundTruth
 for i, j in list:
     scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
@@ -506,5 +518,5 @@ for i, j in list:
                           xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
 # Prediction
 for i, j in list:
-    scimpute.scatterplot2(H_df[:, i], H_df[:, j], title= str(i+1) + ' vs ' + str(j+1) + ' (step2 [focusFnn], prediction)',
-                          xlabel=i, ylabel=j)
+    scimpute.scatterplot2(H_df.ix[:, i], H_df.ix[:, j], title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Aname + '.pred',
+                          xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
