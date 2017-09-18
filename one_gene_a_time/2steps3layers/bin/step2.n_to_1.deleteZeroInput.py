@@ -503,7 +503,5 @@ for i, j in list:
                           xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
 # Prediction
 for i, j in list:
-    i = 'Gene'+str(i+1)  # todo: naming pattern only for splatter data
-    j = 'Gene'+str(j+1)
-    scimpute.scatterplot2(H_df[i], H_df[j], title= i + ' vs ' + j + ' (step2 [focusFnn], prediction)',
+    scimpute.scatterplot2(H_df[:, i], H_df[:, j], title= str(i+1) + ' vs ' + str(j+1) + ' (step2 [focusFnn], prediction)',
                           xlabel=i, ylabel=j)
