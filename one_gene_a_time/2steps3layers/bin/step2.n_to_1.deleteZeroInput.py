@@ -522,13 +522,13 @@ List = [[0, 1],
 # GroundTruth
 for i, j in List:
     scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
-                          title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Bname,
-                          xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
+                          title="Gene" + str(i) + 'vs Gene' + str(j) + 'in ' + Bname,
+                          xlabel='Gene' + str(i), ylabel='Gene' + str(j))
 # Input
 for i, j in List:
-    scimpute.scatterplot2(df.ix[:, i], df.ix[:, j], title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Aname,
-                          xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
+    scimpute.scatterplot2(df.ix[:, i], df.ix[:, j], title="Gene" + str(i) + 'vs Gene' + str(j) + 'in ' + Aname,
+                          xlabel='Gene' + str(i), ylabel='Gene' + str(j))
 # Prediction
 for i, j in List:
-    scimpute.scatterplot2(H_df.ix[:, i], H_df.ix[:, j], title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Aname + '.pred',
-                          xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
+    scimpute.scatterplot2(H_df.ix[:, i], H_df.ix[:, j], title="Gene" + str(i) + 'vs Gene' + str(j) + 'in ' + Aname + '.pred',
+                          xlabel='Gene' + str(i), ylabel='Gene' + str(j + 1))
