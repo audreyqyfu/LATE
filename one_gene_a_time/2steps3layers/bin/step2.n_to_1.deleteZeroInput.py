@@ -76,7 +76,8 @@ else:
 print("this is just testing version, superfast and bad")
 # todo
 j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]
-j_lst = range(1000)
+j_lst = [4058, 7496]
+# j_lst = range(1000)
 # j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
@@ -517,7 +518,6 @@ List = [[0, 1],
         [800, 801],
         [200, 800]
         ]  # todo: this List only validated for splatter dataset E/F
-
 
 # GroundTruth
 for i, j in List:
