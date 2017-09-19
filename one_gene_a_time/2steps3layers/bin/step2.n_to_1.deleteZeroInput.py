@@ -74,9 +74,10 @@ else:
 
 # Parameters #
 print("this is just testing version, superfast and bad")
-j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]  # todo
-j_lst = [0, 1, 800]  # todo
-j_lst = range(n)
+# todo
+j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]
+j_lst = range(1000)
+# j_lst = range(n)
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.01  # todo: was 0.002 for SGD
@@ -225,7 +226,7 @@ for j in j_lst:
     mse_bench_valid = []
     epoch_log = []
     # log_dir = './re_train' + '_j' + str(j)
-    log_dir = './re_train_j'
+    log_dir = './re_train_j'  # todo: to avoid creating a mess on disk
     scimpute.refresh_logfolder(log_dir)
 
     # rand split data
@@ -509,25 +510,25 @@ corrcoef_matrix_vis(H_valid_df, title="step2(focusFnn).valid.imputation.corr_gen
 
 
 # Gene-Gene relationships #
-list = [[0, 1],
+List = [[0, 1],
         [200, 201],
         [400, 401],
         [600, 601],
         [800, 801],
         [200, 800]
-        ]  # todo: this list only validated for splatter dataset E/F
+        ]  # todo: this List only validated for splatter dataset E/F
 
 
 # GroundTruth
-for i, j in list:
+for i, j in List:
     scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
                           title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Bname,
                           xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
 # Input
-for i, j in list:
+for i, j in List:
     scimpute.scatterplot2(df.ix[:, i], df.ix[:, j], title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Aname,
                           xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
 # Prediction
-for i, j in list:
+for i, j in List:
     scimpute.scatterplot2(H_df.ix[:, i], H_df.ix[:, j], title="Gene" + str(i + 1) + 'vs Gene' + str(j + 1) + 'in ' + Aname + '.pred',
                           xlabel='Gene' + str(i + 1), ylabel='Gene' + str(j + 1))
