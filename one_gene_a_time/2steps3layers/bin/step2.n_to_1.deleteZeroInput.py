@@ -76,7 +76,7 @@ else:
 print("this is just testing version, superfast and bad")
 # todo
 j_lst = [0, 1, 200, 201, 400, 401, 600, 601, 800, 801]
-j_lst = [4058, 7496]
+j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 # j_lst = range(1000)
 # j_lst = range(n)
 # j = 400
@@ -512,6 +512,7 @@ corrcoef_matrix_vis(H_valid_df, title="step2(focusFnn).valid.imputation.corr_gen
 
 # Gene-Gene relationships #
 List = [[0, 1],
+        [2, 3],
         [200, 201],
         [400, 401],
         [600, 601],
@@ -521,12 +522,12 @@ List = [[0, 1],
 
 # GroundTruth
 for i, j in List:
-    scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
+    scimpute.scatterplot2(df2_jlst.ix[:, i], df2_jlst.ix[:, j],
                           title="Gene" + str(i) + 'vs Gene' + str(j) + 'in ' + Bname,
                           xlabel='Gene' + str(i), ylabel='Gene' + str(j))
 # Input
 for i, j in List:
-    scimpute.scatterplot2(df.ix[:, i], df.ix[:, j], title="Gene" + str(i) + 'vs Gene' + str(j) + 'in ' + Aname,
+    scimpute.scatterplot2(df_jlst.ix[:, i], df_jlst.ix[:, j], title="Gene" + str(i) + 'vs Gene' + str(j) + 'in ' + Aname,
                           xlabel='Gene' + str(i), ylabel='Gene' + str(j))
 # Prediction
 for i, j in List:
