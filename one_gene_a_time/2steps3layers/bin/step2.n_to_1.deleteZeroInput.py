@@ -89,7 +89,7 @@ pIn = 0.8
 pHidden = 0.5
 # log_dir = './re_train' + '_j' + str(j)
 # scimpute.refresh_logfolder(log_dir)
-display_step = 10  # todo: change to 100
+display_step = 500  # todo: change to 100
 snapshot_step = 5000
 
 # loop over j_lst, init focusFnn w/b, keep encoder w/b same
@@ -388,7 +388,7 @@ for j in j_lst:
     scimpute.curveplot2(epoch_log, corr_log_train, corr_log_valid,
                          title='learning_curve_pearsonr_bench.step2.gene'+str(j),
                          xlabel='epoch'
-                                + "\nvalid:"+str(corr_log_valid[-1]),
+                                + "\nvalid:"+str(corr_log_valid[-1]) + "; m_train_solid: " + str(df_train_solid.values.shape[0]),
                          ylabel='Pearson corr (predction vs ground truth)')
     scimpute.curveplot2(epoch_log, mse_bench_train, mse_bench_valid,
                          title='learning_curve_MSE_bench.step2.gene'+str(j),
@@ -404,7 +404,7 @@ for j in j_lst:
     # gene-correlation for gene-j
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid_j[:,0],
                           title=str('gene-' + str(j) + ', valid, step2'),
-                          xlabel='Ground Truth ' + Bname,
+                          xlabel='Ground Truth ' + Bname + "; m_train_solid: " + str(df_train_solid.values.shape[0]),
                           ylabel='Prediction ' + Aname
                           )
 
@@ -418,12 +418,12 @@ for j in j_lst:
 
     print("<<< Finished gene", j)
 
-    # visualization of weights
-    encoder_w1 = sess.run(encoder_params['w1'])  # 1000, 500
-    encoder_b1 = sess.run(encoder_params['b1'])  # 500, (do T)
-    encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
-    encoder_b1_T = encoder_b1.T
-    scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
+    # # visualization of weights  # todo: disabled temperately for faster speed
+    # encoder_w1 = sess.run(encoder_params['w1'])  # 1000, 500
+    # encoder_b1 = sess.run(encoder_params['b1'])  # 500, (do T)
+    # encoder_b1 = encoder_b1.reshape(len(encoder_b1), 1)
+    # encoder_b1_T = encoder_b1.T
+    # scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
 
     sess.close()
     tf.reset_default_graph()
