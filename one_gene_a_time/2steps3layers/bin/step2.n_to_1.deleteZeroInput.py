@@ -360,6 +360,7 @@ for j in j_lst:
 
 
     # summaries and plots #
+    # create H matrix from each gene-j
     h_valid_j = sess.run(y_pred, feed_dict={X: df_valid.values,
                                             keep_prob_input: 1, keep_prob_hidden: 1})
     h_valid_solid_j = sess.run(y_pred, feed_dict={X: df_valid_solid.values,
@@ -376,10 +377,6 @@ for j in j_lst:
         # print('H is defined')
         H = np.column_stack((H, h_j))
         H_valid = np.column_stack((H_valid, h_valid_j))
-
-    print('H:', H.shape, H)
-    time.sleep(1)
-
 
     # code_neck_valid_solid = sess.run(encoder_op, feed_dict={X: df_valid_solid.values})
     # code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values})
@@ -408,13 +405,13 @@ for j in j_lst:
                           ylabel='Prediction ' + Aname
                           )
 
-    # todo: better vis of focusFnn
-    focusFnn_w1 = sess.run(focusFnn_params['w1'])  #500, 1
-    focusFnn_b1 = sess.run(focusFnn_params['b1'])  #1
-    focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
-    focusFnn_b1_T = focusFnn_b1.T
-    scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1, '+'gene-'+str(j))
-    # scimpute.heatmap_vis(code_neck_valid, title='code_neck_valid, all cells' + Bname, xlab='', ylab='', vmax=max, vmin=min)
+    # # todo: better vis of focusFnn, disabled temperately for faster speed
+    # focusFnn_w1 = sess.run(focusFnn_params['w1'])  #500, 1
+    # focusFnn_b1 = sess.run(focusFnn_params['b1'])  #1
+    # focusFnn_b1 = focusFnn_b1.reshape(len(focusFnn_b1), 1)
+    # focusFnn_b1_T = focusFnn_b1.T
+    # scimpute.visualize_weights_biases(focusFnn_w1, focusFnn_b1_T, 'focusFnn_w1, b1, '+'gene-'+str(j))
+    # # scimpute.heatmap_vis(code_neck_valid, title='code_neck_valid, all cells' + Bname, xlab='', ylab='', vmax=max, vmin=min)
 
     print("<<< Finished gene", j)
 
