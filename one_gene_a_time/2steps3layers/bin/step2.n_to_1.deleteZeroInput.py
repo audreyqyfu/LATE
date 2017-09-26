@@ -513,11 +513,11 @@ corrcoef_matrix_vis(H_valid_df, title="step2(focusFnn).valid.imputation.corr_gen
 # Gene-Gene relationships #
 List = [[0, 1],
         [2, 3],
-        [200, 201],
-        [400, 401],
-        [600, 601],
-        [800, 801],
-        [200, 800]
+        # [200, 201],
+        # [400, 401],
+        # [600, 601],
+        # [800, 801],
+        # [200, 800]
         ]  # todo: this List only validated for splatter dataset E/F
 
 # GroundTruth
