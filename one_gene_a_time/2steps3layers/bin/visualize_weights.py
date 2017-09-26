@@ -130,4 +130,7 @@ scimpute.visualize_weights_biases(decoder_w1, decoder_b1_T, 'decoder_w1, b1')
 scimpute.visualize_weights_biases(decoder_w2, decoder_b2_T, 'decoder_w2, b2')
 
 # save weights for further work
-scimpute.save_csv(fname='encoder_w1.csv', arr=encoder_w1)
+scimpute.save_csv(encoder_w1, 'encoder_w1.csv')
+scimpute.save_csv(encoder_w2, 'encoder_w2.csv')
+scimpute.save_csv(decoder_w1, 'decoder_w1.csv')
+scimpute.save_csv(decoder_w2, 'decoder_w2.csv')
