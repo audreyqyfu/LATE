@@ -23,10 +23,13 @@ def read_csv(fname):
     return (df)
 
 
-def save_csv(fname='arr.csv.gz', arr=None):
+def save_csv(arr, fname):
     '''if fname=x.csv.gz, will be compressed
     if fname=x.csv, will not be compressed'''
+    tic = time.time()
     np.savetxt(fname, arr, fmt='%.3e', delimiter=',', newline='\n')
+    toc = time.time()
+    print("saving" + fname + " took {:.1f} seconds".format(toc - tic))
 
 
 def save_hd5(df, out_name):
