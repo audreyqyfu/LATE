@@ -335,7 +335,7 @@ code_neck_valid = sess.run(encoder_op, feed_dict={X: df_valid.values, keep_prob_
 scimpute.curveplot(epoch_log, corr_log,
                      title='learning_curve_pearsonr.step1',
                      xlabel='epoch'+' (final corr = ' + str(corr_log[-1]) + ')',
-                     ylabel='Pearson corr (predction vs ground truth, valid)')
+                     ylabel='Medium Cell-Pearsonr for first 100 cells\n(predction vs ground truth, valid)')
 
 # gene-corr hist
 hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,

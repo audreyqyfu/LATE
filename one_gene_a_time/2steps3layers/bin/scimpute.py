@@ -23,6 +23,12 @@ def read_csv(fname):
     return (df)
 
 
+def save_csv(fname='arr.csv.gz', arr=None):
+    '''if fname=x.csv.gz, will be compressed
+    if fname=x.csv, will not be compressed'''
+    np.savetxt(fname, arr, fmt='%.3e', delimiter=',', newline='\n')
+
+
 def save_hd5(df, out_name):
     tic = time.time()
     df.to_hdf(out_name, key='null', mode='w', complevel=9, complib='blosc')
