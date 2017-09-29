@@ -123,6 +123,23 @@ decoder_b2 = sess.run(decoder_params['b2'])
 decoder_b2 = decoder_b2.reshape(len(decoder_b2), 1)
 decoder_b2_T = decoder_b2.T
 
+# find near-zero columns in encoder_w1
+print(decoder_w2.shape)
+
+decoder_w2_abs = np.absolute(decoder_w2)
+decoder_w2_abs_colsum = np.sum(decoder_w2_abs, axis=0)
+print(decoder_w2_abs_colsum.shape)
+
+decoder_w2_var = np.var(decoder_w2, axis=0)
+print(decoder_w2_var.shape)
+small_var_idx = decoder_w2_var < 0.00001  # 1006 genes
+df_small_var = df.ix[:, small_var_idx]
+scimpute.save_hd5(df_small_var, 'df_small_var.hd5')
+sum(df_small_var, axis=0)
+
+
+
+
 # visualization
 scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
 scimpute.visualize_weights_biases(encoder_w2, encoder_b2_T, 'encoder_w2, b2')
