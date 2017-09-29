@@ -366,8 +366,7 @@ for j in [0, 1, 200, 201, 400, 401, 600, 601, 800, 801, 998, 999]:
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j],
                           title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
                           xlabel='Ground Truth ' + Bname,
-                          ylabel='Prediction ' + Aname,
-                          range=[0, max]
+                          ylabel='Prediction ' + Aname
                           )
 
 # visualization of weights (new way), get weights
