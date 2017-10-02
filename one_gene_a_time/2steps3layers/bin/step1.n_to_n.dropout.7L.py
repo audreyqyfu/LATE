@@ -175,7 +175,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0003
-training_epochs = 100  # todo change epochs
+training_epochs = 1000  # todo change epochs
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
@@ -187,7 +187,7 @@ n_hidden_3 = 200
 
 log_dir = './pre_train'
 
-display_step = 1
+display_step = 20
 snapshot_step = 1000
 
 scimpute.refresh_logfolder(log_dir)
