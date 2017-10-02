@@ -238,15 +238,15 @@ def encoder(x):
         layer_3 = tf.nn.relu(tf.add(tf.matmul(layer_2_drop, encoder_params['w3']),
                                     encoder_params['b3']))
 
-        variable_summaries('weights_w1', encoder_params['w1'])
-        variable_summaries('weights_w2', encoder_params['w2'])
-        variable_summaries('weights_w3', encoder_params['w3'])
-        variable_summaries('biases_b1', encoder_params['b1'])
-        variable_summaries('biases_b2', encoder_params['b2'])
-        variable_summaries('biases_b3', encoder_params['b3'])
-        variable_summaries('activations_a1', layer_1)
-        variable_summaries('activations_a2', layer_2)
-        variable_summaries('activations_a3', layer_3)
+        variable_summaries('encoder_w1', encoder_params['w1'])
+        variable_summaries('encoder_w2', encoder_params['w2'])
+        variable_summaries('encoder_w3', encoder_params['w3'])
+        variable_summaries('encoder_b1', encoder_params['b1'])
+        variable_summaries('encoder_b2', encoder_params['b2'])
+        variable_summaries('encoder_b3', encoder_params['b3'])
+        variable_summaries('encoder_a1', layer_1)
+        variable_summaries('encoder_a2', layer_2)
+        variable_summaries('encoder_a3', layer_3)
     return layer_3
 
 
@@ -263,15 +263,15 @@ def decoder(x):
         layer_3 = tf.nn.relu(tf.add(tf.matmul(layer_2_drop, decoder_params['w3']),
                                        decoder_params['b3']))
 
-        variable_summaries('weights_w1', decoder_params['w1'])
-        variable_summaries('weights_w2', decoder_params['w2'])
-        variable_summaries('weights_w3', decoder_params['w3'])
-        variable_summaries('biases_b1', decoder_params['b1'])
-        variable_summaries('biases_b2', decoder_params['b2'])
-        variable_summaries('biases_b3', decoder_params['b3'])
-        variable_summaries('activations_a1', layer_1)
-        variable_summaries('activations_a2', layer_2)
-        variable_summaries('activations_a3', layer_3)
+        variable_summaries('decoder_w1', decoder_params['w1'])
+        variable_summaries('decoder_w2', decoder_params['w2'])
+        variable_summaries('decoder_w3', decoder_params['w3'])
+        variable_summaries('decoder_b1', decoder_params['b1'])
+        variable_summaries('decoder_b2', decoder_params['b2'])
+        variable_summaries('decoder_b3', decoder_params['b3'])
+        variable_summaries('decoder_a1', layer_1)
+        variable_summaries('decoder_a2', layer_2)
+        variable_summaries('decoder_a3', layer_3)
     return layer_3
 
 
