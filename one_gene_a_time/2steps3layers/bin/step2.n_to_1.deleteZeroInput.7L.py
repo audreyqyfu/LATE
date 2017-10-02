@@ -82,7 +82,7 @@ j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.003  # todo: was 0.01 for 3L
-training_epochs = 2500  # todo: 10000 for show, 1600 for early stop
+training_epochs = 2000  # todo: 2500 for 7L step2
 batch_size = 128  # todo: can be too large if solid cells < 256
 sd = 0.0001 #stddev for random init
 n_input = n
@@ -98,6 +98,7 @@ snapshot_step = 500
 
 # loop over j_lst, init focusFnn w/b, keep encoder w/b same
 for j in j_lst:
+    print("\n>>> for gene", j)
 
     keep_prob_input = tf.placeholder(tf.float32)
     keep_prob_hidden = tf.placeholder(tf.float32)
@@ -267,6 +268,10 @@ for j in j_lst:
     # restore encoder w/b, frozen
     saver = tf.train.Saver()
     saver.restore(sess, "./pre_train/step1.ckpt")
+    print("pre-trained params loaded")
+    # print('encoder_w1', sess.run(encoder_params['w1'])[0:2, 0:1])
+    # print('decoder_w3', sess.run(decoder_params['w3'])[0:2, j:j+1])
+
 
     # define fucusFnn_params only after restore, or error, because it's not in ckpt
     tf.set_random_seed(4)  # seed
@@ -278,8 +283,6 @@ for j in j_lst:
     }
     init_focusFnn = tf.variables_initializer(list(focusFnn_params.values()))
 
-
-    print("\n>>> for gene", j)
     # prep #
     corr_log_train = []
     corr_log_valid = []
@@ -310,10 +313,16 @@ for j in j_lst:
     df2_test = df2.ix[df_test.index]
     print_parameters()
 
-    # work #
-    sess.run(init_focusFnn)
-    # focusFnn_b1 = sess.run(focusFnn_params['b1'])  # same init series each run, diff init each j
+    # real work #
 
+    # init focusFnn parameters (n->1 part)
+    sess.run(init_focusFnn)  # replaced by encoder_last_layer three lines later
+    decoder_w3 = sess.run(decoder_params['w3'])
+    decoder_b3 = sess.run(decoder_params['b3'])
+    focusFnn_params['w1'].load(decoder_w3[:, j:j + 1], session=sess)  # use pre-trained weights
+    focusFnn_params['b1'].load(decoder_b3[j:j+1], session=sess)  # use pre-trained weights
+    decoder_w3 = None
+    decoder_b3 = None
     encoder_op = encoder(X)
     fnn_op = focusFnn(encoder_op)
 
@@ -492,6 +501,8 @@ for j in j_lst:
 
 # out loop #
 # only after all genes processed, do that dim match (df, H[:,j_lst])
+
+# get and save dfs
 H_df = pd.DataFrame(data=H, columns=df.ix[:, j_lst].columns, index=df.ix[:, j_lst].index)
 scimpute.save_hd5(H_df, "./plots/imputation.step2.hd5")
 H_valid_df = pd.DataFrame(data=H_valid, columns=df_valid.ix[:, j_lst].columns, index=df_valid.ix[:, j_lst].index)
@@ -503,6 +514,8 @@ scimpute.save_hd5(df2_valid, "./plots/df2_valid.hd5")
 # Get same subset of genes(j_lst)/cells(valid set)
 def subset_df (df_big, df_subset):
     return (df_big.ix[df_subset.index, df_subset.columns])
+
+
 df_jlst = subset_df(df, H_df)
 df2_jlst = subset_df(df2, H_df)
 df_valid_jlst = subset_df(df, H_valid_df)
@@ -564,7 +577,6 @@ def corrcoef_matrix_vis (df, title='xxx.imputation.corr_gene_wise'):
 corrcoef_matrix_vis(df_jlst, title="DF.corr_gene_wise")
 corrcoef_matrix_vis(df2_jlst, title="DF2.corr_gene_wise")
 corrcoef_matrix_vis(H_df, title="step2(focusFnn).imputation.corr_gene_wise")
-
 
 
 corrcoef_matrix_vis(df_valid_jlst, title="DF.valid.corr_gene_wise")
