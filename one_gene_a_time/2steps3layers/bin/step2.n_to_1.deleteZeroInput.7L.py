@@ -82,7 +82,7 @@ j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 # j = 400
 # print("\n\n>>> for gene", j)
 learning_rate = 0.003  # todo: was 0.01 for 3L
-training_epochs = 2000  # todo: 10000 for show, 1600 for early stop
+training_epochs = 2500  # todo: 10000 for show, 1600 for early stop
 batch_size = 128  # todo: can be too large if solid cells < 256
 sd = 0.0001 #stddev for random init
 n_input = n
