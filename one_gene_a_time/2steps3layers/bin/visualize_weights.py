@@ -139,12 +139,9 @@ plt.title('decoder_w2_abs_colsum')
 plt.savefig('decoder_w2_abs_colsum.hist.png', bbox_inches='tight')
 plt.close()
 # filter
-small_absSum_idx = decoder_w2_abs_colsum < 1  # seem from hist
+small_absSum_idx = decoder_w2_abs_colsum < 0.7  # seem from hist
 print("small_absSum_idx:", sum(small_absSum_idx))
 df_small_absSum = df.ix[:, small_absSum_idx]
-
-
-
 
 
 # small var
@@ -155,7 +152,7 @@ plt.title('decoder_w2_colVar')
 plt.savefig('decoder_w2_colVar.hist.png', bbox_inches='tight')
 plt.close()
 # filter
-small_var_idx = decoder_w2_colVar < 0.00001  # to get 25% genes
+small_var_idx = decoder_w2_colVar < 0.000005  # to get 25% genes
 print('small_var_idx', sum(small_var_idx))
 df_small_var = df.ix[:, small_var_idx]
 
