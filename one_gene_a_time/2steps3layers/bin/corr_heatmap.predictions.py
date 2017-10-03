@@ -12,8 +12,8 @@ list = [[1, 2], [100, 104], [101, 160], [107, 198],
         [600, 800], [204, 604], [205, 805]]
 
 
-# For input data #
-DF = scimpute.read_hd5('../data/v1-1-5-3/v1-1-5-3.E3.hd5')
+# For input data #  todo: disabled temperately
+DF = scimpute.read_hd5('../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5')
 DF = DF.transpose()
 # corr
 corrcoef_matrix_gene_wise0 = np.corrcoef(DF, rowvar=False)
