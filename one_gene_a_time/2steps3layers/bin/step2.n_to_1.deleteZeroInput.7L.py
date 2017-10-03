@@ -336,7 +336,11 @@ for j in j_lst:
         tf.summary.scalar('cost', cost)
         tf.summary.scalar('cost_benchmark', cost_benchmark)
 
-    train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost, var_list=[list(focusFnn_params.values())])  # todo: only update the last layer, update more layers in future
+    train_op = tf.train.GradientDescentOptimizer(learning_rate).\
+        minimize(cost, var_list=list(decoder_params.values())
+                                 + list(focusFnn_params.values())
+                                 + list(encoder_params.values())
+                 )  # todo: change lastLayer/decoder/all layers to updadte
 
     train_writer = tf.summary.FileWriter(log_dir+'/train', sess.graph)
     valid_writer = tf.summary.FileWriter(log_dir+'/valid', sess.graph)
