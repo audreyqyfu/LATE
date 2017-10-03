@@ -465,3 +465,5 @@ def mean_df(df):
     return(Mean)
 
 
+def subset_df(df_big, df_subset):
+    return (df_big.ix[df_subset.index, df_subset.columns])
