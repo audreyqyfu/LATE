@@ -442,3 +442,26 @@ def corr_one_gene(col1, col2, accuracy = 3):
     result = pearsonr(col1, col2)[0][0]
     result = round(result, accuracy)
     return(result)
+
+
+def hist_df(df, title="hist of df"):
+    df_flat = df.values.reshape(df.size, 1)
+    plt.hist(df_flat, bins=200)
+    plt.title(title)
+    plt.savefig(title+'.png', bbox_inches='tight')
+    plt.close()
+    print('hist of ', title, 'is done')
+
+
+def nnzero_rate_df(df):
+    idx = df != 0
+    nnzero_rate = round(sum(sum(idx.values))/df.size,3)
+    return(nnzero_rate)
+
+
+def mean_df(df):
+    Sum = sum(sum(df.values))
+    Mean = Sum/df.size
+    return(Mean)
+
+
