@@ -309,7 +309,7 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('cost', cost)
     tf.summary.scalar('cost_benchmark', cost_benchmark)
 
-train_op = tf.train.GradientDescentOptimizer(learning_rate). \
+train_op = tf.train.AdamOptimizer(learning_rate). \
     minimize(cost, var_list=[list(decoder_params.values()), list(encoder_params.values())])
 
 # Launch Session #
