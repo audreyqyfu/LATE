@@ -178,8 +178,8 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0003
-annealing_constant = 0.99  # for each epoch
-training_epochs = 10000  # todo change epochs
+annealing_constant = 0.98  # for each epoch
+training_epochs = 4000  # todo change epochs
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
@@ -309,7 +309,7 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('cost', cost)
     tf.summary.scalar('cost_benchmark', cost_benchmark)
 
-train_op = tf.train.AdamOptimizer(learning_rate). \
+train_op = tf.train.GradientDescentOptimizer(learning_rate). \
     minimize(cost, var_list=[list(decoder_params.values()), list(encoder_params.values())])
 
 # Launch Session #
