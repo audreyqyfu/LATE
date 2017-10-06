@@ -33,7 +33,7 @@ def print_parameters():
           "\nn_hidden3: ", n_hidden_3,
           "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
-          # "\nannealing_constant", annealing_constant,
+          "\nannealing_constant", annealing_constant,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
           "\nkeep_prob_input: ", pIn,
@@ -177,13 +177,13 @@ df2_valid = df2.ix[df_valid.index]
 df2_test = df2.ix[df_test.index]
 
 # Parameters #
-learning_rate = 0.01
+learning_rate = 0.00003
 # annealing_constant = 0.98  # for each epoch
-training_epochs = 4000  # todo change epochs
+training_epochs = 500  # todo change epochs
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
-# sd = 0.00001  # stddev for random init
+sd = 0.00001  # stddev for random init
 n_input = n
 n_hidden_1 = 800
 n_hidden_2 = 600
@@ -192,7 +192,7 @@ n_hidden_4 = 200
 
 log_dir = './pre_train'
 
-display_step = 10
+display_step = 20
 snapshot_step = 1000
 
 scimpute.refresh_logfolder(log_dir)
@@ -209,50 +209,27 @@ M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 keep_prob_input = tf.placeholder(tf.float32)
 keep_prob_hidden = tf.placeholder(tf.float32)
 
-# tf.set_random_seed(3)  # seed todo: back to fixed seed
+# tf.set_random_seed(3)  # seed
 encoder_params = {
-    'w1': tf.Variable(tf.random_uniform([n_input, n_hidden_1],
-                                        minval=-6/math.sqrt(n_input + n_hidden_1),
-                                        maxval=6/math.sqrt(n_input + n_hidden_1)),
-                      name='encoder_w1'),
-    'b1': tf.Variable(tf.ones([n_hidden_1]), name='encoder_b1'),
-    'w2': tf.Variable(tf.random_uniform([n_hidden_1, n_hidden_2],
-                                        minval=-6/math.sqrt(n_hidden_1 + n_hidden_2),
-                                        maxval=6/math.sqrt(n_hidden_1 + n_hidden_2)),
-                      name='encoder_w2'),
-    'b2': tf.Variable(tf.ones([n_hidden_2]), name='encoder_b2'),
-    'w3': tf.Variable(tf.random_uniform([n_hidden_2, n_hidden_3],
-                                        minval=-6/math.sqrt(n_hidden_2 + n_hidden_3),
-                                        maxval=6/math.sqrt(n_hidden_2 + n_hidden_3)),
-                      name='encoder_w3'),
-    'b3': tf.Variable(tf.ones([n_hidden_3]), name='encoder_b3'),
-    'w4': tf.Variable(tf.random_uniform([n_hidden_3, n_hidden_4],
-                                        minval=-6/math.sqrt(n_hidden_3 + n_hidden_4),
-                                        maxval=6/math.sqrt(n_hidden_3 + n_hidden_4)),
-                      name='encoder_w4'),
-    'b4': tf.Variable(tf.ones([n_hidden_4]), name='encoder_b4')
+    'w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev=sd), name='encoder_w1'),
+    'b1': tf.Variable(tf.random_normal([n_hidden_1], mean=100 * sd, stddev=sd), name='encoder_b1'),
+    'w2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2], stddev=sd), name='encoder_w2'),
+    'b2': tf.Variable(tf.random_normal([n_hidden_2], mean=100 * sd, stddev=sd), name='encoder_b2'),
+    'w3': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_3], stddev=sd), name='encoder_w3'),
+    'b3': tf.Variable(tf.random_normal([n_hidden_3], mean=100 * sd, stddev=sd), name='encoder_b3'),
+    'w4': tf.Variable(tf.random_normal([n_hidden_3, n_hidden_4], stddev=sd), name='encoder_w4'),
+    'b4': tf.Variable(tf.random_normal([n_hidden_4], mean=100 * sd, stddev=sd), name='encoder_b4')
 }
 decoder_params = {
-    'w1': tf.Variable(tf.random_uniform([n_hidden_4, n_hidden_3],
-                                        minval=-6/math.sqrt(n_hidden_4 + n_hidden_3),
-                                        maxval=6/math.sqrt(n_hidden_4 + n_hidden_3)),
-                      name='decoder_w1'),
-    'b1': tf.Variable(tf.ones([n_hidden_3]), name='decoder_b1'),
-    'w2': tf.Variable(tf.random_uniform([n_hidden_3, n_hidden_2],
-                                        minval=-6/math.sqrt(n_hidden_3 + n_hidden_2),
-                                        maxval=6/math.sqrt(n_hidden_3 + n_hidden_2)),
-                      name='decoder_w2'),
-    'b2': tf.Variable(tf.ones([n_hidden_2]), name='decoder_b2'),
-    'w3': tf.Variable(tf.random_uniform([n_hidden_2, n_hidden_1],
-                                        minval=-6/math.sqrt(n_hidden_2 + n_hidden_1),
-                                        maxval=6/math.sqrt(n_hidden_2 + n_hidden_1)),
-                      name='decoder_w3'),
-    'b3': tf.Variable(tf.ones([n_hidden_1]), name='decoder_b3'),
-    'w4': tf.Variable(tf.random_uniform([n_hidden_1, n_input],
-                                        minval=-6/math.sqrt(n_hidden_1 + n_input),
-                                        maxval=6/math.sqrt(n_hidden_1 + n_input)),
-                      name='decoder_w4'),
-    'b4': tf.Variable(tf.ones([n_input]), name='decoder_b4')
+    'w1': tf.Variable(tf.random_normal([n_hidden_4, n_hidden_3], stddev=sd), name='decoder_w1'),
+    'b1': tf.Variable(tf.random_normal([n_hidden_3], mean=100 * sd, stddev=sd), name='decoder_b1'),
+    # 'b1': tf.Variable(tf.ones([n_input]), name='decoder_b1') #fast, but maybe linear model
+    'w2': tf.Variable(tf.random_normal([n_hidden_3, n_hidden_2], stddev=sd), name='decoder_w2'),
+    'b2': tf.Variable(tf.random_normal([n_hidden_2], mean=100 * sd, stddev=sd), name='decoder_b2'),
+    'w3': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1], stddev=sd), name='decoder_w3'),
+    'b3': tf.Variable(tf.random_normal([n_hidden_1], mean=100 * sd, stddev=sd), name='decoder_b3'),
+    'w4': tf.Variable(tf.random_normal([n_hidden_1, n_input], stddev=sd), name='decoder_w4'),
+    'b4': tf.Variable(tf.random_normal([n_input], mean=100 * sd, stddev=sd), name='decoder_b4')
 }
 parameters = {**encoder_params, **decoder_params}
 
@@ -301,10 +278,8 @@ def decoder(x):
         layer_3 = tf.nn.relu(tf.add(tf.matmul(layer_2_drop, decoder_params['w3']),
                                        decoder_params['b3']))
         layer_3_drop = tf.nn.dropout(layer_3, keep_prob_hidden)
-        # layer_4 = tf.nn.relu(tf.add(tf.matmul(layer_3_drop, decoder_params['w4']),
-        #                                decoder_params['b4']))  # todo: back to ReLu in output layer
-        layer_4 = tf.add(tf.matmul(layer_3_drop, decoder_params['w4']),
-                                       decoder_params['b4'])
+        layer_4 = tf.nn.relu(tf.add(tf.matmul(layer_3_drop, decoder_params['w4']),
+                                       decoder_params['b4']))
 
         variable_summaries('decoder_w1', decoder_params['w1'])
         variable_summaries('decoder_w2', decoder_params['w2'])
@@ -385,8 +360,8 @@ for epoch in range(1, training_epochs + 1):
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
-    # if epoch > 20:
-    #     learning_rate = learning_rate * annealing_constant
+    if epoch > 20:
+        learning_rate = learning_rate * annealing_constant
 
 train_writer.close()
 valid_writer.close()
