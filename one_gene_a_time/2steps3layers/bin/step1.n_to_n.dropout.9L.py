@@ -177,13 +177,13 @@ df2_valid = df2.ix[df_valid.index]
 df2_test = df2.ix[df_test.index]
 
 # Parameters #
-learning_rate = 0.0003
+learning_rate = 0.01
 # annealing_constant = 0.98  # for each epoch
 training_epochs = 4000  # todo change epochs
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
-sd = 0.00001  # stddev for random init
+# sd = 0.00001  # stddev for random init
 n_input = n
 n_hidden_1 = 800
 n_hidden_2 = 600
