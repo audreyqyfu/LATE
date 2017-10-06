@@ -175,7 +175,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0003
-training_epochs = 10000  # todo change epochs
+training_epochs = 2000  # todo change epochs, 2000 good for 5L
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
@@ -226,8 +226,10 @@ def encoder(x):
         layer_1 = tf.nn.relu(tf.add(tf.matmul(x_drop, encoder_params['w1']),
                                     encoder_params['b1']))
         layer_1_drop = tf.nn.dropout(layer_1, keep_prob_hidden)
-        layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1_drop, encoder_params['w2']),
-                                    encoder_params['b2']))
+        # layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1_drop, encoder_params['w2']),
+        #                             encoder_params['b2']))
+        layer_2 = tf.add(tf.matmul(layer_1_drop, encoder_params['w2']),  # todo: test linear output
+                                    encoder_params['b2'])
 
         variable_summaries('weights_w1', encoder_params['w1'])
         variable_summaries('weights_w2', encoder_params['w2'])
