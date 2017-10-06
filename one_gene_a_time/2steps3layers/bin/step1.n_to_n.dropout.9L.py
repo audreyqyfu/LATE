@@ -33,7 +33,7 @@ def print_parameters():
           "\nn_hidden3: ", n_hidden_3,
           "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
-          "\nannealing_constant", annealing_constant,
+          # "\nannealing_constant", annealing_constant,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
           "\nkeep_prob_input: ", pIn,
@@ -360,8 +360,8 @@ for epoch in range(1, training_epochs + 1):
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
-    if epoch > 20:
-        learning_rate = learning_rate * annealing_constant
+    # if epoch > 20:
+    #     learning_rate = learning_rate * annealing_constant
 
 train_writer.close()
 valid_writer.close()
