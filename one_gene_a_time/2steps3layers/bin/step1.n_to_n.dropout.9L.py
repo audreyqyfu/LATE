@@ -33,7 +33,6 @@ def print_parameters():
           "\nn_hidden3: ", n_hidden_3,
           "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
-          # "\nannealing_constant", annealing_constant,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
           "\nkeep_prob_input: ", pIn,
@@ -177,13 +176,12 @@ df2_valid = df2.ix[df_valid.index]
 df2_test = df2.ix[df_test.index]
 
 # Parameters #
-learning_rate = 0.00003
-# annealing_constant = 0.98  # for each epoch
-training_epochs = 500  # todo change epochs
+learning_rate = 0.00003  # small for 9L
+training_epochs = 3000
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
-sd = 0.00001  # stddev for random init
+sd = 0.00001  # stddev for random init, small for 9L
 n_input = n
 n_hidden_1 = 800
 n_hidden_2 = 600
@@ -193,7 +191,7 @@ n_hidden_4 = 200
 log_dir = './pre_train'
 
 display_step = 20
-snapshot_step = 1000
+snapshot_step = 500
 
 scimpute.refresh_logfolder(log_dir)
 
@@ -209,7 +207,7 @@ M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 keep_prob_input = tf.placeholder(tf.float32)
 keep_prob_hidden = tf.placeholder(tf.float32)
 
-# tf.set_random_seed(3)  # seed
+tf.set_random_seed(3)  # seed
 encoder_params = {
     'w1': tf.Variable(tf.random_normal([n_input, n_hidden_1], stddev=sd), name='encoder_w1'),
     'b1': tf.Variable(tf.random_normal([n_hidden_1], mean=100 * sd, stddev=sd), name='encoder_b1'),
@@ -360,8 +358,6 @@ for epoch in range(1, training_epochs + 1):
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
-    # if epoch > 20:
-    #     learning_rate = learning_rate * annealing_constant
 
 train_writer.close()
 valid_writer.close()
@@ -409,6 +405,11 @@ encoder_b3 = sess.run(encoder_params['b3'])
 encoder_b3 = encoder_b3.reshape(len(encoder_b3), 1)
 encoder_b3_T = encoder_b3.T
 
+encoder_w4 = sess.run(encoder_params['w4'])
+encoder_b4 = sess.run(encoder_params['b4'])
+encoder_b4 = encoder_b4.reshape(len(encoder_b4), 1)
+encoder_b4_T = encoder_b4.T
+
 decoder_w1 = sess.run(decoder_params['w1'])
 decoder_b1 = sess.run(decoder_params['b1'])
 decoder_b1 = decoder_b1.reshape(len(decoder_b1), 1)
@@ -423,20 +424,32 @@ decoder_w3 = sess.run(decoder_params['w3'])
 decoder_b3 = sess.run(decoder_params['b3'])
 decoder_b3 = decoder_b3.reshape(len(decoder_b3), 1)
 decoder_b3_T = decoder_b3.T
+
+decoder_w4 = sess.run(decoder_params['w4'])
+decoder_b4 = sess.run(decoder_params['b4'])
+decoder_b4 = decoder_b4.reshape(len(decoder_b4), 1)
+decoder_b4_T = decoder_b4.T
+
 # visualize weights/biases
 scimpute.visualize_weights_biases(encoder_w1, encoder_b1_T, 'encoder_w1, b1')
 scimpute.visualize_weights_biases(encoder_w2, encoder_b2_T, 'encoder_w2, b2')
 scimpute.visualize_weights_biases(encoder_w3, encoder_b3_T, 'encoder_w3, b3')
+scimpute.visualize_weights_biases(encoder_w4, encoder_b4_T, 'encoder_w4, b4')
 scimpute.visualize_weights_biases(decoder_w1, decoder_b1_T, 'decoder_w1, b1')
 scimpute.visualize_weights_biases(decoder_w2, decoder_b2_T, 'decoder_w2, b2')
 scimpute.visualize_weights_biases(decoder_w3, decoder_b3_T, 'decoder_w3, b3')
+scimpute.visualize_weights_biases(decoder_w4, decoder_b4_T, 'decoder_w4, b4')
+
 # save weights
 scimpute.save_csv(encoder_w1, 'encoder_w1.csv.gz')
 scimpute.save_csv(encoder_w2, 'encoder_w2.csv.gz')
 scimpute.save_csv(encoder_w3, 'encoder_w3.csv.gz')
+scimpute.save_csv(encoder_w4, 'encoder_w4.csv.gz')
+
 scimpute.save_csv(decoder_w1, 'decoder_w1.csv.gz')
 scimpute.save_csv(decoder_w2, 'decoder_w2.csv.gz')
 scimpute.save_csv(decoder_w3, 'decoder_w3.csv.gz')
+scimpute.save_csv(decoder_w4, 'decoder_w4.csv.gz')
 
 # visualizing dfs
 visualization_of_dfs()
