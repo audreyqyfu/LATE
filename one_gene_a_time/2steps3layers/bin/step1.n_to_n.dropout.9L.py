@@ -382,7 +382,7 @@ hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                   )
 
 # gene-correlation for gene-j
-for j in [0, 1, 200, 201, 400, 401, 600, 601, 800, 801, 998, 999]:
+for j in [4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
     scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j],
                           title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
                           xlabel='Ground Truth ' + Bname,
