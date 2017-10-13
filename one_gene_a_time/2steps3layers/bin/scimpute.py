@@ -467,3 +467,63 @@ def mean_df(df):
 
 def subset_df(df_big, df_subset):
     return (df_big.ix[df_subset.index, df_subset.columns])
+
+def read_data(data_name):
+    if data_name is 'splatter':  # only this mode creates gene-gene plot
+        file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
+        file_benchmark = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"
+        Aname = '(E3)'
+        Bname = '(E3)'  # careful
+        df = pd.read_hdf(file).transpose()  # [cells,genes]
+        df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    elif data_name is 'EMT2730':  # 2.7k cells used in magic paper
+        file = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5" #data need imputation
+        file_benchmark = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"
+        Aname = '(EMT2730)'
+        Bname = '(EMT2730)'
+        df = pd.read_hdf(file).transpose() #[cells,genes]
+        df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
+    elif data_name is 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
+        file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"  # data need imputation
+        file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"
+        Aname = '(EMT9k)'
+        Bname = '(EMT9k)'
+        df = pd.read_hdf(file).transpose()  # [cells,genes]
+        df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    elif data_name is 'EMT9k_log':  # magic imputation using 8.7k cells > 300 reads/cell
+        file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
+        file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"
+        Aname = '(EMT9kLog)'
+        Bname = '(EMT9kLog)'
+        df = pd.read_hdf(file).transpose()  # [cells,genes]
+        df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+    else:
+        raise Warning("data name not recognized!")
+
+    m, n = df.shape  # m: n_cells; n: n_genes
+    print("\ninput df: ", Aname, " ", file, "\n", df.values[0:4, 0:4], "\n")
+    print("ground-truth df: ", Bname, " ", file_benchmark, "\n", df2.values[0:4, 0:4], "\n")
+
+    return(df, df2, Aname, Bname, m, n)
+
+
+def _init_weights_biases (name, dim_in, dim_out, sd):
+    """
+    init weights and biases
+    
+    :param name: 
+    :param dim_in: 
+    :param dim_out: 
+    :param sd: 
+    :return: 
+    """
+    with tf.name_scope(name):
+        W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd),
+                        name=name+'_W')
+        b = tf.Variable(tf.random_normal([dim_out]), mean=100*sd, stddev=sd,
+                        name=name+'_b')
+
+    variable_summaries(name+'_W', W)
+    variable_summaries(name+'_b', b)
+
+    return W, b
