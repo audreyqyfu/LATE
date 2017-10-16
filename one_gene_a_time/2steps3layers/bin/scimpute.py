@@ -622,9 +622,15 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
     if not os.path.exists("plots"):
         os.makedirs("plots")
 
+    # list to np.array, to use index
+    epoch = np.array(epoch)
+    mse_batch = np.array(mse_batch)
+    # mse_train = np.array(mse_train)
+    mse_valid = np.array(mse_valid)
+
     # plot (full range)
     fprefix = "./plots/" + title
-    plt.plot(epoch, mse_batch, 'b-', label='mse_batch')
+    plt.plot(epoch, mse_batch, 'b--', label='mse_batch')
     # plt.plot(epoch, mse_train, 'g--', label='mse_train')
     plt.plot(epoch, mse_valid, 'r-', label='mse_valid')
     plt.title(title)
@@ -643,23 +649,86 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
 
     # plot (no epoch0)
     fprefix = "./plots/" + title + '.cropped'
-    epoch_log.pop(0)
-    mse_batch.pop(0)
-    # mse_train.pop(0)
-    mse_valid.pop(0)
-    plt.plot(epoch, mse_batch, 'b-', label='mse_batch')
-    # plt.plot(epoch, mse_train, 'g--', label='mse_train')
-    plt.plot(epoch, mse_valid, 'r-', label='mse_valid')
+    zoom = np.arange(1, len(mse_batch))
+    plt.plot(epoch[zoom], mse_batch[zoom], 'b--', label='mse_batch')
+    # plt.plot(epoch[zoom], mse_train[zoom], 'g--', label='mse_train')
+    plt.plot(epoch[zoom], mse_valid[zoom], 'r-', label='mse_valid')
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.legend()
     if range is None:
-        max, min = max_min_element_in_arrs([mse_batch, mse_valid])
+        max, min = max_min_element_in_arrs([mse_batch[zoom], mse_valid[zoom]])
         # max, min = max_min_element_in_arrs([mse_batch, mse_train, mse_valid])
+        plt.ylim(min, max)
+    else:
+        plt.ylim(range[0], range[1])
+
+    plt.savefig(fprefix + '.png', bbox_inches='tight')
+    plt.close()
+
+
+def learning_curve_corr(epoch, corr_batch, corr_valid,
+                       title='learning curve (corr)', xlabel='epochs', ylabel='corr', range=None):
+    """
+    learning curve
+    :param epoch: 
+    :param corr_batch: 
+    # :param corr_train: 
+    :param corr_valid: 
+    :param title: 
+    :param xlabel: 
+    :param ylabel: 
+    :param range: 
+    :return: 
+    """
+
+    # create plots directory
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
+
+    # list to np.array, to use index
+    epoch = np.array(epoch)
+    corr_batch = np.array(corr_batch)
+    # corr_train = np.array(corr_train)
+    corr_valid = np.array(corr_valid)
+
+    # plot (full range)
+    fprefix = "./plots/" + title
+    plt.plot(epoch, corr_batch, 'b--', label='corr_batch')
+    # plt.plot(epoch, corr_train, 'g--', label='corr_train')
+    plt.plot(epoch, corr_valid, 'r-', label='corr_valid')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    if range is None:
+        max, min = max_min_element_in_arrs([corr_batch, corr_valid])
+        # max, min = max_min_element_in_arrs([corr_batch, corr_train, corr_valid])
         plt.ylim(min,max)
     else:
         plt.ylim(range[0], range[1])
 
     plt.savefig(fprefix + '.png', bbox_inches='tight')
     plt.close()
+
+    # plot (no epoch0)
+    fprefix = "./plots/" + title + '.cropped'
+    zoom = np.arange(1, len(corr_batch))
+    plt.plot(epoch[zoom], corr_batch[zoom], 'b--', label='corr_batch')
+    # plt.plot(epoch[zoom], corr_train[zoom], 'g--', label='corr_train')
+    plt.plot(epoch[zoom], corr_valid[zoom], 'r-', label='corr_valid')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    if range is None:
+        max, min = max_min_element_in_arrs([corr_batch[zoom], corr_valid[zoom]])
+        # max, min = max_min_element_in_arrs([corr_batch, corr_train, corr_valid])
+        plt.ylim(min, max)
+    else:
+        plt.ylim(range[0], range[1])
+
+    plt.savefig(fprefix + '.png', bbox_inches='tight')
+    plt.close()
+

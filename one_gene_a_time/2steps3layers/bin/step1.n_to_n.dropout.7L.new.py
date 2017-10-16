@@ -113,6 +113,8 @@ print_parameters()
 
 
 # Define model #
+tf.reset_default_graph()
+
 X = tf.placeholder(tf.float32, [None, n_input])  # input
 M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 
@@ -206,10 +208,10 @@ for epoch in range(1, training_epochs+1):
 train_writer.close()
 valid_writer.close()
 
+
 # learning curve
 scimpute.learning_curve_mse(epoch_log, mse_log_batch, mse_log_valid)
 scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid)
-
 
 # gene-corr hist
 hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
