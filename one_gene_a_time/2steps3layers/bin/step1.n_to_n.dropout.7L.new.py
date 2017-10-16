@@ -51,8 +51,8 @@ def evaluate_epoch0():
     mse_log_valid.append(mse_valid)
     print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
 
-    h_train = sess.run(h, feed_dict={X: df_train.values[:100], pIn_holder: 1, pHidden_holder: 1})
-    h_valid = sess.run(h, feed_dict={X: df_valid.values[:100], pIn_holder: 1, pHidden_holder: 1})
+    h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
     corr_train = scimpute.medium_corr(df_train.values, h_train)
     corr_valid = scimpute.medium_corr(df_valid.values, h_valid)
     cell_corr_log_batch.append(corr_train)
@@ -120,7 +120,6 @@ M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 
 pIn_holder = tf.placeholder(tf.float32)
 pHidden_holder = tf.placeholder(tf.float32)
-
 
 w_e1, b_e1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
 a_e1 = scimpute.dense_layer('encoder1', X, w_e1, b_e1, pIn_holder)

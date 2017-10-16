@@ -263,9 +263,11 @@ def medium_corr(arr1, arr2, num=100, accuracy=3):
     # from scipy.stats.stats import pearsonr
     pearsonrlog = []
     m, n = arr1.shape
-    num = min(100, m)
-    # indices = np.random.choice(range(m), num, replace=False)
-    for i in range(num - 1):
+    num = min(100, m)  # same 100 cells being evaluated for learning curves
+    # print(num, 'samples being used to calculate pearsonr')
+    np.random.seed(100)
+    idx = np.random.choice(range(m), num, replace=False)
+    for i in idx:
         pearsonrlog.append(pearsonr(arr1[i], arr2[i]))
     pearsonrlog.sort()
     result = round(pearsonrlog[int(num // 2)][0], accuracy)
