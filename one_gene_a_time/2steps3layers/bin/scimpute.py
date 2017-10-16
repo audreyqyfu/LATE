@@ -262,6 +262,9 @@ def medium_corr(arr1, arr2, num=100, accuracy=3):
     will calculate correlation between corresponding rows"""
     # from scipy.stats.stats import pearsonr
     pearsonrlog = []
+    m, n = arr1.shape
+    num = min(100, m)
+    # indices = np.random.choice(range(m), num, replace=False)
     for i in range(num - 1):
         pearsonrlog.append(pearsonr(arr1[i], arr2[i]))
     pearsonrlog.sort()
@@ -495,8 +498,8 @@ def read_data(data_name):
         file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"
         Aname = '(EMT9kLog)'
         Bname = '(EMT9kLog)'
-        df = pd.read_hdf(file).transpose()  # [cells,genes]
-        df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
+        df = pd.read_hdf(file).transpose().ix[:, 1:1000]  # [cells,genes]  todo: change back after test
+        df2 = pd.read_hdf(file_benchmark).transpose().ix[:, 1:1000]  # [cells,genes]
     else:
         raise Warning("data name not recognized!")
 
@@ -507,23 +510,156 @@ def read_data(data_name):
     return(df, df2, Aname, Bname, m, n)
 
 
-def _init_weights_biases (name, dim_in, dim_out, sd):
+def variable_summaries(name, var):
+    """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+    with tf.name_scope(name):
+        mean = tf.reduce_mean(var)
+        tf.summary.scalar('mean', mean)
+        with tf.name_scope('stddev'):
+            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+        tf.summary.scalar('stddev', stddev)
+        tf.summary.scalar('max', tf.reduce_max(var))
+        tf.summary.scalar('min', tf.reduce_min(var))
+        tf.summary.histogram('histogram', var)
+
+
+def weight_variable(name_scope, dim_in, dim_out, sd):
     """
-    init weights and biases
+    define weights
     
-    :param name: 
+    :param name_scope: 
     :param dim_in: 
     :param dim_out: 
     :param sd: 
     :return: 
     """
-    with tf.name_scope(name):
+    with tf.name_scope(name_scope):
         W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd),
-                        name=name+'_W')
-        b = tf.Variable(tf.random_normal([dim_out]), mean=100*sd, stddev=sd,
-                        name=name+'_b')
+                        name=name_scope+'_W')
 
-    variable_summaries(name+'_W', W)
-    variable_summaries(name+'_b', b)
+    variable_summaries(name_scope+'_W', W)
+
+    return W
+
+
+def bias_variable(name_scope, dim_out, sd):
+    """
+    define biases
+
+    :param name_scope: 
+    :param dim_out: 
+    :param sd: 
+    :return: 
+    """
+    with tf.name_scope(name_scope):
+
+        b = tf.Variable(tf.random_normal([dim_out], mean=100 * sd, stddev=sd),
+                        name=name_scope + '_b')
+
+    variable_summaries(name_scope + '_b', b)
+
+    return b
+
+
+def weight_bias_variable(name_scope, dim_in, dim_out, sd):
+    """
+    define weights and biases
+
+    :param name_scope: 
+    :param dim_in: 
+    :param dim_out: 
+    :param sd: 
+    :return: 
+    """
+    with tf.name_scope(name_scope):
+        W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd),
+                        name=name_scope + '_W')
+        b = tf.Variable(tf.random_normal([dim_out], mean=100 * sd, stddev=sd),
+                        name=name_scope + '_b')
+
+    variable_summaries(name_scope + '_W', W)
+    variable_summaries(name_scope + '_b', b)
 
     return W, b
+
+
+def dense_layer(name, input, W, b, pRetain):
+    """
+    define a layer and return output
+    
+    :param name: 
+    :param input: X_placeholder or a(l-1)
+    :param W: weights
+    :param b: biases 
+    :param pRetain: 
+    :return: 
+    """
+    x_drop = tf.nn.dropout(input, pRetain)
+    z = tf.add(tf.matmul(x_drop, W), b)
+    a = tf.nn.relu(z)
+
+    variable_summaries(name+'_a', a)
+
+    return a
+
+
+def learning_curve_mse(epoch, mse_batch, mse_valid,
+                       title='learning curve (MSE)', xlabel='epochs', ylabel='MSE', range=None):
+    """
+    learning curve
+    :param epoch: 
+    :param mse_batch: 
+    # :param mse_train: 
+    :param mse_valid: 
+    :param title: 
+    :param xlabel: 
+    :param ylabel: 
+    :param range: 
+    :return: 
+    """
+
+    # create plots directory
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
+
+    # plot (full range)
+    fprefix = "./plots/" + title
+    plt.plot(epoch, mse_batch, 'b-', label='mse_batch')
+    # plt.plot(epoch, mse_train, 'g--', label='mse_train')
+    plt.plot(epoch, mse_valid, 'r-', label='mse_valid')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    if range is None:
+        max, min = max_min_element_in_arrs([mse_batch, mse_valid])
+        # max, min = max_min_element_in_arrs([mse_batch, mse_train, mse_valid])
+        plt.ylim(min,max)
+    else:
+        plt.ylim(range[0], range[1])
+
+    plt.savefig(fprefix + '.png', bbox_inches='tight')
+    plt.close()
+
+    # plot (no epoch0)
+    fprefix = "./plots/" + title + '.cropped'
+    epoch_log.pop(0)
+    mse_batch.pop(0)
+    # mse_train.pop(0)
+    mse_valid.pop(0)
+    plt.plot(epoch, mse_batch, 'b-', label='mse_batch')
+    # plt.plot(epoch, mse_train, 'g--', label='mse_train')
+    plt.plot(epoch, mse_valid, 'r-', label='mse_valid')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    if range is None:
+        max, min = max_min_element_in_arrs([mse_batch, mse_valid])
+        # max, min = max_min_element_in_arrs([mse_batch, mse_train, mse_valid])
+        plt.ylim(min,max)
+    else:
+        plt.ylim(range[0], range[1])
+
+    plt.savefig(fprefix + '.png', bbox_inches='tight')
+    plt.close()
