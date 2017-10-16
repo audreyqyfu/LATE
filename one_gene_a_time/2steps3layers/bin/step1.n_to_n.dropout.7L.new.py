@@ -31,8 +31,8 @@ def print_parameters():
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
-          "\nkeep_prob_input: ", pIn,
-          "\nkeep_prob_hidden: ", pHidden, "\n",
+          "\npIn_holder: ", pIn,
+          "\npHidden_holder: ", pHidden, "\n",
           "\ndf_train.values.shape", df_train.values.shape,
           "\ndf_valid.values.shape", df_valid.values.shape,
           "\ndf2_train.shape", df2_train.shape,
@@ -63,16 +63,18 @@ def evaluate_epoch0():
 
 def snapshot():
     print("#Snapshot: ")
-    # show full data-set corr
-    h_train = sess.run(y_pred, feed_dict={X: df_train.values, keep_prob_input: 1, keep_prob_hidden: 1})  # np.array [len(df_train),1]
-    h_valid = sess.run(y_pred, feed_dict={X: df_valid.values, keep_prob_input: 1, keep_prob_hidden: 1})
-    print("medium cell-pearsonr in all train data: ",
+    # inference
+    h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    h_input = sess.run(h, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    # print whole dataset pearsonr
+    print("medium cell-pearsonr(all train): ",
           scimpute.medium_corr(df2_train.values, h_train, num=len(df_train)))
-    print("medium cell-pearsonr in all valid data: ",
+    print("medium cell-pearsonr(all valid): ",
           scimpute.medium_corr(df2_valid.values, h_valid, num=len(df_valid)))
-    # save predictions
-    h_input = sess.run(y_pred, feed_dict={X: df.values, keep_prob_input: 1, keep_prob_hidden: 1})
-    print("medium cell-pearsonr in all imputation cells: ", scimpute.medium_corr(df2.values, h_input, num=m))
+    print("medium cell-pearsonr in all imputation cells: ",
+          scimpute.medium_corr(df2.values, h_input, num=m))
+    # save pred
     df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
     scimpute.save_hd5(df_h_input, log_dir + "/imputation.step1.hd5")
     # save model
@@ -100,13 +102,13 @@ n_hidden_1 = 20
 n_hidden_2 = 400
 n_hidden_3 = 200
 pIn = 0.8
-pHidden = 0.5
+pHidden = 1  # todo: change back to 0.5 after test
 learning_rate = 0.01  # todo: was 0.0003
 sd = 0.0001  # stddev for random init
 batch_size = 256
-training_epochs = 30
+training_epochs = 10
 display_step = 1
-snapshot_step = 500
+snapshot_step = 5
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
 print_parameters()
@@ -200,7 +202,7 @@ for epoch in range(1, training_epochs+1):
     # Log per observation interval
     if (epoch == 1) or (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
-        # snapshot()
+        snapshot()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
@@ -215,5 +217,5 @@ scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid
 # gene-corr hist
 hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                   fprefix='hist gene-corr, valid, step1',
-                                  title="gene-corr, prediction vs ground-truth"
+                                  title="gene-corr (prediction vs ground-truth)"
                                   )

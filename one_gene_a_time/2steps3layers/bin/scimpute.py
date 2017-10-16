@@ -358,7 +358,7 @@ def gene_corr_hist(arr1, arr2, fprefix='hist_gene_corr', title='hist_gene_corr')
     hist.sort()
     # histogram of correlation
     fig = plt.figure(figsize=(9, 9))
-    plt.hist(hist)
+    plt.hist(hist, bins=100)
     plt.xlabel('gene-corr (Pearson)')
     plt.ylabel('freq')
     plt.title(title)
@@ -636,7 +636,7 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
     # plt.plot(epoch, mse_train, 'g--', label='mse_train')
     plt.plot(epoch, mse_valid, 'r-', label='mse_valid')
     plt.title(title)
-    plt.xlabel(xlabel)
+    plt.xlabel(xlabel + '\nfinal valid mse:' + str(mse_valid[-1]))
     plt.ylabel(ylabel)
     plt.legend()
     if range is None:
@@ -656,7 +656,7 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
     # plt.plot(epoch[zoom], mse_train[zoom], 'g--', label='mse_train')
     plt.plot(epoch[zoom], mse_valid[zoom], 'r-', label='mse_valid')
     plt.title(title)
-    plt.xlabel(xlabel)
+    plt.xlabel(xlabel + '\nfinal valid mse:' + str(mse_valid[-1]))
     plt.ylabel(ylabel)
     plt.legend()
     if range is None:
@@ -701,7 +701,7 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
     # plt.plot(epoch, corr_train, 'g--', label='corr_train')
     plt.plot(epoch, corr_valid, 'r-', label='corr_valid')
     plt.title(title)
-    plt.xlabel(xlabel)
+    plt.xlabel(xlabel + '\nfinal valid corr:' + str(corr_valid[-1]))
     plt.ylabel(ylabel)
     plt.legend()
     if range is None:
@@ -721,7 +721,7 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
     # plt.plot(epoch[zoom], corr_train[zoom], 'g--', label='corr_train')
     plt.plot(epoch[zoom], corr_valid[zoom], 'r-', label='corr_valid')
     plt.title(title)
-    plt.xlabel(xlabel)
+    plt.xlabel(xlabel + '\nfinal valid corr:' + str(corr_valid[-1]))
     plt.ylabel(ylabel)
     plt.legend()
     if range is None:
