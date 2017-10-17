@@ -576,9 +576,9 @@ def weight_bias_variable(name_scope, dim_in, dim_out, sd):
     :return: 
     """
     with tf.name_scope(name_scope):
-        W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd, dtype=tf.float64),
+        W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd, dtype=tf.float32),
                         name=name_scope + '_W')
-        b = tf.Variable(tf.random_normal([dim_out], mean=100 * sd, stddev=sd, dtype=tf.float64),
+        b = tf.Variable(tf.random_normal([dim_out], mean=100 * sd, stddev=sd, dtype=tf.float32),
                         name=name_scope + '_b')
 
     variable_summaries(name_scope + '_W', W)

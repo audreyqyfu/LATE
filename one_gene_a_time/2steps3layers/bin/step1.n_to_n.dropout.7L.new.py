@@ -201,11 +201,11 @@ print_parameters()
 tf.reset_default_graph()
 
 # placeholders
-X = tf.placeholder(tf.float64, [None, n_input])  # input
-M = tf.placeholder(tf.float64, [None, n_input])  # benchmark
+X = tf.placeholder(tf.float32, [None, n_input])  # input
+M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 
-pIn_holder = tf.placeholder(tf.float64)
-pHidden_holder = tf.placeholder(tf.float64)
+pIn_holder = tf.placeholder(tf.float32)
+pHidden_holder = tf.placeholder(tf.float32)
 
 # init variables and build graph
 tf.set_random_seed(3)  # seed
