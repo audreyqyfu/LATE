@@ -115,7 +115,7 @@ def snapshot():
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
-    code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    code_bottle_neck_input = sess.run(e_a4, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     scimpute.save_csv(code_bottle_neck_input, 'code_bottle_neck_input.csv.gz')
 
 
@@ -207,8 +207,8 @@ learning_rate = 0.00003  # 0.0003 for 7L, 0.00003 for 9L
 sd = 0.00001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
 batch_size = 256
 training_epochs = 3000
-display_step = 1
-snapshot_step = 2  #todo
+display_step = 20
+snapshot_step = 500
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
 print_parameters()
@@ -330,7 +330,7 @@ for epoch in range(1, training_epochs+1):
         epoch_log.append(epoch)
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
-        # todo: tensorboard summaries
+        # tb summary
         tb_summary()
 
         # temp: show weights in layer1, and see if it updates in deep network
