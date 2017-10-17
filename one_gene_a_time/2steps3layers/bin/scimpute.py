@@ -500,8 +500,8 @@ def read_data(data_name):
         file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"
         Aname = '(EMT9kLog)'
         Bname = '(EMT9kLog)'
-        df = pd.read_hdf(file).transpose().ix[:, 1:1000]  # [cells,genes]  todo: change back after test
-        df2 = pd.read_hdf(file_benchmark).transpose().ix[:, 1:1000]  # [cells,genes]
+        df = pd.read_hdf(file).transpose()  # .ix[:, 1:1000]  # [cells,genes]
+        df2 = pd.read_hdf(file_benchmark).transpose()  #.ix[:, 1:1000]  # [cells,genes]
     else:
         raise Warning("data name not recognized!")
 

@@ -42,7 +42,7 @@ def print_parameters():
 
 
 def evaluate_epoch0():
-    print("\nEpoch 0:")
+    print("> Evaluate epoch 0:")
     epoch_log.append(epoch)
     mse_train = sess.run(mse_input, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
     mse_valid = sess.run(mse_input, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
@@ -61,8 +61,25 @@ def evaluate_epoch0():
     print("Cell-pearsonr train, valid:", corr_train, corr_valid)
 
 
+def tb_summary():
+    print('> Tensorboard summaries')
+    run_metadata = tf.RunMetadata()
+    train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
+    merged_summary = tf.summary.merge_all()
+    summary_train = sess.run(merged_summary, feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, pIn_holder: 1.0, pHidden_holder: 1.0})
+    train_writer.add_summary(summary_train, epoch)
+    valid_writer.add_summary(summary_valid, epoch)
+
+
+def learning_curve():
+    print('> plotting learning curves')
+    scimpute.learning_curve_mse(epoch_log, mse_log_batch, mse_log_valid)
+    scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid)
+
+
 def snapshot():
-    print("#Snapshot: ")
+    print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
     # inference
     h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
     h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
@@ -82,12 +99,69 @@ def snapshot():
     print("Model saved in: %s" % save_path)
 
 
+def save_bottle_neck_representation():
+    print("> save bottle-neck_representation")
+    # todo: change variable name for each model
+    code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    scimpute.save_csv(code_bottle_neck_input, 'code_bottle_neck_input.csv.gz')
+
+
+def groundTruth_vs_prediction():
+    print("> Ground truth vs prediction")
+    for j in [4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
+    # for j in [0, 200, 400, 600, 800]:  # todo: change
+        scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j],
+                              title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
+                              xlabel='Ground Truth ' + Bname,
+                              ylabel='Prediction ' + Aname
+                              )
+
+
+def gene_gene_relationship():
+    print('> gene-gene relationship before/after inference')
+    List = [[4058, 7496],  # todo: change
+            [8495, 12871]
+            ]
+    # Prediction
+    for i, j in List:
+        scimpute.scatterplot2(h_valid[:, i], h_valid[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred',
+                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j + 1))
+    # # Input
+    # for i, j in List:
+    #     scimpute.scatterplot2(df.ix[:, i], df.ix[:, j],
+    #                           title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname,
+    #                           xlabel='Gene' + str(i), ylabel='Gene' + str(j))
+    # GroundTruth
+    for i, j in List:
+        scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth',
+                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j))
+
+
+def weights_visualization(w, b):
+    print('visualization of weights/biases for each layer')
+    w_arr = sess.run(w)
+    b_arr = sess.run(b)
+    b_arr = b_arr.reshape(len(b_arr), 1)
+    b_arr_T = b_arr.T
+    scimpute.visualize_weights_biases(w_arr, b_arr_T, 'e_w1, e_b1')
+
+
+def save_weights():
+    print('save weights in csv')
+    scimpute.save_csv(sess.run(e_w1), 'e_w1.csv.gz')
+    scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
+
+
 def visualization_of_dfs():
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
+    print('visualization of dfs')
+    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
+    # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
     scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 
 # read data #
@@ -98,11 +172,11 @@ df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index],
 
 # Parameters #
 n_input = n
-n_hidden_1 = 20
+n_hidden_1 = 800
 n_hidden_2 = 400
 n_hidden_3 = 200
 pIn = 0.8
-pHidden = 1  # todo: change back to 0.5 after test
+pHidden = 0.5  # todo: change back to 0.5 after test
 learning_rate = 0.01  # todo: was 0.0003
 sd = 0.0001  # stddev for random init
 batch_size = 256
@@ -123,15 +197,27 @@ M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
 pIn_holder = tf.placeholder(tf.float32)
 pHidden_holder = tf.placeholder(tf.float32)
 
-w_e1, b_e1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
-a_e1 = scimpute.dense_layer('encoder1', X, w_e1, b_e1, pIn_holder)
+e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
+e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
 
-w_d1, b_d1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-a_d1 = scimpute.dense_layer('decoder1', a_e1, w_d1, b_d1, pHidden_holder)
+e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
+e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
+
+e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
+e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
+
+d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
+d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
+
+d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
+d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+
+d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
+d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
 
 y_input = X
 y_groundTruth = M
-h = a_d1
+h = d_a1
 
 with tf.name_scope("Metrics"):
     mse_input = tf.reduce_mean(tf.pow(y_input - h, 2))
@@ -140,8 +226,8 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('mse_groundTruth', mse_groundTruth)
 
 trainer = tf.train.AdamOptimizer(learning_rate). \
-    minimize(mse_input, var_list=[w_e1, b_e1,
-                                  w_d1, b_d1])
+    minimize(mse_input, var_list=[e_w1, e_b1,
+                                  d_w1, d_b1])
 
 # Launch Session #
 sess = tf.Session()
@@ -172,14 +258,17 @@ for epoch in range(1, training_epochs+1):
 
      # Log per epoch
     if (epoch == 1) or (epoch % display_step == 0):
-        tic_log = time.time()
+        # print training time
         print("\n#Epoch ", epoch, " took: ",
               round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
               round(toc_wall - tic_wall, 2), "Wall seconds")
-        # epoch_summary()
-        mse_batch, h_batch = sess.run([mse_input, h], feed_dict={X: x_batch, pIn_holder:1.0, pHidden_holder:1.0})
+
+        tic_log = time.time()
+
+        # Ad hoc summaries
+        mse_batch, h_batch = sess.run([mse_input, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
         # mse_train, h_train = sess.run([mse_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
-        mse_valid, h_valid = sess.run([mse_input, h], feed_dict={X: df_valid, pIn_holder:1.0, pHidden_holder:1.0})
+        mse_valid, h_valid = sess.run([mse_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
         mse_log_batch.append(mse_batch)
         # mse_log_train.append(mse_train)
         mse_log_valid.append(mse_valid)
@@ -199,10 +288,25 @@ for epoch in range(1, training_epochs+1):
         epoch_log.append(epoch)
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
+        # tensorboard summaries
+        # epoch_summary()
+
+
+
     # Log per observation interval
     if (epoch == 1) or (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
         snapshot()
+        learning_curve()
+        hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
+                                       fprefix='hist gene-corr, valid, step1',
+                                       title="gene-corr (prediction vs ground-truth)"
+                                       )
+        visualization_of_dfs()
+        gene_gene_relationship()
+        groundTruth_vs_prediction()
+        weights_visualization(e_w1, e_b1)
+        save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
@@ -210,12 +314,6 @@ train_writer.close()
 valid_writer.close()
 
 
-# learning curve
-scimpute.learning_curve_mse(epoch_log, mse_log_batch, mse_log_valid)
-scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid)
 
-# gene-corr hist
-hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
-                                  fprefix='hist gene-corr, valid, step1',
-                                  title="gene-corr (prediction vs ground-truth)"
-                                  )
+
+
