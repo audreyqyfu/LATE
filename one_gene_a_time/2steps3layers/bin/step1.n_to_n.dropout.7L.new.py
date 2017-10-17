@@ -59,17 +59,30 @@ def evaluate_epoch0():
     cell_corr_log_train.append(corr_train)
     cell_corr_log_valid.append(corr_valid)
     print("Cell-pearsonr train, valid:", corr_train, corr_valid)
+    # tb
+    merged_summary = tf.summary.merge_all()
+    summary_batch = sess.run(merged_summary, feed_dict={X: df_train, M: df2_train,  # M is not used here, just dummy
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    batch_writer.add_summary(summary_batch, epoch)
+    valid_writer.add_summary(summary_valid, epoch)
 
 
 def tb_summary():
     print('> Tensorboard summaries')
-    run_metadata = tf.RunMetadata()
-    train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
+    tic = time.time()
+    # run_metadata = tf.RunMetadata()
+    # batch_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
     merged_summary = tf.summary.merge_all()
-    summary_batch = sess.run(merged_summary, feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
-    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_batch = sess.run(merged_summary, feed_dict={X: x_batch, M: x_batch,  # M is not used here, just dummy
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
     batch_writer.add_summary(summary_batch, epoch)
     valid_writer.add_summary(summary_valid, epoch)
+    toc = time.time()
+    print('tb_summary time:', round(toc-tic,2))
 
 
 def learning_curve():
@@ -144,17 +157,21 @@ def gene_gene_relationship():
                               xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j))
 
 
-def weights_visualization(w, b):
+def weights_visualization(w_name, b_name):
     print('visualization of weights/biases for each layer')
+    w = eval(w_name)
+    b = eval(b_name)
     w_arr = sess.run(w)
     b_arr = sess.run(b)
     b_arr = b_arr.reshape(len(b_arr), 1)
     b_arr_T = b_arr.T
-    scimpute.visualize_weights_biases(w_arr, b_arr_T, 'e_w1, e_b1')  # todo: bug here, update name
+    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: bug here, update name
 
 
 def save_weights():  # todo: change when model changes depth
     print('save weights in csv')
+    scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
+    scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
     scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
     scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
     scimpute.save_csv(sess.run(e_w3), 'e_w2.csv.gz')
@@ -179,23 +196,22 @@ df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index],
 
 # Parameters #
 n_input = n
-n_hidden_1 = 80
-n_hidden_2 = 60
-n_hidden_3 = 40
-n_hidden_4 = 20
+n_hidden_1 = 800
+n_hidden_2 = 600
+n_hidden_3 = 400
+n_hidden_4 = 200
 
 pIn = 0.8
-pHidden = 0.5  # todo: change back to 0.5 after test
-learning_rate = 0.00003  # todo: 0.0003 for 7L, 0.00003 for 9L
+pHidden = 0.5
+learning_rate = 0.00003  # 0.0003 for 7L, 0.00003 for 9L
 sd = 0.00001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
 batch_size = 256
-training_epochs = 2
+training_epochs = 3000
 display_step = 1
-snapshot_step = 500
+snapshot_step = 2  #todo
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
 print_parameters()
-
 
 # Define model #
 tf.reset_default_graph()
@@ -210,30 +226,37 @@ pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
 # init variables and build graph
 tf.set_random_seed(3)  # seed
 
-e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
-e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
-scimpute.variable_summaries('encoder1', e_w1)
+with tf.name_scope('Encoder_L1'):
+    e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
+    e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
 
-e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
-e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
+with tf.name_scope('Encoder_L2'):
+    e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
+    e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
 
-e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
-e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
+with tf.name_scope('Encoder_L3'):
+    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
+    e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 
-e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
-e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
+with tf.name_scope('Encoder_L4'):
+    e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
+    e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
 
-d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
-d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
+with tf.name_scope('Decoder_L4'):
+    d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
+    d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
 
-d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
+with tf.name_scope('Decoder_L3'):
+    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
+    d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
 
-d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+with tf.name_scope('Decoder_L2'):
+    d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
+    d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
 
-d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
+with tf.name_scope('Decoder_L1'):
+    d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
+    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
 
 # define input/output
 y_input = X
@@ -308,24 +331,10 @@ for epoch in range(1, training_epochs+1):
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
         # todo: tensorboard summaries
-        print('> Tensorboard summaries')
-        # run_metadata = tf.RunMetadata()
-        # batch_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
-        merged_summary = tf.summary.merge_all()
-        summary_batch = sess.run(merged_summary, feed_dict={X: x_batch, M: x_batch,  # M is not used here, just dummy
-                                                            pIn_holder: 1.0, pHidden_holder: 1.0})
-        summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
-                                                            pIn_holder: 1.0, pHidden_holder: 1.0})
-        batch_writer.add_summary(summary_batch, epoch)
-        valid_writer.add_summary(summary_valid, epoch)
+        tb_summary()
 
-        # temp: show weights in layer1,2
+        # temp: show weights in layer1, and see if it updates in deep network
         print('encoder_w1: ', sess.run(e_w1)[0, 0:2])
-        print('encoder_w2: ', sess.run(e_w2)[0, 0:2])
-        print('encoder_w3: ', sess.run(e_w3)[0, 0:2])
-        print('encoder_b1: ', sess.run(e_b1)[0])
-        print('encoder_b2: ', sess.run(e_b2)[0])
-        print('encoder_b3: ', sess.run(e_b3)[0])
 
     # Log per observation interval
     if (epoch % snapshot_step == 0) or (epoch == training_epochs):
@@ -339,20 +348,22 @@ for epoch in range(1, training_epochs+1):
         visualization_of_dfs()
         gene_gene_relationship()
         groundTruth_vs_prediction()
-        weights_visualization(e_w1, e_b1)
-        weights_visualization(e_w2, e_b2)
-        weights_visualization(e_w3, e_b3)
-        weights_visualization(e_w4, e_b4)
-        weights_visualization(d_w1, d_b1)
-        weights_visualization(d_w2, d_b2)
-        weights_visualization(d_w3, d_b3)
-        weights_visualization(d_w4, d_b4)
+        weights_visualization('e_w1', 'e_b1')
+        weights_visualization('e_w2', 'e_b2')
+        weights_visualization('e_w3', 'e_b3')
+        weights_visualization('e_w4', 'e_b4')
+        weights_visualization('d_w1', 'd_b1')
+        weights_visualization('d_w2', 'd_b2')
+        weights_visualization('d_w3', 'd_b3')
+        weights_visualization('d_w4', 'd_b4')
         save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
 batch_writer.close()
 valid_writer.close()
+sess.close()
+print("Finished!")
 
 
 

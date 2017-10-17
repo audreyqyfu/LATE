@@ -438,7 +438,7 @@ def visualize_weights_biases(weight, bias, title, cmap='rainbow'):
 
     fig.colorbar(sm_w, cax=axes[0, 1])
     fig.colorbar(sm_b, cax=axes[2, 0], orientation="horizontal")
-
+    # todo: add title in plot
     plt.savefig(fname, bbox_inches='tight')
     plt.close(fig)
 
