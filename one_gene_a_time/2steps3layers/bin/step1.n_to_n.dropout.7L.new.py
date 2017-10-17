@@ -150,7 +150,7 @@ def weights_visualization(w, b):
     b_arr = sess.run(b)
     b_arr = b_arr.reshape(len(b_arr), 1)
     b_arr_T = b_arr.T
-    scimpute.visualize_weights_biases(w_arr, b_arr_T, 'e_w1, e_b1')
+    scimpute.visualize_weights_biases(w_arr, b_arr_T, 'e_w1, e_b1')  # todo: bug here, update name
 
 
 def save_weights():  # todo: change when model changes depth
@@ -201,17 +201,18 @@ print_parameters()
 tf.reset_default_graph()
 
 # placeholders
-X = tf.placeholder(tf.float32, [None, n_input])  # input
-M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
+X = tf.placeholder(tf.float32, [None, n_input], name='X_input')  # input
+M = tf.placeholder(tf.float32, [None, n_input], name='M_ground_truth')  # benchmark
 
-pIn_holder = tf.placeholder(tf.float32)
-pHidden_holder = tf.placeholder(tf.float32)
+pIn_holder = tf.placeholder(tf.float32, name='pIn')
+pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
 
 # init variables and build graph
 tf.set_random_seed(3)  # seed
 
 e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
 e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
+scimpute.variable_summaries('encoder1', e_w1)
 
 e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
 e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
@@ -307,6 +308,16 @@ for epoch in range(1, training_epochs+1):
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
         # todo: tensorboard summaries
+        print('> Tensorboard summaries')
+        # run_metadata = tf.RunMetadata()
+        # batch_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
+        merged_summary = tf.summary.merge_all()
+        summary_batch = sess.run(merged_summary, feed_dict={X: x_batch, M: x_batch,  # M is not used here, just dummy
+                                                            pIn_holder: 1.0, pHidden_holder: 1.0})
+        summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
+                                                            pIn_holder: 1.0, pHidden_holder: 1.0})
+        batch_writer.add_summary(summary_batch, epoch)
+        valid_writer.add_summary(summary_valid, epoch)
 
         # temp: show weights in layer1,2
         print('encoder_w1: ', sess.run(e_w1)[0, 0:2])
