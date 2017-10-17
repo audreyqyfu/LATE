@@ -66,9 +66,9 @@ def tb_summary():
     run_metadata = tf.RunMetadata()
     train_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
     merged_summary = tf.summary.merge_all()
-    summary_train = sess.run(merged_summary, feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_batch = sess.run(merged_summary, feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
     summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, pIn_holder: 1.0, pHidden_holder: 1.0})
-    train_writer.add_summary(summary_train, epoch)
+    batch_writer.add_summary(summary_batch, epoch)
     valid_writer.add_summary(summary_valid, epoch)
 
 
@@ -110,11 +110,16 @@ def groundTruth_vs_prediction():
     print("> Ground truth vs prediction")
     for j in [4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
     # for j in [0, 200, 400, 600, 800]:  # todo: change
-        scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j],
-                              title=str('scatterplot, gene-' + str(j) + ', valid, step1'),
-                              xlabel='Ground Truth ' + Bname,
-                              ylabel='Prediction ' + Aname
-                              )
+            scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j], range='same',
+                                  title=str('scatterplot1, gene-' + str(j) + ', valid, step1'),
+                                  xlabel='Ground Truth ' + Bname,
+                                  ylabel='Prediction ' + Aname
+                                  )
+            scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j], range='flexible',
+                                      title=str('scatterplot2, gene-' + str(j) + ', valid, step1'),
+                                      xlabel='Ground Truth ' + Bname,
+                                      ylabel='Prediction ' + Aname
+                                      )
 
 
 def gene_gene_relationship():
@@ -148,10 +153,12 @@ def weights_visualization(w, b):
     scimpute.visualize_weights_biases(w_arr, b_arr_T, 'e_w1, e_b1')
 
 
-def save_weights():
+def save_weights():  # todo: change when model changes depth
     print('save weights in csv')
-    scimpute.save_csv(sess.run(e_w1), 'e_w1.csv.gz')
-    scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
+    scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
+    scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
+    scimpute.save_csv(sess.run(e_w3), 'e_w2.csv.gz')
+    scimpute.save_csv(sess.run(d_w3), 'd_w2.csv.gz')
 
 
 def visualization_of_dfs():
@@ -172,17 +179,19 @@ df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index],
 
 # Parameters #
 n_input = n
-n_hidden_1 = 800
-n_hidden_2 = 400
-n_hidden_3 = 200
+n_hidden_1 = 80
+n_hidden_2 = 60
+n_hidden_3 = 40
+n_hidden_4 = 20
+
 pIn = 0.8
 pHidden = 0.5  # todo: change back to 0.5 after test
-learning_rate = 0.01  # todo: was 0.0003
-sd = 0.0001  # stddev for random init
+learning_rate = 0.00003  # todo: 0.0003 for 7L, 0.00003 for 9L
+sd = 0.00001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
 batch_size = 256
-training_epochs = 10
+training_epochs = 2
 display_step = 1
-snapshot_step = 5
+snapshot_step = 500
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
 print_parameters()
@@ -191,11 +200,15 @@ print_parameters()
 # Define model #
 tf.reset_default_graph()
 
-X = tf.placeholder(tf.float32, [None, n_input])  # input
-M = tf.placeholder(tf.float32, [None, n_input])  # benchmark
+# placeholders
+X = tf.placeholder(tf.float64, [None, n_input])  # input
+M = tf.placeholder(tf.float64, [None, n_input])  # benchmark
 
-pIn_holder = tf.placeholder(tf.float32)
-pHidden_holder = tf.placeholder(tf.float32)
+pIn_holder = tf.placeholder(tf.float64)
+pHidden_holder = tf.placeholder(tf.float64)
+
+# init variables and build graph
+tf.set_random_seed(3)  # seed
 
 e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
 e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
@@ -206,6 +219,12 @@ e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
 e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
 e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 
+e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
+e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
+
+d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
+d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
+
 d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
 d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
 
@@ -215,6 +234,7 @@ d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
 d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
 d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
 
+# define input/output
 y_input = X
 y_groundTruth = M
 h = d_a1
@@ -225,16 +245,14 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('mse_input', mse_input)
     tf.summary.scalar('mse_groundTruth', mse_groundTruth)
 
-trainer = tf.train.AdamOptimizer(learning_rate). \
-    minimize(mse_input, var_list=[e_w1, e_b1,
-                                  d_w1, d_b1])
+trainer = tf.train.AdamOptimizer(learning_rate).minimize(mse_input)
 
 # Launch Session #
 sess = tf.Session()
 saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 sess.run(init)
-train_writer = tf.summary.FileWriter(log_dir + '/train', sess.graph)
+batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 epoch = 0
 total_batch = int(math.floor(len(df_train) // batch_size))  # floor
@@ -288,13 +306,18 @@ for epoch in range(1, training_epochs+1):
         epoch_log.append(epoch)
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
-        # tensorboard summaries
-        # epoch_summary()
+        # todo: tensorboard summaries
 
-
+        # temp: show weights in layer1,2
+        print('encoder_w1: ', sess.run(e_w1)[0, 0:2])
+        print('encoder_w2: ', sess.run(e_w2)[0, 0:2])
+        print('encoder_w3: ', sess.run(e_w3)[0, 0:2])
+        print('encoder_b1: ', sess.run(e_b1)[0])
+        print('encoder_b2: ', sess.run(e_b2)[0])
+        print('encoder_b3: ', sess.run(e_b3)[0])
 
     # Log per observation interval
-    if (epoch == 1) or (epoch % snapshot_step == 0) or (epoch == training_epochs):
+    if (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
         snapshot()
         learning_curve()
@@ -306,11 +329,18 @@ for epoch in range(1, training_epochs+1):
         gene_gene_relationship()
         groundTruth_vs_prediction()
         weights_visualization(e_w1, e_b1)
+        weights_visualization(e_w2, e_b2)
+        weights_visualization(e_w3, e_b3)
+        weights_visualization(e_w4, e_b4)
+        weights_visualization(d_w1, d_b1)
+        weights_visualization(d_w2, d_b2)
+        weights_visualization(d_w3, d_b3)
+        weights_visualization(d_w4, d_b4)
         save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 
-train_writer.close()
+batch_writer.close()
 valid_writer.close()
 
 

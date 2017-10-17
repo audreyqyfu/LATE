@@ -313,7 +313,7 @@ def curveplot2(x, y, z, title, xlabel, ylabel):
     plt.close()
 
 
-def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range=None):
+def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
     '''x is slice, y is a slice
     have to be slice to help pearsonr(x,y)[0] work
     range=[min, max]'''
@@ -328,10 +328,12 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range=None):
     plt.title(str(title+"\ncorr: "+corr))
     plt.xlabel(xlabel+"\nmean: "+str(round(np.mean(x), 2)) )
     plt.ylabel(ylabel+"\nmean: "+str(round(np.mean(y), 2)) )
-    if range is None:
+    if range is 'same':
         max, min = max_min_element_in_arrs([x,y])
         plt.xlim(min, max)
         plt.ylim(min,max)
+    elif range is 'flexible':
+        next
     else:
         plt.xlim(range[0], range[1])
         plt.ylim(range[0], range[1])
@@ -574,9 +576,9 @@ def weight_bias_variable(name_scope, dim_in, dim_out, sd):
     :return: 
     """
     with tf.name_scope(name_scope):
-        W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd),
+        W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd, dtype=tf.float64),
                         name=name_scope + '_W')
-        b = tf.Variable(tf.random_normal([dim_out], mean=100 * sd, stddev=sd),
+        b = tf.Variable(tf.random_normal([dim_out], mean=100 * sd, stddev=sd, dtype=tf.float64),
                         name=name_scope + '_b')
 
     variable_summaries(name_scope + '_W', W)
