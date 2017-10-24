@@ -186,14 +186,14 @@ def visualize_weights():
 def save_weights():
     # todo: update when model changes depth
     print('save weights in csv')
-    scimpute.save_csv(sess.run(e_w1), 'e_w1.csv.gz')
-    scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
-    # scimpute.save_csv(sess.run(e_w2), 'e_w2.csv.gz')
-    # scimpute.save_csv(sess.run(d_w2), 'd_w2.csv.gz')
-    # scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
-    # scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
-    # scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
-    # scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
+    scimpute.save_csv(sess.run(e_w1), 'pre_train/e_w1.csv.gz')
+    scimpute.save_csv(sess.run(d_w1), 'pre_train/d_w1.csv.gz')
+    # scimpute.save_csv(sess.run(e_w2), 'pre_train/e_w2.csv.gz')
+    # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
+    # scimpute.save_csv(sess.run(e_w3), 'pre_train/e_w3.csv.gz')
+    # scimpute.save_csv(sess.run(d_w3), 'pre_train/d_w3.csv.gz')
+    # scimpute.save_csv(sess.run(e_w4), 'pre_train/e_w4.csv.gz')
+    # scimpute.save_csv(sess.run(d_w4), 'pre_train/d_w4.csv.gz')
 
 
 def visualization_of_dfs():
@@ -230,8 +230,8 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 100  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 20
+training_epochs = 200  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 10
 snapshot_step = 500
 print_parameters()
 
