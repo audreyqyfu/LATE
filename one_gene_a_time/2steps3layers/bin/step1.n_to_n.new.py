@@ -25,11 +25,11 @@ import scimpute
 
 def print_parameters():
     print(os.getcwd(), "\n",
-          "\n# Parameters: 5L",
+          "\n# Parameters: 7L",
           "\nn_features: ", n,
           "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
           "\nn_hidden2: ", n_hidden_2,
-          # "\nn_hidden3: ", n_hidden_3,
+          "\nn_hidden3: ", n_hidden_3,
           # "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
@@ -119,7 +119,7 @@ def snapshot():
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
-    code_bottle_neck_input = sess.run(e_a2, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    code_bottle_neck_input = sess.run(e_a3, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
     # todo: hclust, but seaborn not on server yet
     # clustermap = sns.clustermap(code_bottle_neck_input)
@@ -188,8 +188,8 @@ def visualize_weights():
     weights_visualization('d_w1', 'd_b1')
     weights_visualization('e_w2', 'e_b2')
     weights_visualization('d_w2', 'd_b2')
-    # weights_visualization('e_w3', 'e_b3')
-    # weights_visualization('d_w3', 'd_b3')
+    weights_visualization('e_w3', 'e_b3')
+    weights_visualization('d_w3', 'd_b3')
     # weights_visualization('e_w4', 'e_b4')
     # weights_visualization('d_w4', 'd_b4')
 
@@ -201,8 +201,8 @@ def save_weights():
     np.save('pre_train/d_w1', sess.run(d_w1))
     np.save('pre_train/e_w2', sess.run(e_w2))
     np.save('pre_train/d_w2', sess.run(d_w2))
-    # np.save('pre_train/e_w3', sess.run(e_w3))
-    # np.save('pre_train/d_w3', sess.run(d_w3))
+    np.save('pre_train/e_w3', sess.run(e_w3))
+    np.save('pre_train/d_w3', sess.run(d_w3))
     # np.save('pre_train/e_w4', sess.run(e_w4))
     # np.save('pre_train/d_w4', sess.run(d_w4))
     # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
@@ -267,10 +267,10 @@ with tf.name_scope('Encoder_L1'):
 with tf.name_scope('Encoder_L2'):
     e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
     e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
-#
-# with tf.name_scope('Encoder_L3'):
-#     e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
-#     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
+
+with tf.name_scope('Encoder_L3'):
+    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
+    e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 #
 # with tf.name_scope('Encoder_L4'):
 #     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
@@ -280,13 +280,13 @@ with tf.name_scope('Encoder_L2'):
 #     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
 #     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
 #
-# with tf.name_scope('Decoder_L3'):
-#     d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-#     d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
-#
+with tf.name_scope('Decoder_L3'):
+    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
+    d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
+
 with tf.name_scope('Decoder_L2'):
     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-    d_a2 = scimpute.dense_layer('decoder2', e_a2, d_w2, d_b2, pHidden_holder)
+    d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
