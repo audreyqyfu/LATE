@@ -235,17 +235,9 @@ with tf.name_scope('Encoder_L2'):
     e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
     e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
 
-with tf.name_scope('Encoder_L3'):
-    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
-    e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
-
-with tf.name_scope('Decoder_L3'):
-    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-    d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
-
 with tf.name_scope('Decoder_L2'):
     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-    d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+    d_a2 = scimpute.dense_layer('decoder2', e_a2, d_w2, d_b2, pHidden_holder)
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
@@ -343,10 +335,8 @@ for epoch in range(1, training_epochs+1):
         groundTruth_vs_prediction()
         weights_visualization('e_w1', 'e_b1')
         weights_visualization('e_w2', 'e_b2')
-        weights_visualization('e_w3', 'e_b3')
         weights_visualization('d_w1', 'd_b1')
         weights_visualization('d_w2', 'd_b2')
-        weights_visualization('d_w3', 'd_b3')
         save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
