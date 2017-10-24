@@ -26,8 +26,10 @@ def print_parameters():
     print(os.getcwd(), "\n",
           "\n# Parameters:",
           "\nn_features: ", n,
-          "\nn_hidden1: ", n_hidden_1,
+          "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
           "\nn_hidden2: ", n_hidden_2,
+          "\nn_hidden3: ", n_hidden_3,
+          "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
@@ -152,7 +154,7 @@ def gene_gene_relationship():
     #                           xlabel='Gene' + str(i), ylabel='Gene' + str(j))
     # GroundTruth
     for i, j in List:
-        scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
+        scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
                               title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth',
                               xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j))
 
@@ -228,7 +230,7 @@ pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
 
 # init variables and build graph
 tf.set_random_seed(3)  # seed
-
+# todo: adjust based on depth
 with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
