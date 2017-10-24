@@ -13,6 +13,7 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
+# import seaborn as sns
 
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
@@ -24,10 +25,12 @@ import scimpute
 
 def print_parameters():
     print(os.getcwd(), "\n",
-          "\n# Parameters:",
+          "\n# Parameters: 9L",
           "\nn_features: ", n,
-          "\nn_hidden1: ", n_hidden_1,
+          "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
           "\nn_hidden2: ", n_hidden_2,
+          "\nn_hidden3: ", n_hidden_3,
+          "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
@@ -110,19 +113,22 @@ def snapshot():
     # save model
     save_path = saver.save(sess, log_dir + "/step1.ckpt")
     print("Model saved in: %s" % save_path)
+    return (h_train, h_valid, h_input)
 
 
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
     code_bottle_neck_input = sess.run(e_a4, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
-    scimpute.save_csv(code_bottle_neck_input, 'code_bottle_neck_input.csv.gz')
+    np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
+    # todo: hclust, but seaborn not on server yet
+    # clustermap = sns.clustermap(code_bottle_neck_input)
+    # clustermap.savefig('bottle_neck.hclust.png')
 
 
 def groundTruth_vs_prediction():
     print("> Ground truth vs prediction")
     for j in [4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
-    # for j in [0, 200, 400, 600, 800]:  # todo: change
             scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j], range='same',
                                   title=str('scatterplot1, gene-' + str(j) + ', valid, step1'),
                                   xlabel='Ground Truth ' + Bname,
@@ -137,24 +143,32 @@ def groundTruth_vs_prediction():
 
 def gene_gene_relationship():
     print('> gene-gene relationship before/after inference')
-    List = [[4058, 7496],  # todo: change
-            [8495, 12871]
+    List = [[4058, 7496],
+            [8495, 12871],
+            [2, 3],
+            [205, 206]
             ]
-    # Prediction
+    # Valid set: Prediction
     for i, j in List:
         scimpute.scatterplot2(h_valid[:, i], h_valid[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred',
-                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j + 1))
-    # # Input
-    # for i, j in List:
-    #     scimpute.scatterplot2(df.ix[:, i], df.ix[:, j],
-    #                           title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname,
-    #                           xlabel='Gene' + str(i), ylabel='Gene' + str(j))
-    # GroundTruth
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.valid',
+                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j + 1))
+    # Valid set: GroundTruth
+    for i, j in List:
+        scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.valid',
+                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j))
+    # Input set: Prediction
+    for i, j in List:
+        scimpute.scatterplot2(h_train[:, i], h_train[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.input',
+                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j + 1))
+
+    # Input set: GroundTruth
     for i, j in List:
         scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth',
-                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j))
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.input',
+                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j))
 
 
 def weights_visualization(w_name, b_name):
@@ -165,19 +179,33 @@ def weights_visualization(w_name, b_name):
     b_arr = sess.run(b)
     b_arr = b_arr.reshape(len(b_arr), 1)
     b_arr_T = b_arr.T
-    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: bug here, update name
+    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: update name (low priority)
 
 
-def save_weights():  # todo: change when model changes depth
+def visualize_weights():
+    # todo: update when model changes depth
+    weights_visualization('e_w1', 'e_b1')
+    weights_visualization('d_w1', 'd_b1')
+    weights_visualization('e_w2', 'e_b2')
+    weights_visualization('d_w2', 'd_b2')
+    weights_visualization('e_w3', 'e_b3')
+    weights_visualization('d_w3', 'd_b3')
+    weights_visualization('e_w4', 'e_b4')
+    weights_visualization('d_w4', 'd_b4')
+
+
+def save_weights():
+    # todo: update when model changes depth
     print('save weights in csv')
-    scimpute.save_csv(sess.run(e_w1), 'e_w1.csv.gz')
-    scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
-    scimpute.save_csv(sess.run(e_w2), 'e_w2.csv.gz')
-    scimpute.save_csv(sess.run(d_w2), 'd_w2.csv.gz')
-    scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
-    scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
-    scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
-    scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
+    np.save('pre_train/e_w1', sess.run(e_w1))
+    np.save('pre_train/d_w1', sess.run(d_w1))
+    np.save('pre_train/e_w2', sess.run(e_w2))
+    np.save('pre_train/d_w2', sess.run(d_w2))
+    np.save('pre_train/e_w3', sess.run(e_w3))
+    np.save('pre_train/d_w3', sess.run(d_w3))
+    np.save('pre_train/e_w4', sess.run(e_w4))
+    np.save('pre_train/d_w4', sess.run(d_w4))
+    # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
 
 
 def visualization_of_dfs():
@@ -196,26 +224,29 @@ scimpute.refresh_logfolder(log_dir)
 # read data #
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
 max = max(df.values.max(), df2.values.max())
-df_train, df_valid, df_test = scimpute.split_df(df, a=0.9, b=0.1, c=0.0)
+df_train, df_valid, df_test = scimpute.split_df(df, a=0.7, b=0.15, c=0.15)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
 df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
 df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
+df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 
 # Parameters #
+# todo: update for different depth
 n_input = n
 n_hidden_1 = 800
 n_hidden_2 = 600
 n_hidden_3 = 400
 n_hidden_4 = 200
 
+# todo: adjust to optimized hyper-parameters when different layers used
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 7L, 0.00003 for 9L
-sd = 0.00001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
+learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L
+sd = 0.00001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 3000
+training_epochs = 3000  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 20
-snapshot_step = 500
+snapshot_step = 1000
 print_parameters()
 
 # Define model #
@@ -230,7 +261,7 @@ pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
 
 # init variables and build graph
 tf.set_random_seed(3)  # seed
-
+# todo: adjust based on depth
 with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
@@ -261,7 +292,7 @@ with tf.name_scope('Decoder_L2'):
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
+    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
 
 # define input/output
 y_input = X
@@ -344,23 +375,21 @@ for epoch in range(1, training_epochs+1):
     # Log per observation interval
     if (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
-        snapshot()
+        h_train, h_valid, h_input = snapshot()
         learning_curve()
         hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                        fprefix='hist gene-corr, valid, step1',
                                        title="gene-corr (prediction vs ground-truth)"
                                        )
+        hist = scimpute.cell_corr_hist(h_valid, df2_valid.values,
+                                       fprefix='hist cell-corr, valid, step1',
+                                       title="cell-corr (prediction vs ground-truth)"
+                                       )
         visualization_of_dfs()
         gene_gene_relationship()
         groundTruth_vs_prediction()
-        weights_visualization('e_w1', 'e_b1')
-        weights_visualization('e_w2', 'e_b2')
-        weights_visualization('e_w3', 'e_b3')
-        weights_visualization('e_w4', 'e_b4')
-        weights_visualization('d_w1', 'd_b1')
-        weights_visualization('d_w2', 'd_b2')
-        weights_visualization('d_w3', 'd_b3')
-        weights_visualization('d_w4', 'd_b4')
+        save_bottle_neck_representation()
+        visualize_weights()
         save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
@@ -369,8 +398,3 @@ batch_writer.close()
 valid_writer.close()
 sess.close()
 print("Finished!")
-
-
-
-
-
