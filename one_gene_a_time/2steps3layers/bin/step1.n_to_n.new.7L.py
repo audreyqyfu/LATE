@@ -170,12 +170,12 @@ def weights_visualization(w_name, b_name):
 
 def save_weights():  # todo: change when model changes depth
     print('save weights in csv')
-    scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
-    scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
+    scimpute.save_csv(sess.run(e_w1), 'e_w1.csv.gz')
+    scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
+    scimpute.save_csv(sess.run(e_w2), 'e_w2.csv.gz')
+    scimpute.save_csv(sess.run(d_w2), 'd_w2.csv.gz')
     scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
     scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
-    scimpute.save_csv(sess.run(e_w3), 'e_w2.csv.gz')
-    scimpute.save_csv(sess.run(d_w3), 'd_w2.csv.gz')
 
 
 def visualization_of_dfs():

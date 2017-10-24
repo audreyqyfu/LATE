@@ -27,7 +27,6 @@ def print_parameters():
           "\n# Parameters:",
           "\nn_features: ", n,
           "\nn_hidden1: ", n_hidden_1,
-          "\nn_hidden2: ", n_hidden_2,
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
@@ -174,7 +173,10 @@ def save_weights():  # todo: change when model changes depth
     scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
     scimpute.save_csv(sess.run(e_w2), 'e_w2.csv.gz')
     scimpute.save_csv(sess.run(d_w2), 'd_w2.csv.gz')
-
+    scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
+    scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
+    scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
+    scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
 
 
 def visualization_of_dfs():
@@ -200,16 +202,15 @@ df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
 
 # Parameters #
 n_input = n
-n_hidden_1 = 400
-n_hidden_2 = 200
+n_hidden_1 = 200
 
 pIn = 0.8
 pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 7L, 0.00003 for 9L
 sd = 0.0001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
 batch_size = 256
-training_epochs = 1000
-display_step = 20
+training_epochs = 100
+display_step = 1
 snapshot_step = 500
 print_parameters()
 
@@ -230,17 +231,9 @@ with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
 
-with tf.name_scope('Encoder_L2'):
-    e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
-    e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
-
-with tf.name_scope('Decoder_L2'):
-    d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-    d_a2 = scimpute.dense_layer('decoder2', e_a2, d_w2, d_b2, pHidden_holder)
-
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
+    d_a1 = scimpute.dense_layer('decoder1', e_a1, d_w1, d_b1, pHidden_holder)
 
 # define input/output
 y_input = X
@@ -333,9 +326,7 @@ for epoch in range(1, training_epochs+1):
         gene_gene_relationship()
         groundTruth_vs_prediction()
         weights_visualization('e_w1', 'e_b1')
-        weights_visualization('e_w2', 'e_b2')
         weights_visualization('d_w1', 'd_b1')
-        weights_visualization('d_w2', 'd_b2')
         save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
