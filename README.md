@@ -13,11 +13,10 @@
 # input data format
   - edit function 'read_data' in 'scimpute.py', so that df contains input_data_matrix [cell, genes]; df2 should be identical to df in step1
   - example of df:
-   |gene1|gene2
-   ------|-----
-  W29957|0.392652|0.127627
-  W29958|0.377387|0.213198
-  - '<test, test, test
-  test, test>'
+ |gene1|gene2
+ |------|-----
+W29957|0.392652|0.127627
+W29958|0.377387|0.213198
+
 
 
