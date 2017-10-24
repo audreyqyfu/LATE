@@ -118,7 +118,7 @@ def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
     code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
-    scimpute.save_csv(code_bottle_neck_input, 'code_bottle_neck_input.csv.gz')
+    scimpute.save_csv(code_bottle_neck_input, 'pre_train/code_bottle_neck_input.csv')
 
 
 def groundTruth_vs_prediction():
@@ -230,8 +230,8 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 200  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 10
+training_epochs = 2  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 1
 snapshot_step = 500
 print_parameters()
 
@@ -370,6 +370,7 @@ for epoch in range(1, training_epochs+1):
         visualization_of_dfs()
         gene_gene_relationship()
         groundTruth_vs_prediction()
+        save_bottle_neck_representation()
         visualize_weights()
         save_weights()
         toc_log2 = time.time()
