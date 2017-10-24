@@ -202,16 +202,15 @@ df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
 # Parameters #
 n_input = n
 n_hidden_1 = 800
-n_hidden_2 = 600
-n_hidden_3 = 400
-n_hidden_4 = 200
+n_hidden_2 = 400
+n_hidden_3 = 200
 
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 7L, 0.00003 for 9L
-sd = 0.00001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
+learning_rate = 0.0003  # 0.0003 for 7L, 0.00003 for 9L
+sd = 0.0001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
 batch_size = 256
-training_epochs = 3000
+training_epochs = 1000
 display_step = 20
 snapshot_step = 500
 print_parameters()
@@ -241,17 +240,9 @@ with tf.name_scope('Encoder_L3'):
     e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 
-with tf.name_scope('Encoder_L4'):
-    e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
-    e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
-
-with tf.name_scope('Decoder_L4'):
-    d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
-    d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
-
 with tf.name_scope('Decoder_L3'):
     d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-    d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
+    d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
 
 with tf.name_scope('Decoder_L2'):
     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
@@ -354,11 +345,9 @@ for epoch in range(1, training_epochs+1):
         weights_visualization('e_w1', 'e_b1')
         weights_visualization('e_w2', 'e_b2')
         weights_visualization('e_w3', 'e_b3')
-        weights_visualization('e_w4', 'e_b4')
         weights_visualization('d_w1', 'd_b1')
         weights_visualization('d_w2', 'd_b2')
         weights_visualization('d_w3', 'd_b3')
-        weights_visualization('d_w4', 'd_b4')
         save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
