@@ -148,21 +148,27 @@ def gene_gene_relationship():
             [2, 3],
             [205, 206]
             ]
-    # Prediction
+    # Valid set: Prediction
     for i, j in List:
         scimpute.scatterplot2(h_valid[:, i], h_valid[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred',
-                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j + 1))
-    # # Input
-    # for i, j in List:
-    #     scimpute.scatterplot2(df.ix[:, i], df.ix[:, j],
-    #                           title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname,
-    #                           xlabel='Gene' + str(i), ylabel='Gene' + str(j))
-    # GroundTruth
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.valid',
+                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j + 1))
+    # Valid set: GroundTruth
     for i, j in List:
         scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth',
-                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j))
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.valid',
+                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j))
+    # Input set: Prediction
+    for i, j in List:
+        scimpute.scatterplot2(h_input[:, i], h_input[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.input',
+                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j + 1))
+
+    # Input set: GroundTruth
+    for i, j in List:
+        scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.input',
+                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j))
 
 
 def weights_visualization(w_name, b_name):
@@ -191,14 +197,15 @@ def visualize_weights():
 def save_weights():
     # todo: update when model changes depth
     print('save weights in csv')
-    scimpute.save_csv(sess.run(e_w1), 'pre_train/e_w1.csv.gz')
-    scimpute.save_csv(sess.run(d_w1), 'pre_train/d_w1.csv.gz')
-    # scimpute.save_csv(sess.run(e_w2), 'pre_train/e_w2.csv.gz')
+    np.save('pre_train/e_w1.csv.gz', sess.run(e_w1))
+    np.save('pre_train/d_w1.csv.gz', sess.run(d_w1))
+    np.save('pre_train/e_w2.csv.gz', sess.run(e_w2))
+    np.save('pre_train/d_w2.csv.gz', sess.run(d_w2))
+    np.save('pre_train/e_w3.csv.gz', sess.run(e_w3))
+    np.save('pre_train/d_w3.csv.gz', sess.run(d_w3))
+    np.save('pre_train/e_w4.csv.gz', sess.run(e_w4))
+    np.save('pre_train/d_w4.csv.gz', sess.run(d_w4))
     # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
-    # scimpute.save_csv(sess.run(e_w3), 'pre_train/e_w3.csv.gz')
-    # scimpute.save_csv(sess.run(d_w3), 'pre_train/d_w3.csv.gz')
-    # scimpute.save_csv(sess.run(e_w4), 'pre_train/e_w4.csv.gz')
-    # scimpute.save_csv(sess.run(d_w4), 'pre_train/d_w4.csv.gz')
 
 
 def visualization_of_dfs():
@@ -235,7 +242,7 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 20  #3L:100, 5L:1000, 7L:1000, 9L:3000
+training_epochs = 10  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 1
 snapshot_step = 500
 print_parameters()
