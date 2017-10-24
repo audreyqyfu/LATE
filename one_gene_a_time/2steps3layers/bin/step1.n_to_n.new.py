@@ -118,7 +118,7 @@ def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
     code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
-    scimpute.save_csv(code_bottle_neck_input, 'pre_train/code_bottle_neck_input.csv')
+    scimpute.save_csv(code_bottle_neck_input, 'pre_train/code_bottle_neck_input.csv.gz')
 
 
 def groundTruth_vs_prediction():
