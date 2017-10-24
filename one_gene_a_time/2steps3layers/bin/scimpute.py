@@ -342,13 +342,13 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
     plt.close()
 
 
-def gene_corr_hist(arr1, arr2, fprefix='hist_gene_corr', title='hist_gene_corr'):
+def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
     '''calculate correlation between genes [columns]
     arr [cells, genes]'''
     # create plots directory
     if not os.path.exists("plots"):
         os.makedirs("plots")
-    fprefix = "./plots/" + fprefix
+    fprefix = "./plots/" + title
 
     # if arr1.shape is arr2.shape:
     range_size = arr2.shape[1]
@@ -362,6 +362,33 @@ def gene_corr_hist(arr1, arr2, fprefix='hist_gene_corr', title='hist_gene_corr')
     fig = plt.figure(figsize=(9, 9))
     plt.hist(hist, bins=100)
     plt.xlabel('gene-corr (Pearson)')
+    plt.ylabel('freq')
+    plt.title(title)
+    plt.savefig(fprefix + ".png", bbox_inches='tight')
+    plt.close(fig)
+    return hist
+
+
+def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
+    '''calculate correlation between genes [columns]
+    arr [cells, genes]'''
+    # create plots directory
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
+    fprefix = "./plots/" + title
+
+    # if arr1.shape is arr2.shape:
+    range_size = arr2.shape[0]
+    hist = []
+    for i in range(range_size):
+        corr = pearsonr(arr1[i, :], arr2[i, :])[0]
+        if not math.isnan(corr):
+            hist.append(corr)
+    hist.sort()
+    # histogram of correlation
+    fig = plt.figure(figsize=(9, 9))
+    plt.hist(hist, bins=100)
+    plt.xlabel('cell-corr between prediction and truth')
     plt.ylabel('freq')
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
