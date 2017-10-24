@@ -507,6 +507,9 @@ def read_data(data_name):
     else:
         raise Warning("data name not recognized!")
 
+    # df = df.ix[1:1000] # todo: for development
+    # df2 = df.ix[1:1000]
+
     m, n = df.shape  # m: n_cells; n: n_genes
     print("\ninput df: ", Aname, " ", file, "\n", df.values[0:4, 0:4], "\n")
     print("ground-truth df: ", Bname, " ", file_benchmark, "\n", df2.values[0:4, 0:4], "\n")
@@ -607,6 +610,30 @@ def dense_layer(name, input, W, b, pRetain):
     return a
 
 
+def dense_layer_BN(name, input, W, b, pRetain, epsilon = 1e-3):
+    """
+    define a layer and return output
+
+    :param name: 
+    :param input: X_placeholder or a(l-1)
+    :param W: weights
+    :param b: biases 
+    :param pRetain: 
+    :return: 
+    """
+    x_drop = tf.nn.dropout(input, pRetain)
+    z = tf.add(tf.matmul(x_drop, W), b)
+    # BN
+    batch_mean, batch_var = tf.nn.moments(z, [0])
+    z_bn = tf.nn.batch_normalization(z, batch_mean, batch_var, beta, scale, epsilon)
+    # NL
+    a = tf.nn.relu(z_bn)
+
+    variable_summaries(name + '_a', a)
+
+    return a
+
+
 def learning_curve_mse(epoch, mse_batch, mse_valid,
                        title='learning curve (MSE)', xlabel='epochs', ylabel='MSE', range=None):
     """
@@ -673,7 +700,7 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
 
 
 def learning_curve_corr(epoch, corr_batch, corr_valid,
-                       title='learning curve (corr)', xlabel='epochs', ylabel='corr', range=None):
+                       title='learning curve (corr)', xlabel='epochs', ylabel='cell-corr', range=None):
     """
     learning curve
     :param epoch: 
