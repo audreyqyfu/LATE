@@ -113,6 +113,7 @@ def snapshot():
     # save model
     save_path = saver.save(sess, log_dir + "/step1.ckpt")
     print("Model saved in: %s" % save_path)
+    return (h_train, h_valid, h_input)
 
 
 def save_bottle_neck_representation():
@@ -159,7 +160,7 @@ def gene_gene_relationship():
                               xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j))
     # Input set: Prediction
     for i, j in List:
-        scimpute.scatterplot2(h_test[:, i], h_test[:, j],
+        scimpute.scatterplot2(h_train[:, i], h_train[:, j],
                               title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.input',
                               xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j + 1))
 
@@ -196,14 +197,14 @@ def visualize_weights():
 def save_weights():
     # todo: update when model changes depth
     print('save weights in csv')
-    np.save('pre_train/e_w1.csv.gz', sess.run(e_w1))
-    np.save('pre_train/d_w1.csv.gz', sess.run(d_w1))
-    np.save('pre_train/e_w2.csv.gz', sess.run(e_w2))
-    np.save('pre_train/d_w2.csv.gz', sess.run(d_w2))
-    np.save('pre_train/e_w3.csv.gz', sess.run(e_w3))
-    np.save('pre_train/d_w3.csv.gz', sess.run(d_w3))
-    np.save('pre_train/e_w4.csv.gz', sess.run(e_w4))
-    np.save('pre_train/d_w4.csv.gz', sess.run(d_w4))
+    np.save('pre_train/e_w1', sess.run(e_w1))
+    np.save('pre_train/d_w1', sess.run(d_w1))
+    # np.save('pre_train/e_w2', sess.run(e_w2))
+    # np.save('pre_train/d_w2', sess.run(d_w2))
+    # np.save('pre_train/e_w3', sess.run(e_w3))
+    # np.save('pre_train/d_w3', sess.run(d_w3))
+    # np.save('pre_train/e_w4', sess.run(e_w4))
+    # np.save('pre_train/d_w4', sess.run(d_w4))
     # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
 
 
@@ -241,8 +242,8 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 10  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 1
+training_epochs = 150  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 5
 snapshot_step = 500
 print_parameters()
 
@@ -372,7 +373,7 @@ for epoch in range(1, training_epochs+1):
     # Log per observation interval
     if (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
-        snapshot()
+        h_train, h_valid, h_input = snapshot()
         learning_curve()
         hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                        fprefix='hist gene-corr, valid, step1',

@@ -13,6 +13,7 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
+# import seaborn as sns
 
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
@@ -112,13 +113,17 @@ def snapshot():
     # save model
     save_path = saver.save(sess, log_dir + "/step1.ckpt")
     print("Model saved in: %s" % save_path)
+    return (h_train, h_valid, h_input)
 
 
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
     code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
-    scimpute.save_csv(code_bottle_neck_input, 'code_bottle_neck_input.csv.gz')
+    np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
+    # todo: hclust, but seaborn not on server yet
+    # clustermap = sns.clustermap(code_bottle_neck_input)
+    # clustermap.savefig('bottle_neck.hclust.png')
 
 
 def groundTruth_vs_prediction():
@@ -143,21 +148,27 @@ def gene_gene_relationship():
             [2, 3],
             [205, 206]
             ]
-    # Prediction
+    # Valid set: Prediction
     for i, j in List:
         scimpute.scatterplot2(h_valid[:, i], h_valid[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred',
-                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j + 1))
-    # # Input
-    # for i, j in List:
-    #     scimpute.scatterplot2(df.ix[:, i], df.ix[:, j],
-    #                           title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname,
-    #                           xlabel='Gene' + str(i), ylabel='Gene' + str(j))
-    # GroundTruth
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.valid',
+                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j + 1))
+    # Valid set: GroundTruth
     for i, j in List:
         scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth',
-                              xlabel='Gene' + str(i) + 'valid', ylabel='Gene' + str(j))
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.valid',
+                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j))
+    # Input set: Prediction
+    for i, j in List:
+        scimpute.scatterplot2(h_train[:, i], h_train[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.input',
+                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j + 1))
+
+    # Input set: GroundTruth
+    for i, j in List:
+        scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
+                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.input',
+                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j))
 
 
 def weights_visualization(w_name, b_name):
@@ -186,14 +197,15 @@ def visualize_weights():
 def save_weights():
     # todo: update when model changes depth
     print('save weights in csv')
-    scimpute.save_csv(sess.run(e_w1), 'e_w1.csv.gz')
-    scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
-    # scimpute.save_csv(sess.run(e_w2), 'e_w2.csv.gz')
-    # scimpute.save_csv(sess.run(d_w2), 'd_w2.csv.gz')
-    # scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
-    # scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
-    # scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
-    # scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
+    np.save('pre_train/e_w1', sess.run(e_w1))
+    np.save('pre_train/d_w1', sess.run(d_w1))
+    # np.save('pre_train/e_w2', sess.run(e_w2))
+    # np.save('pre_train/d_w2', sess.run(d_w2))
+    # np.save('pre_train/e_w3', sess.run(e_w3))
+    # np.save('pre_train/d_w3', sess.run(d_w3))
+    # np.save('pre_train/e_w4', sess.run(e_w4))
+    # np.save('pre_train/d_w4', sess.run(d_w4))
+    # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
 
 
 def visualization_of_dfs():
@@ -212,7 +224,7 @@ scimpute.refresh_logfolder(log_dir)
 # read data #
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
 max = max(df.values.max(), df2.values.max())
-df_train, df_valid, df_test = scimpute.split_df(df, a=0.8, b=0.1, c=0.1)
+df_train, df_valid, df_test = scimpute.split_df(df, a=0.7, b=0.15, c=0.15)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
 df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
 df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
@@ -230,7 +242,7 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 100  #3L:100, 5L:1000, 7L:1000, 9L:3000
+training_epochs = 150  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 5
 snapshot_step = 500
 print_parameters()
@@ -361,15 +373,20 @@ for epoch in range(1, training_epochs+1):
     # Log per observation interval
     if (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
-        snapshot()
+        h_train, h_valid, h_input = snapshot()
         learning_curve()
         hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                        fprefix='hist gene-corr, valid, step1',
                                        title="gene-corr (prediction vs ground-truth)"
                                        )
+        hist = scimpute.cell_corr_hist(h_valid, df2_valid.values,
+                                       fprefix='hist cell-corr, valid, step1',
+                                       title="cell-corr (prediction vs ground-truth)"
+                                       )
         visualization_of_dfs()
         gene_gene_relationship()
         groundTruth_vs_prediction()
+        save_bottle_neck_representation()
         visualize_weights()
         save_weights()
         toc_log2 = time.time()
@@ -379,8 +396,3 @@ batch_writer.close()
 valid_writer.close()
 sess.close()
 print("Finished!")
-
-
-
-
-
