@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# debug MSE by reading hd5 of input(B.msk), ground_truth(B), and prediction(h)
-# 10/03/2017
+print('10/17/2017, reads h.hd5 and data.hd5, then analysis the result')
 
 import tensorflow as tf
 import sys
@@ -15,12 +14,20 @@ import time
 import scimpute
 
 # read data
-df_pred = scimpute.read_hd5('plots/imputation.step2.valid.hd5')
+file_input = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
+file_pred = 'pre_train/imputation.step1.hd5'
 
-df_input = scimpute.read_hd5('plots/df_valid.hd5')
+df_pred = scimpute.read_hd5('pre_train/imputation.step1.hd5')
+df_input = scimpute.read_hd5(file_input)
 df_input = scimpute.subset_df(df_input, df_pred)
 
-df_groundTruth = scimpute.read_hd5('plots/df2_valid.hd5')
+train_idx = scimpute.read_csv('pre_train/df_train.index.csv').index
+valid_idx = scimpute.read_csv('pre_train/df_valid.index.csv').index
+
+df_input_train = df_input.ix[train_idx]
+df_input_valid = df_input.ix[valid_idx]
+
+df_groundTruth = scimpute.read_hd5(file_groundTruth)
 df_groundTruth = scimpute.subset_df(df_groundTruth, df_pred)
 
 print(df_pred.ix[0:4, 0:4])
@@ -39,9 +46,3 @@ mse_j_groundTruth = ((pred_j - groundTruth_j) ** 2).mean()
 # matrix MSE
 matrix_mse_input = ((df_pred.values - df_input.values) ** 2).mean()
 matrix_mse_groundTruth = ((df_pred.values - df_groundTruth.values) ** 2).mean()
-
-
-
-
-
-

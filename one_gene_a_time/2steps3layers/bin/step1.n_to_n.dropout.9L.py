@@ -190,8 +190,8 @@ n_hidden_4 = 200
 
 log_dir = './pre_train'
 
-display_step = 20
-snapshot_step = 500
+display_step = 1
+snapshot_step = 2
 
 scimpute.refresh_logfolder(log_dir)
 

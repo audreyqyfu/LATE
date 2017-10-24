@@ -176,7 +176,6 @@ def save_weights():  # todo: change when model changes depth
     scimpute.save_csv(sess.run(d_w2), 'd_w2.csv.gz')
 
 
-
 def visualization_of_dfs():
     print('visualization of dfs')
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])

@@ -12,8 +12,9 @@ import scimpute
 #         [600, 800], [204, 604], [205, 805]]
 
 list = [[4058, 7496],
-        [8495, 12871]]
-
+        [8495, 12871],
+        [2, 3],
+        [205, 206]]
 
 # # For input data #  todo: disabled temperately
 # DF = scimpute.read_hd5('../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5')

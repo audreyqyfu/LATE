@@ -27,9 +27,9 @@ def print_parameters():
           "\n# Parameters:",
           "\nn_features: ", n,
           "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
-          "\nn_hidden2: ", n_hidden_2,
-          "\nn_hidden3: ", n_hidden_3,
-          "\nn_hidden4: ", n_hidden_4,
+          # "\nn_hidden2: ", n_hidden_2,
+          # "\nn_hidden3: ", n_hidden_3,
+          # "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
@@ -117,14 +117,13 @@ def snapshot():
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
-    code_bottle_neck_input = sess.run(e_a4, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     scimpute.save_csv(code_bottle_neck_input, 'code_bottle_neck_input.csv.gz')
 
 
 def groundTruth_vs_prediction():
     print("> Ground truth vs prediction")
     for j in [4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
-    # for j in [0, 200, 400, 600, 800]:  # todo: change
             scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j], range='same',
                                   title=str('scatterplot1, gene-' + str(j) + ', valid, step1'),
                                   xlabel='Ground Truth ' + Bname,
@@ -139,8 +138,10 @@ def groundTruth_vs_prediction():
 
 def gene_gene_relationship():
     print('> gene-gene relationship before/after inference')
-    List = [[4058, 7496],  # todo: change
-            [8495, 12871]
+    List = [[4058, 7496],
+            [8495, 12871],
+            [2, 3],
+            [205, 206]
             ]
     # Prediction
     for i, j in List:
@@ -167,17 +168,32 @@ def weights_visualization(w_name, b_name):
     b_arr = sess.run(b)
     b_arr = b_arr.reshape(len(b_arr), 1)
     b_arr_T = b_arr.T
-    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: bug here, update name
+    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: update name (low priority)
 
 
-def save_weights():  # todo: change when model changes depth
+def visualize_weights():
+    # todo: update when model changes depth
+    weights_visualization('e_w1', 'e_b1')
+    weights_visualization('d_w1', 'd_b1')
+    # weights_visualization('e_w2', 'e_b2')
+    # weights_visualization('d_w2', 'd_b2')
+    # weights_visualization('e_w3', 'e_b3')
+    # weights_visualization('d_w3', 'd_b3')
+    # weights_visualization('e_w4', 'e_b4')
+    # weights_visualization('d_w4', 'd_b4')
+
+
+def save_weights():
+    # todo: update when model changes depth
     print('save weights in csv')
-    scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
-    scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
-    scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
-    scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
-    scimpute.save_csv(sess.run(e_w3), 'e_w2.csv.gz')
-    scimpute.save_csv(sess.run(d_w3), 'd_w2.csv.gz')
+    scimpute.save_csv(sess.run(e_w1), 'e_w1.csv.gz')
+    scimpute.save_csv(sess.run(d_w1), 'd_w1.csv.gz')
+    # scimpute.save_csv(sess.run(e_w2), 'e_w2.csv.gz')
+    # scimpute.save_csv(sess.run(d_w2), 'd_w2.csv.gz')
+    # scimpute.save_csv(sess.run(e_w3), 'e_w3.csv.gz')
+    # scimpute.save_csv(sess.run(d_w3), 'd_w3.csv.gz')
+    # scimpute.save_csv(sess.run(e_w4), 'e_w4.csv.gz')
+    # scimpute.save_csv(sess.run(d_w4), 'd_w4.csv.gz')
 
 
 def visualization_of_dfs():
@@ -196,24 +212,25 @@ scimpute.refresh_logfolder(log_dir)
 # read data #
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
 max = max(df.values.max(), df2.values.max())
-df_train, df_valid, df_test = scimpute.split_df(df, a=0.9, b=0.1, c=0.0)
+df_train, df_valid, df_test = scimpute.split_df(df, a=0.8, b=0.1, c=0.1)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
 df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
 df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
+df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 
 # Parameters #
 n_input = n
-n_hidden_1 = 800
-n_hidden_2 = 600
-n_hidden_3 = 400
-n_hidden_4 = 200
+n_hidden_1 = 200
+# n_hidden_2 = 600
+# n_hidden_3 = 400
+# n_hidden_4 = 200
 
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 7L, 0.00003 for 9L
-sd = 0.00001  # stddev for random init 0.0001 for 7L, 0.00001 for 9L
+learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
+sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 3000
+training_epochs = 100  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 20
 snapshot_step = 500
 print_parameters()
@@ -235,33 +252,33 @@ with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
 
-with tf.name_scope('Encoder_L2'):
-    e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
-    e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
-
-with tf.name_scope('Encoder_L3'):
-    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
-    e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
-
-with tf.name_scope('Encoder_L4'):
-    e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
-    e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
-
-with tf.name_scope('Decoder_L4'):
-    d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
-    d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
-
-with tf.name_scope('Decoder_L3'):
-    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-    d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
-
-with tf.name_scope('Decoder_L2'):
-    d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-    d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+# with tf.name_scope('Encoder_L2'):
+#     e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
+#     e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
+#
+# with tf.name_scope('Encoder_L3'):
+#     e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
+#     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
+#
+# with tf.name_scope('Encoder_L4'):
+#     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
+#     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L4'):
+#     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
+#     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L3'):
+#     d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
+#     d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L2'):
+#     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
+#     d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
+    d_a1 = scimpute.dense_layer('decoder1', e_a1, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
 
 # define input/output
 y_input = X
@@ -353,14 +370,7 @@ for epoch in range(1, training_epochs+1):
         visualization_of_dfs()
         gene_gene_relationship()
         groundTruth_vs_prediction()
-        weights_visualization('e_w1', 'e_b1')
-        weights_visualization('e_w2', 'e_b2')
-        weights_visualization('e_w3', 'e_b3')
-        weights_visualization('e_w4', 'e_b4')
-        weights_visualization('d_w1', 'd_b1')
-        weights_visualization('d_w2', 'd_b2')
-        weights_visualization('d_w3', 'd_b3')
-        weights_visualization('d_w4', 'd_b4')
+        visualize_weights()
         save_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))

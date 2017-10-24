@@ -338,7 +338,7 @@ for j in j_lst:
                 # Summary
                 merged = tf.summary.merge_all()
 
-                [summary_train, cost_train, cost_train_m] = sess.run([merged, cost, cost_benchmark],
+                [summary_train, cost_train, cost_train_m] = sess.run([merged, cost, cost_benchmark],  #todo: change feed to produce correct MSE
                                                        feed_dict={X: df_train_solid.values, M: df2_train_solid.values,
                                                                   keep_prob_input: 1, keep_prob_hidden: 1})
                 [summary_valid, cost_valid, cost_valid_m] = sess.run([merged, cost, cost_benchmark],

@@ -175,7 +175,7 @@ df2_test = df2.ix[df_test.index]
 
 # Parameters #
 learning_rate = 0.0003
-training_epochs = 2000  # todo change epochs, 2000 good for 5L
+training_epochs = 20  # todo change epochs, 2000 good for 5L
 batch_size = 256
 pIn = 0.8
 pHidden = 0.5
