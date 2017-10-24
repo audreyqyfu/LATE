@@ -232,9 +232,9 @@ df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 
 # Parameters #
 n_input = n
-n_hidden_1 = 400
-n_hidden_2 = 200
-# n_hidden_3 = 400
+n_hidden_1 = 800
+n_hidden_2 = 400
+n_hidden_3 = 200
 # n_hidden_4 = 200
 
 pIn = 0.8
