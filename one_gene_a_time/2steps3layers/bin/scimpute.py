@@ -342,7 +342,7 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
     plt.close()
 
 
-def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
+def gene_corr_hist(arr1, arr2, fprefix='hist_gene_corr', title='hist_gene_corr'):
     '''calculate correlation between genes [columns]
     arr [cells, genes]'''
     # create plots directory
@@ -369,7 +369,7 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
     return hist
 
 
-def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
+def cell_corr_hist(arr1, arr2, fprefix='hist_cell_corr', title='hist_cell_corr'):
     '''calculate correlation between genes [columns]
     arr [cells, genes]'''
     # create plots directory

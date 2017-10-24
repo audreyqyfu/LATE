@@ -125,7 +125,6 @@ def save_bottle_neck_representation():
     # clustermap.savefig('bottle_neck.hclust.png')
 
 
-
 def groundTruth_vs_prediction():
     print("> Ground truth vs prediction")
     for j in [4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
@@ -160,13 +159,13 @@ def gene_gene_relationship():
                               xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j))
     # Input set: Prediction
     for i, j in List:
-        scimpute.scatterplot2(h_input[:, i], h_input[:, j],
+        scimpute.scatterplot2(h_test[:, i], h_test[:, j],
                               title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.input',
                               xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j + 1))
 
     # Input set: GroundTruth
     for i, j in List:
-        scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
+        scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
                               title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.input',
                               xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j))
 
@@ -378,6 +377,10 @@ for epoch in range(1, training_epochs+1):
         hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
                                        fprefix='hist gene-corr, valid, step1',
                                        title="gene-corr (prediction vs ground-truth)"
+                                       )
+        hist = scimpute.cell_corr_hist(h_valid, df2_valid.values,
+                                       fprefix='hist cell-corr, valid, step1',
+                                       title="cell-corr (prediction vs ground-truth)"
                                        )
         visualization_of_dfs()
         gene_gene_relationship()
