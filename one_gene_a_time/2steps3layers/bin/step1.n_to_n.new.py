@@ -13,6 +13,7 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
+# import seaborn as sns
 
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
@@ -119,7 +120,10 @@ def save_bottle_neck_representation():
     # todo: change variable name for each model
     code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
-    # scimpute.save_csv(code_bottle_neck_input, 'pre_train/code_bottle_neck_input.csv.gz')
+    # todo: hclust, but seaborn not on server yet
+    # clustermap = sns.clustermap(code_bottle_neck_input)
+    # clustermap.savefig('bottle_neck.hclust.png')
+
 
 
 def groundTruth_vs_prediction():
@@ -213,7 +217,7 @@ scimpute.refresh_logfolder(log_dir)
 # read data #
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
 max = max(df.values.max(), df2.values.max())
-df_train, df_valid, df_test = scimpute.split_df(df, a=0.8, b=0.1, c=0.1)
+df_train, df_valid, df_test = scimpute.split_df(df, a=0.7, b=0.15, c=0.15)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
 df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
 df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
@@ -231,7 +235,7 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 2  #3L:100, 5L:1000, 7L:1000, 9L:3000
+training_epochs = 20  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 1
 snapshot_step = 500
 print_parameters()
