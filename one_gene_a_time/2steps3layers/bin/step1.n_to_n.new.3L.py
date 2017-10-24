@@ -231,7 +231,7 @@ learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
 training_epochs = 100  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 20
+display_step = 5
 snapshot_step = 500
 print_parameters()
 
