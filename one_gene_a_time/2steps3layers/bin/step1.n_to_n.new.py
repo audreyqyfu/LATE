@@ -193,6 +193,8 @@ df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
 max = max(df.values.max(), df2.values.max())
 df_train, df_valid, df_test = scimpute.split_df(df, a=0.9, b=0.1, c=0.0)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
+df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
+df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
 
 # Parameters #
 n_input = n
