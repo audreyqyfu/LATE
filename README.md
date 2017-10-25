@@ -1,5 +1,5 @@
 # scImpute
-# transAutoencoder: autoencoder structure, pre-trained on A, re-train on B.msk
+* transAutoencoder: autoencoder structure, pre-trained on A, re-train on B.msk
 # workflow (with new version of code, only step1 available now, 10/24/2017)
 * step1: 
   - script: scImpute/one_gene_a_time/2steps3layers/bin/step1.n_to_n.new.7L.py
