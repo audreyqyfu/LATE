@@ -17,6 +17,7 @@
   - example of 'df':
   
 empty|gene1|gene2
+---|---|---|
 cell1|0.392652|0.127627
 cell2|0.377387|0.213198
   
