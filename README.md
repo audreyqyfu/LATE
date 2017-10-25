@@ -15,7 +15,7 @@
   - so that 'df' contains input_data_matrix [cell, genes]
   - 'df2' should be identical to 'df' in step1
   - example of 'df':
-  \|gene1|gene2
+  empty|gene1|gene2
   cell1|0.392652|0.127627
   cell2|0.377387|0.213198
    - function 'scimpute.read_csv' is a good option in implementation
