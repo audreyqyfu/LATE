@@ -123,7 +123,7 @@ def save_bottle_neck_representation():
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
     # todo: hclust, but seaborn not on server yet
     clustermap = sns.clustermap(code_bottle_neck_input)
-    clustermap.savefig('bottle_neck.hclust.png')
+    clustermap.savefig('./plots/bottle_neck.hclust.png')
 
 
 def groundTruth_vs_prediction():
