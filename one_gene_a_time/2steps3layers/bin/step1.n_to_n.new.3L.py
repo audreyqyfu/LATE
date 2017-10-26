@@ -13,7 +13,7 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
-# import seaborn as sns
+import seaborn as sns
 
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
@@ -25,7 +25,7 @@ import scimpute
 
 def print_parameters():
     print(os.getcwd(), "\n",
-          "\n# Parameters:",
+          "\n# Parameters: 3L",
           "\nn_features: ", n,
           "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
           # "\nn_hidden2: ", n_hidden_2,
@@ -122,8 +122,8 @@ def save_bottle_neck_representation():
     code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
     # todo: hclust, but seaborn not on server yet
-    # clustermap = sns.clustermap(code_bottle_neck_input)
-    # clustermap.savefig('bottle_neck.hclust.png')
+    clustermap = sns.clustermap(code_bottle_neck_input)
+    clustermap.savefig('bottle_neck.hclust.png')
 
 
 def groundTruth_vs_prediction():
@@ -233,7 +233,7 @@ df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 # Parameters #
 n_input = n
 n_hidden_1 = 200
-# n_hidden_2 = 600
+# n_hidden_2 = 200
 # n_hidden_3 = 400
 # n_hidden_4 = 200
 
@@ -286,7 +286,7 @@ with tf.name_scope('Encoder_L1'):
 #
 # with tf.name_scope('Decoder_L2'):
 #     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-#     d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+#     d_a2 = scimpute.dense_layer('decoder2', e_a2, d_w2, d_b2, pHidden_holder)
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
