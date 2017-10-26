@@ -13,7 +13,7 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
-# import seaborn as sns
+import seaborn as sns
 
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
@@ -122,8 +122,8 @@ def save_bottle_neck_representation():
     code_bottle_neck_input = sess.run(e_a4, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
     # todo: hclust, but seaborn not on server yet
-    # clustermap = sns.clustermap(code_bottle_neck_input)
-    # clustermap.savefig('bottle_neck.hclust.png')
+    clustermap = sns.clustermap(code_bottle_neck_input)
+    clustermap.savefig('./plots/bottle_neck.hclust.png')
 
 
 def groundTruth_vs_prediction():
