@@ -271,6 +271,7 @@ def medium_corr(arr1, arr2, num=100, accuracy=3):
         pearsonrlog.append(pearsonr(arr1[i], arr2[i]))
     pearsonrlog.sort()
     result = round(pearsonrlog[int(num // 2)][0], accuracy)
+    np.random.seed()
     return result
 
 
