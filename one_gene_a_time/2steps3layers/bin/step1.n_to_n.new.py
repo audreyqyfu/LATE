@@ -47,12 +47,12 @@ def print_parameters():
 def evaluate_epoch0():
     print("> Evaluate epoch 0:")
     epoch_log.append(epoch)
-    cost_train = sess.run(cost_input, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
-    cost_valid = sess.run(cost_input, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
-    cost_log_batch.append(cost_train)  # approximation
-    cost_log_train.append(cost_train)
-    cost_log_valid.append(cost_valid)
-    print("cost_train=", round(cost_train, 3), "cost_valid=", round(cost_valid, 3))
+    mse_train = sess.run(mse_input, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_valid = sess.run(mse_input, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_log_batch.append(mse_train)  # approximation
+    mse_log_train.append(mse_train)
+    mse_log_valid.append(mse_valid)
+    print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
 
     h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
     h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
@@ -90,7 +90,7 @@ def tb_summary():
 
 def learning_curve():
     print('> plotting learning curves')
-    scimpute.learning_curve_cost(epoch_log, cost_log_batch, cost_log_valid)
+    scimpute.learning_curve_mse(epoch_log, mse_log_batch, mse_log_valid)
     scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid)
 
 
@@ -300,12 +300,12 @@ y_groundTruth = M
 h = d_a1
 
 with tf.name_scope("Metrics"):
-    cost_input = tf.reduce_mean(tf.pow(y_input - h, 2))
-    cost_groundTruth = tf.reduce_mean(tf.pow(y_groundTruth - h, 2))
-    tf.summary.scalar('cost_input', cost_input)
-    tf.summary.scalar('cost_groundTruth', cost_groundTruth)
+    mse_input = tf.reduce_mean(tf.pow(y_input - h, 2))
+    mse_groundTruth = tf.reduce_mean(tf.pow(y_groundTruth - h, 2))
+    tf.summary.scalar('mse_input', mse_input)
+    tf.summary.scalar('mse_groundTruth', mse_groundTruth)
 
-trainer = tf.train.AdamOptimizer(learning_rate).minimize(cost_input)
+trainer = tf.train.AdamOptimizer(learning_rate).minimize(mse_input)
 
 # Launch Session #
 sess = tf.Session()
@@ -317,7 +317,7 @@ valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 epoch = 0
 total_batch = int(math.floor(len(df_train) // batch_size))  # floor
 epoch_log = []
-cost_log_batch, cost_log_valid, cost_log_train = [], [], []
+mse_log_batch, mse_log_valid, mse_log_train = [], [], []
 cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
 
 evaluate_epoch0()
@@ -344,14 +344,14 @@ for epoch in range(1, training_epochs+1):
         tic_log = time.time()
 
         # Ad hoc summaries
-        cost_batch, h_batch = sess.run([cost_input, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
-        # cost_train, h_train = sess.run([cost_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
-        cost_valid, h_valid = sess.run([cost_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
-        cost_log_batch.append(cost_batch)
-        # cost_log_train.append(cost_train)
-        cost_log_valid.append(cost_valid)
-        print('cost_batch, valid:', cost_batch, cost_valid)
-        # print('cost_batch, train, valid:', cost_batch, cost_train, cost_valid)
+        mse_batch, h_batch = sess.run([mse_input, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
+        # mse_train, h_train = sess.run([mse_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
+        mse_valid, h_valid = sess.run([mse_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
+        mse_log_batch.append(mse_batch)
+        # mse_log_train.append(mse_train)
+        mse_log_valid.append(mse_valid)
+        print('mse_batch, valid:', mse_batch, mse_valid)
+        # print('mse_batch, train, valid:', mse_batch, mse_train, mse_valid)
 
         corr_batch = scimpute.medium_corr(x_batch, h_batch)
         # corr_train = scimpute.medium_corr(df_train.values, h_train)
