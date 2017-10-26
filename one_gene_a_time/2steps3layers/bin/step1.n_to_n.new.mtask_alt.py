@@ -223,7 +223,7 @@ scimpute.refresh_logfolder(log_dir)
 
 # read data #
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
-flag = "test"
+flag = "not test"
 if flag is 'test':  # todo test
     df = df.ix[:, 0:1000]
     df2 = df2.ix[:, 0:1000]
@@ -248,9 +248,9 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 10  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 1
-snapshot_step = 500
+training_epochs = 100000  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 100
+snapshot_step = 10000
 print_parameters()
 
 # Define model #
@@ -262,9 +262,11 @@ M = tf.placeholder(tf.float32, [None, n_input], name='M_ground_truth')  # benchm
 
 pIn_holder = tf.placeholder(tf.float32, name='pIn')
 pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
+J = tf.placeholder(tf.int32, name='j')
 
 # init variables and build graph
 tf.set_random_seed(3)  # seed
+# np.random.seed(26)  # for j_val, but this is useless, because seed() were set free in scimpute later, so can't fix seed for j_val
 # todo: adjust based on depth
 with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
@@ -304,16 +306,13 @@ y_groundTruth = M
 h = d_a1
 
 with tf.name_scope("Metrics"):
-    mse_input = tf.reduce_mean(tf.pow(y_input - h, 2))  # todo
-    mse_input1 = tf.reduce_mean(tf.pow(y_input[:, 2] - h[:, 2], 2))  # todo
-    mse_input2 = tf.reduce_mean(tf.pow(y_input[:, 3] - h[:, 3], 2))
+    mse_input = tf.reduce_mean(tf.pow(y_input - h, 2))  # todo: for report
+    mse_input_j = tf.reduce_mean(tf.pow(y_input[:, J] - h[:, J], 2))  # todo: for training
     mse_groundTruth = tf.reduce_mean(tf.pow(y_groundTruth - h, 2))
     tf.summary.scalar('mse_input', mse_input)
     tf.summary.scalar('mse_groundTruth', mse_groundTruth)
 
-trainer1 = tf.train.AdamOptimizer(learning_rate).minimize(mse_input1)  # todo
-trainer2 = tf.train.AdamOptimizer(learning_rate).minimize(mse_input2)
-
+trainer = tf.train.AdamOptimizer(learning_rate).minimize(mse_input_j)  # todo: mtask_alt
 
 # Launch Session #
 sess = tf.Session()
@@ -337,11 +336,11 @@ for epoch in range(1, training_epochs+1):
     random_indices = np.random.choice(len(df_train), batch_size, replace=False)
     for i in range(total_batch):
         indices = np.arange(batch_size * i, batch_size*(i+1))
+        j_val = np.random.choice(range(n), 1)[0]  # todo: in mini-batch, momentum problem not validated yet
         x_batch = df_train.values[indices, :]
-        if epoch % 2 == 0:
-            sess.run(trainer1, feed_dict={X: x_batch, pIn_holder: pIn, pHidden_holder: pHidden})  # todo
-        else:
-            sess.run(trainer2, feed_dict={X: x_batch, pIn_holder: pIn, pHidden_holder: pHidden})
+        sess.run(trainer, feed_dict={X: x_batch,
+                                          pIn_holder: pIn, pHidden_holder: pHidden,
+                                          J: j_val})  # todo
 
 
     toc_cpu, toc_wall = time.clock(), time.time()
@@ -383,8 +382,7 @@ for epoch in range(1, training_epochs+1):
 
         # temp: show weights in layer1, and see if it updates in deep network
         print('encoder_w1: ', sess.run(e_w1)[0, 0:2])
-        print('decoder_w1: ', sess.run(d_w1)[0, 0:4])  # todo: select genes: found only related weights updated, good
-        # print('decoder_w1: ', sess.run(e_w1)[0, 4057:4059])  # todo: select genes
+        # print('j_val:', j_val, '; decoder_w1: ', sess.run(d_w1)[0, 0:4])  # todo: select genes: found only related weights updated, good
 
     # Log per observation interval
     if (epoch % snapshot_step == 0) or (epoch == training_epochs):
