@@ -13,7 +13,7 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
-# import seaborn as sns
+import seaborn as sns
 
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
@@ -25,12 +25,12 @@ import scimpute
 
 def print_parameters():
     print(os.getcwd(), "\n",
-          "\n# Parameters: 9L",
+          "\n# Parameters: 3L",
           "\nn_features: ", n,
           "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
-          "\nn_hidden2: ", n_hidden_2,
-          "\nn_hidden3: ", n_hidden_3,
-          "\nn_hidden4: ", n_hidden_4,
+          # "\nn_hidden2: ", n_hidden_2,
+          # "\nn_hidden3: ", n_hidden_3,
+          # "\nn_hidden4: ", n_hidden_4,
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
           "\nepoches: ", training_epochs, "\n",
@@ -47,12 +47,12 @@ def print_parameters():
 def evaluate_epoch0():
     print("> Evaluate epoch 0:")
     epoch_log.append(epoch)
-    cost_train = sess.run(cost_input, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
-    cost_valid = sess.run(cost_input, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
-    cost_log_batch.append(cost_train)  # approximation
-    cost_log_train.append(cost_train)
-    cost_log_valid.append(cost_valid)
-    print("cost_train=", round(cost_train, 3), "cost_valid=", round(cost_valid, 3))
+    mse_train = sess.run(mse_input, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_valid = sess.run(mse_input, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_log_batch.append(mse_train)  # approximation
+    mse_log_train.append(mse_train)
+    mse_log_valid.append(mse_valid)
+    print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
 
     h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
     h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
@@ -90,7 +90,7 @@ def tb_summary():
 
 def learning_curve():
     print('> plotting learning curves')
-    scimpute.learning_curve_cost(epoch_log, cost_log_batch, cost_log_valid)
+    scimpute.learning_curve_mse(epoch_log, mse_log_batch, mse_log_valid)
     scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid)
 
 
@@ -119,11 +119,11 @@ def snapshot():
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
-    code_bottle_neck_input = sess.run(e_a4, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
     # todo: hclust, but seaborn not on server yet
-    # clustermap = sns.clustermap(code_bottle_neck_input)
-    # clustermap.savefig('bottle_neck.hclust.png')
+    clustermap = sns.clustermap(code_bottle_neck_input)
+    clustermap.savefig('bottle_neck.hclust.png')
 
 
 def groundTruth_vs_prediction():
@@ -186,12 +186,12 @@ def visualize_weights():
     # todo: update when model changes depth
     weights_visualization('e_w1', 'e_b1')
     weights_visualization('d_w1', 'd_b1')
-    weights_visualization('e_w2', 'e_b2')
-    weights_visualization('d_w2', 'd_b2')
-    weights_visualization('e_w3', 'e_b3')
-    weights_visualization('d_w3', 'd_b3')
-    weights_visualization('e_w4', 'e_b4')
-    weights_visualization('d_w4', 'd_b4')
+    # weights_visualization('e_w2', 'e_b2')
+    # weights_visualization('d_w2', 'd_b2')
+    # weights_visualization('e_w3', 'e_b3')
+    # weights_visualization('d_w3', 'd_b3')
+    # weights_visualization('e_w4', 'e_b4')
+    # weights_visualization('d_w4', 'd_b4')
 
 
 def save_weights():
@@ -199,12 +199,12 @@ def save_weights():
     print('save weights in csv')
     np.save('pre_train/e_w1', sess.run(e_w1))
     np.save('pre_train/d_w1', sess.run(d_w1))
-    np.save('pre_train/e_w2', sess.run(e_w2))
-    np.save('pre_train/d_w2', sess.run(d_w2))
-    np.save('pre_train/e_w3', sess.run(e_w3))
-    np.save('pre_train/d_w3', sess.run(d_w3))
-    np.save('pre_train/e_w4', sess.run(e_w4))
-    np.save('pre_train/d_w4', sess.run(d_w4))
+    # np.save('pre_train/e_w2', sess.run(e_w2))
+    # np.save('pre_train/d_w2', sess.run(d_w2))
+    # np.save('pre_train/e_w3', sess.run(e_w3))
+    # np.save('pre_train/d_w3', sess.run(d_w3))
+    # np.save('pre_train/e_w4', sess.run(e_w4))
+    # np.save('pre_train/d_w4', sess.run(d_w4))
     # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
 
 
@@ -231,22 +231,20 @@ df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
 df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 
 # Parameters #
-# todo: update for different depth
 n_input = n
-n_hidden_1 = 800
-n_hidden_2 = 600
-n_hidden_3 = 400
-n_hidden_4 = 200
+n_hidden_1 = 200
+# n_hidden_2 = 200
+# n_hidden_3 = 400
+# n_hidden_4 = 200
 
-# todo: adjust to optimized hyper-parameters when different layers used
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L
-sd = 0.00001  # 3-7L:1e-3, 9L:1e-4
+learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
+sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 3000  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 20
-snapshot_step = 1000
+training_epochs = 150  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 5
+snapshot_step = 500
 print_parameters()
 
 # Define model #
@@ -266,33 +264,33 @@ with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
 
-with tf.name_scope('Encoder_L2'):
-    e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
-    e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
-
-with tf.name_scope('Encoder_L3'):
-    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
-    e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
-
-with tf.name_scope('Encoder_L4'):
-    e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
-    e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
-
-with tf.name_scope('Decoder_L4'):
-    d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
-    d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
-
-with tf.name_scope('Decoder_L3'):
-    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-    d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
-
-with tf.name_scope('Decoder_L2'):
-    d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-    d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+# with tf.name_scope('Encoder_L2'):
+#     e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
+#     e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
+#
+# with tf.name_scope('Encoder_L3'):
+#     e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
+#     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
+#
+# with tf.name_scope('Encoder_L4'):
+#     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
+#     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L4'):
+#     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
+#     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L3'):
+#     d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
+#     d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L2'):
+#     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
+#     d_a2 = scimpute.dense_layer('decoder2', e_a2, d_w2, d_b2, pHidden_holder)
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
+    d_a1 = scimpute.dense_layer('decoder1', e_a1, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
 
 # define input/output
 y_input = X
@@ -300,12 +298,12 @@ y_groundTruth = M
 h = d_a1
 
 with tf.name_scope("Metrics"):
-    cost_input = tf.reduce_mean(tf.pow(y_input - h, 2))
-    cost_groundTruth = tf.reduce_mean(tf.pow(y_groundTruth - h, 2))
-    tf.summary.scalar('cost_input', cost_input)
-    tf.summary.scalar('cost_groundTruth', cost_groundTruth)
+    mse_input = tf.reduce_mean(tf.pow(y_input - h, 2))
+    mse_groundTruth = tf.reduce_mean(tf.pow(y_groundTruth - h, 2))
+    tf.summary.scalar('mse_input', mse_input)
+    tf.summary.scalar('mse_groundTruth', mse_groundTruth)
 
-trainer = tf.train.AdamOptimizer(learning_rate).minimize(cost_input)
+trainer = tf.train.AdamOptimizer(learning_rate).minimize(mse_input)
 
 # Launch Session #
 sess = tf.Session()
@@ -317,7 +315,7 @@ valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 epoch = 0
 total_batch = int(math.floor(len(df_train) // batch_size))  # floor
 epoch_log = []
-cost_log_batch, cost_log_valid, cost_log_train = [], [], []
+mse_log_batch, mse_log_valid, mse_log_train = [], [], []
 cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
 
 evaluate_epoch0()
@@ -344,14 +342,14 @@ for epoch in range(1, training_epochs+1):
         tic_log = time.time()
 
         # Ad hoc summaries
-        cost_batch, h_batch = sess.run([cost_input, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
-        # cost_train, h_train = sess.run([cost_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
-        cost_valid, h_valid = sess.run([cost_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
-        cost_log_batch.append(cost_batch)
-        # cost_log_train.append(cost_train)
-        cost_log_valid.append(cost_valid)
-        print('cost_batch, valid:', cost_batch, cost_valid)
-        # print('cost_batch, train, valid:', cost_batch, cost_train, cost_valid)
+        mse_batch, h_batch = sess.run([mse_input, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
+        # mse_train, h_train = sess.run([mse_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
+        mse_valid, h_valid = sess.run([mse_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
+        mse_log_batch.append(mse_batch)
+        # mse_log_train.append(mse_train)
+        mse_log_valid.append(mse_valid)
+        print('mse_batch, valid:', mse_batch, mse_valid)
+        # print('mse_batch, train, valid:', mse_batch, mse_train, mse_valid)
 
         corr_batch = scimpute.medium_corr(x_batch, h_batch)
         # corr_train = scimpute.medium_corr(df_train.values, h_train)
