@@ -128,7 +128,7 @@ def save_bottle_neck_representation():
 
 def groundTruth_vs_prediction():
     print("> Ground truth vs prediction")
-    for j in [4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
+    for j in [2, 3, 205, 206, 4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
             scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j], range='same',
                                   title=str('scatterplot1, gene-' + str(j) + ', valid, step1'),
                                   xlabel='Ground Truth ' + Bname,
@@ -143,10 +143,10 @@ def groundTruth_vs_prediction():
 
 def gene_gene_relationship():
     print('> gene-gene relationship before/after inference')
-    List = [[4058, 7496],
-            [8495, 12871],
-            [2, 3],
-            [205, 206]
+    List = [[2, 3],
+            [205, 206],
+            [4058, 7496],
+            [8495, 12871]
             ]
     # Valid set: Prediction
     for i, j in List:
@@ -223,12 +223,16 @@ scimpute.refresh_logfolder(log_dir)
 
 # read data #
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
+
 flag = "not test"
 if flag is 'test':  # todo test
     df = df.ix[:, 0:1000]
     df2 = df2.ix[:, 0:1000]
     n = 1000
     print('# Test mode#')
+else:
+    print('# Not Test Mode #')
+
 max = max(df.values.max(), df2.values.max())
 df_train, df_valid, df_test = scimpute.split_df(df, a=0.7, b=0.15, c=0.15)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
@@ -248,8 +252,8 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 100000  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 100
+training_epochs = 50  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 10
 snapshot_step = 10000
 print_parameters()
 
@@ -336,11 +340,11 @@ for epoch in range(1, training_epochs+1):
     random_indices = np.random.choice(len(df_train), batch_size, replace=False)
     for i in range(total_batch):
         indices = np.arange(batch_size * i, batch_size*(i+1))
-        j_val = np.random.choice(range(n), 1)[0]  # todo: in mini-batch, momentum problem not validated yet
+        j_val = np.random.choice(range(5), 1)[0]  # todo: in mini-batch, momentum problem not validated yet; change 5 to n
         x_batch = df_train.values[indices, :]
         sess.run(trainer, feed_dict={X: x_batch,
                                           pIn_holder: pIn, pHidden_holder: pHidden,
-                                          J: j_val})  # todo
+                                          J: j_val})
 
 
     toc_cpu, toc_wall = time.clock(), time.time()
