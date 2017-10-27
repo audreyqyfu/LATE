@@ -252,8 +252,8 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 50  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 10
+training_epochs = 1000  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 100
 snapshot_step = 10000
 print_parameters()
 
