@@ -7,4 +7,5 @@ nvidia-smi -L
 source /usr/modules/init/bash
 module load python/3.5.2
 python -u ./step1.n_to_n.new.mtask_alt.py
+python -u ./result_analysis.step1.py
 echo "*--done--*"
