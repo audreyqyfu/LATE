@@ -323,7 +323,7 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
         os.makedirs("plots")
     fprefix = "./plots/" + title
     # plot
-    corr, __ = pearsonr(x, y)
+    corr, _ = pearsonr(x, y)
     corr = str(round(corr, 4))
     plt.plot(x, y, 'o')
     plt.title(str(title+"\ncorr: "+corr))
