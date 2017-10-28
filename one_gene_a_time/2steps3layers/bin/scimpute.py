@@ -221,6 +221,7 @@ def split_arr(arr, a=0.8, b=0.1, c=0.1):
     """input array, output rand split arrays
     a: train, b: valid, c: test
     e.g.: [arr_train, arr_valid, arr_test] = split(df.values)"""
+    print(">splitting data")
     np.random.seed(1)  # for splitting consistency
     train_indices = np.random.choice(arr.shape[0], int(round(arr.shape[0] * a // (a + b + c))), replace=False)
     remain_indices = np.array(list(set(range(arr.shape[0])) - set(train_indices)))
