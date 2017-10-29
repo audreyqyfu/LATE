@@ -326,11 +326,11 @@ evaluate_epoch0()
 # training
 for epoch in range(1, training_epochs+1):
     tic_cpu, tic_wall = time.clock(), time.time()
-
-    random_indices = np.random.choice(len(df_train), batch_size, replace=False)
+    ridx_full = np.random.choice(len(df_train), len(df_train), replace=False)
     for i in range(num_batch):
         indices = np.arange(batch_size * i, batch_size*(i+1))
-        x_batch = df_train.values[indices, :]
+        ridx_batch = ridx_full[indices]
+        x_batch = df_train.values[r_idx_batch, :]
         sess.run(trainer, feed_dict={X: x_batch, pIn_holder: pIn, pHidden_holder: pHidden})
 
     toc_cpu, toc_wall = time.clock(), time.time()
