@@ -316,7 +316,7 @@ sess.run(init)
 batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 epoch = 0
-total_batch = int(math.floor(len(df_train) // batch_size))  # floor
+num_batch = int(math.floor(len(df_train) // batch_size))  # floor
 epoch_log = []
 mse_log_batch, mse_log_valid, mse_log_train = [], [], []
 cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
@@ -328,7 +328,7 @@ for epoch in range(1, training_epochs+1):
     tic_cpu, tic_wall = time.clock(), time.time()
 
     random_indices = np.random.choice(len(df_train), batch_size, replace=False)
-    for i in range(total_batch):
+    for i in range(num_batch):
         indices = np.arange(batch_size * i, batch_size*(i+1))
         x_batch = df_train.values[indices, :]
         sess.run(trainer, feed_dict={X: x_batch, pIn_holder: pIn, pHidden_holder: pHidden})
