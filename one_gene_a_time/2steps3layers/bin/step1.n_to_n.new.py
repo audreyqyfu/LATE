@@ -330,7 +330,7 @@ for epoch in range(1, training_epochs+1):
     for i in range(num_batch):
         indices = np.arange(batch_size * i, batch_size*(i+1))
         ridx_batch = ridx_full[indices]
-        x_batch = df_train.values[r_idx_batch, :]
+        x_batch = df_train.values[ridx_batch, :]
         sess.run(trainer, feed_dict={X: x_batch, pIn_holder: pIn, pHidden_holder: pHidden})
 
     toc_cpu, toc_wall = time.clock(), time.time()
