@@ -16,7 +16,7 @@ import scimpute
 # set filename
 file_input = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
 file_groundTruth = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
-file_pred = 'pre_train/imputation.step1.hd5'
+file_pred = 're_train/imputation.step1.hd5'
 
 # read data
 h = scimpute.read_hd5('pre_train/imputation.step1.hd5')
