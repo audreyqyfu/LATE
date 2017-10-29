@@ -4,7 +4,7 @@
 # 1. [x] restore (TL)
 # 2. [x] use functions in model
 # 3. [x] mtask (one gene a time with one network)
-# 4. [ ] exclude zeros or not
+# 4. [-] exclude zeros or not
 # 5. [ ] search for 'change with layer' after changing layers
 # 6. [ ] split analysis of final result from imputation; only plot learning curve here
 
@@ -388,8 +388,7 @@ for epoch in range(1, training_epochs+1):
         indices = np.arange(batch_size * i, batch_size*(i+1))
         x_batch = df_train.ix[indices, :]  # [bs, n]
         # j_batch
-        j = np.random.choice(j_lst, 1)[0]  # todo: change to jlist for test, range(n_input) for real usage
-        print('only jst used for training')
+        j = np.random.choice(range(n_input), 1)[0]  # todo: change to jlist for test, range(n_input) for real usage
         # solid data
         nz_indices = (x_batch.ix[:, j:j + 1] > 0).values  #todo: get nz first then choose mini-batch
         x_batch_nz = x_batch[nz_indices]
@@ -405,9 +404,8 @@ for epoch in range(1, training_epochs+1):
         tic_log = time.time()
 
         # overview
-        print('epoch: ', epoch)
-        print('num mini-batch:', i+1)
-        print('num_nz', len(x_batch_nz))
+        print('epoch: ', epoch, '; num mini-batch:', i+1)
+        print('for gene', j, ', num_nz: ', len(x_batch_nz))
 
         # print training time
         print("\n#Epoch ", epoch, " took: ",
