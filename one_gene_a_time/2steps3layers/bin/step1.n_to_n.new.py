@@ -217,11 +217,11 @@ def visualization_of_dfs():
     # scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     # scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
-
+# refresh pre_train folder
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
 
-# read data #
+# read data and save indexes
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
 max = max(df.values.max(), df2.values.max())
 df_train, df_valid, df_test = scimpute.split_df(df, a=0.7, b=0.15, c=0.15)
@@ -299,6 +299,7 @@ y_input = X
 y_groundTruth = M
 h = d_a1
 
+# define loss
 with tf.name_scope("Metrics"):
     mse_input = tf.reduce_mean(tf.pow(y_input - h, 2))
     mse_groundTruth = tf.reduce_mean(tf.pow(y_groundTruth - h, 2))
