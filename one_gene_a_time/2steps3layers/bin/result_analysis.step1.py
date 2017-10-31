@@ -16,10 +16,10 @@ import scimpute
 # set filename
 file_input = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
 file_groundTruth = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
-file_pred = 're_train/imputation.step1.hd5'
+file_pred = 're_train/imputation.step2.hd5'
 
 # read data
-h = scimpute.read_hd5('pre_train/imputation.step1.hd5')
+h = scimpute.read_hd5(file_pred)
 df = scimpute.read_hd5(file_input).transpose()
 # df = scimpute.subset_df(df, h)
 print('df.shape', df.shape)
@@ -46,12 +46,12 @@ def groundTruth_vs_prediction():
     print("> Ground truth vs prediction")
     for j in [1, 2, 3, 4, 205, 206, 4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
             scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='same',
-                                  title=str('scatterplot1, gene-' + str(j) + ', valid, step1  '),
+                                  title=str('scatterplot1, gene-' + str(j) + ', valid, step1'),
                                   xlabel='Ground Truth ',
                                   ylabel='Prediction '
                                   )
             scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='flexible',
-                                      title=str('scatterplot2, gene-' + str(j) + ', valid, step1  '),
+                                      title=str('scatterplot2, gene-' + str(j) + ', valid, step1'),
                                       xlabel='Ground Truth ',
                                       ylabel='Prediction '
                                       )
