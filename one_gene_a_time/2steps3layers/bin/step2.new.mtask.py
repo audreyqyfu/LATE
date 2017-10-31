@@ -290,12 +290,12 @@ n_hidden_3 = 400
 n_hidden_4 = 200
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L # change with layer
+learning_rate = 0.000003  # 0.0003 for 3-7L, 0.00003 for 9L # change with layer
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 600
-training_epochs = 2000  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 10
-snapshot_step = 1000
+training_epochs = 10000000  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 200
+snapshot_step = 5000
 # print_parameters()
 j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 
@@ -387,8 +387,8 @@ for epoch in range(1, training_epochs+1):
         # x_batch
         # indices = np.arange(batch_size * i, batch_size*(i+1))
         # x_batch = df_train.ix[indices, :]  # [bs, n]
-        x_idx = np.random.choice(m, batch_size, replace=False)
-        x_batch = df_train
+        # x_idx = np.random.choice(m, batch_size, replace=False)
+        x_batch = df_train  #todo: still batch
         # j_batch
         j = np.random.choice(range(n_input), 1)[0]  # todo: change to jlist for test, range(n_input) for real usage
         # solid data
