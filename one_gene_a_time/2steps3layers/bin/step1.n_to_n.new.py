@@ -121,9 +121,9 @@ def save_bottle_neck_representation():
     # todo: change variable name for each model
     code_bottle_neck_input = sess.run(e_a4, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
-    # todo: hclust, but seaborn not on server yet
-    clustermap = sns.clustermap(code_bottle_neck_input)
-    clustermap.savefig('./plots/bottle_neck.hclust.png')
+    # # todo: hclust, but seaborn not on server yet
+    # clustermap = sns.clustermap(code_bottle_neck_input)
+    # clustermap.savefig('./plots/bottle_neck.hclust.png')
 
 
 def groundTruth_vs_prediction():
@@ -244,7 +244,7 @@ pHidden = 0.5
 learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L
 sd = 0.00001  # 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-training_epochs = 3000  #3L:100, 5L:1000, 7L:1000, 9L:3000
+training_epochs = 3  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 20
 snapshot_step = 1000
 print_parameters()
@@ -379,11 +379,9 @@ for epoch in range(1, training_epochs+1):
         h_train, h_valid, h_input = snapshot()
         learning_curve()
         hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
-                                       fprefix='hist gene-corr, valid, step1',
                                        title="gene-corr (prediction vs ground-truth)"
                                        )
         hist = scimpute.cell_corr_hist(h_valid, df2_valid.values,
-                                       fprefix='hist cell-corr, valid, step1',
                                        title="cell-corr (prediction vs ground-truth)"
                                        )
         visualization_of_dfs()

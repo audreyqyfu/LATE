@@ -344,7 +344,7 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
     plt.close()
 
 
-def gene_corr_hist(arr1, arr2, fprefix='hist_gene_corr', title='hist_gene_corr'):
+def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
     '''calculate correlation between genes [columns]
     arr [cells, genes]'''
     # create plots directory
@@ -360,18 +360,20 @@ def gene_corr_hist(arr1, arr2, fprefix='hist_gene_corr', title='hist_gene_corr')
         if not math.isnan(corr):
             hist.append(corr)
     hist.sort()
+    medium = round(np.median(hist), 3)
+
     # histogram of correlation
-    fig = plt.figure(figsize=(9, 9))
+    fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100)
-    plt.xlabel('gene-corr (Pearson)')
-    plt.ylabel('freq')
+    plt.xlabel('Gene-corr (Pearson)' + '\nMedium='+str(medium))
+    plt.ylabel('Freq')
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
     plt.close(fig)
     return hist
 
 
-def cell_corr_hist(arr1, arr2, fprefix='hist_cell_corr', title='hist_cell_corr'):
+def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
     '''calculate correlation between genes [columns]
     arr [cells, genes]'''
     # create plots directory
@@ -387,11 +389,13 @@ def cell_corr_hist(arr1, arr2, fprefix='hist_cell_corr', title='hist_cell_corr')
         if not math.isnan(corr):
             hist.append(corr)
     hist.sort()
+    medium = round(np.median(hist), 3)
+
     # histogram of correlation
-    fig = plt.figure(figsize=(9, 9))
+    fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100)
-    plt.xlabel('cell-corr between prediction and truth')
-    plt.ylabel('freq')
+    plt.xlabel('Cell-corr (Pearson)' + '\nMedium='+str(medium))
+    plt.ylabel('Freq')
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
     plt.close(fig)
@@ -484,7 +488,7 @@ def hist_df(df, title="hist of df"):
     df_flat = df.values.reshape(df.size, 1)
     plt.hist(df_flat, bins=200)
     plt.title(title)
-    plt.savefig(title+'.png', bbox_inches='tight')
+    plt.savefig('./plots/', title+'.png', bbox_inches='tight')
     plt.close()
     print('hist of ', title, 'is done')
 
