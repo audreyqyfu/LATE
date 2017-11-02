@@ -258,7 +258,7 @@ def split_df(df, a=0.8, b=0.1, c=0.1):
     return df_train, df_valid, df_test
 
 
-def medium_corr(arr1, arr2, num=100, accuracy=3):
+def median_corr(arr1, arr2, num=100, accuracy=3):
     """arr1 & arr2 must have same shape
     will calculate correlation between corresponding rows"""
     # from scipy.stats.stats import pearsonr
@@ -360,12 +360,13 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
         if not math.isnan(corr):
             hist.append(corr)
     hist.sort()
-    medium = round(np.median(hist), 3)
+    median = round(np.median(hist), 3)
+    mean = round(np.mean(hist), 3)
 
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100)
-    plt.xlabel('Gene-corr (Pearson)' + '\nMedium='+str(medium))
+    plt.xlabel('Gene-corr (Pearson)'+'\nmedian='+str(median)+', mean='+str(mean))
     plt.ylabel('Freq')
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
@@ -389,12 +390,12 @@ def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
         if not math.isnan(corr):
             hist.append(corr)
     hist.sort()
-    medium = round(np.median(hist), 3)
+    median = round(np.median(hist), 3)
 
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100)
-    plt.xlabel('Cell-corr (Pearson)' + '\nMedium='+str(medium))
+    plt.xlabel('Cell-corr (Pearson)'+'\nmedian='+str(median)+', mean='+str(mean))
     plt.ylabel('Freq')
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
