@@ -26,6 +26,9 @@
   - modules: scImpute/one_gene_a_time/2steps3layers/bin/scimpute.py
   - command: `python -u step1.n_to_n.new.7L.py`
   
+ * step2:
+  
+  
 # input data format
 - read hd5 or csv into pandas data-frames
   - 'df' contains input_data_matrix [cell, genes]
