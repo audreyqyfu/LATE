@@ -21,10 +21,9 @@ import matplotlib.pyplot as plt
 sys.path.append('./bin')
 print('sys.path', sys.path)
 import scimpute
-import hl_func
-
-import importlib  # for development: reload modules in pycharm
-importlib.reload(hl_func)
+# import hl_func
+# import importlib  # for development: reload modules in pycharm
+# importlib.reload(hl_func)
 
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
@@ -32,17 +31,20 @@ print('tf.__version__', tf.__version__)
 
 def print_parameters():
     print(os.getcwd(), "\n",
-          "\n# Parameters: 9L",
-          "\nn_features: ", n,
-          "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
-          "\nn_hidden2: ", n_hidden_2,
-          "\nn_hidden3: ", n_hidden_3,
-          "\nn_hidden4: ", n_hidden_4,
+          "\n# Parameters: {}L".format(L),
+          "\nn_features: ", n)
+    for l1 in range(1, l+1):
+      print("n_hidden{}: {}".format(l1, eval('n_hidden_'+str(l1))))
+    print(
           "\nlearning_rate :", learning_rate,
           "\nbatch_size: ", batch_size,
-          "\nepoches: ", training_epochs, "\n",
+          "\nepoches: ", training_epochs,
+          "\ndisplay_step (interval on learning curve): {}epochs".format(display_step),
+          "\nsnapshot_step (interval of saving session, imputation): {}epochs".format(snapshot_step),
+          "\n",
           "\npIn_holder: ", pIn,
-          "\npHidden_holder: ", pHidden, "\n",
+          "\npHidden_holder: ", pHidden,
+          "\n",
           "\ndf_train.values.shape", df_train.values.shape,
           "\ndf_valid.values.shape", df_valid.values.shape,
           "\ndf2_train.shape", df2_train.shape,
@@ -131,6 +133,7 @@ def save_bottle_neck_representation():
     # clustermap = sns.clustermap(code_bottle_neck_input)
     # clustermap.savefig('./plots/bottle_neck.hclust.png')
 
+
 def visualize_weight(w_name, b_name):
     w = eval(w_name)
     b = eval(b_name)
@@ -170,10 +173,10 @@ def visualization_of_dfs():
     print('visualization of dfs')
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
     # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df_valid.values, title='df.valid'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h_valid, title='h.valid'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df.values, title='df'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(h, title='h'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 
 # refresh pre_train folder
@@ -182,7 +185,18 @@ scimpute.refresh_logfolder(log_dir)
 
 
 # read data and save indexes
-df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
+file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
+file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
+name1 = '(EMT_MAGIC_A)'
+name2 = '(EMT_MAGIC_A)'
+df = pd.read_hdf(file).transpose()  # [cells,genes]
+df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
+
+m, n = df.shape  # m: n_cells; n: n_genes
+print("\ninput df: ", name1, " ", file, "\n", df.values[0:4, 0:4], "\n")
+print("ground-truth df: ", name2, " ", file2, "\n", df2.values[0:4, 0:4], "\n")
+# df, df2, name1, name2, m, n = scimpute.read_data('EMT9k_log')  # used during development
+
 max = max(df.values.max(), df2.values.max())
 df_train, df_valid, df_test = scimpute.split_df(df, a=0.7, b=0.15, c=0.15)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
@@ -201,12 +215,12 @@ n_hidden_4 = -1
 
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
-sd = 0.00001  # 3-7L:1e-3, 9L:1e-4, update for different depth
+learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
+sd = 0.0001  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
-training_epochs = 3  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 20
-snapshot_step = 1000
+training_epochs = 1000  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 2Z0  # interval on learning curve
+snapshot_step = 500  # interval of saving session, imputation
 print_parameters()  # todo: use logger, dict
 
 # Define model #
@@ -276,11 +290,9 @@ saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 sess.run(init)
 
-
-
-
 batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
+
 epoch = 0
 num_batch = int(math.floor(len(df_train) // batch_size))  # floor
 epoch_log = []
@@ -299,64 +311,58 @@ for epoch in range(1, training_epochs+1):
         ridx_batch = ridx_full[indices]
         x_batch = df_train.values[ridx_batch, :]
         sess.run(trainer, feed_dict={X: x_batch, pIn_holder: pIn, pHidden_holder: pHidden})
-
     toc_cpu, toc_wall = time.clock(), time.time()
 
      # Log per epoch
     if (epoch == 1) or (epoch % display_step == 0):
+        tic_log = time.time()
         # print training time
         print("\n#Epoch ", epoch, " took: ",
               round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
               round(toc_wall - tic_wall, 2), "Wall seconds")
 
-        tic_log = time.time()
-
         # Ad hoc summaries
         mse_batch, h_batch = sess.run([mse_input, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
-        # mse_train, h_train = sess.run([mse_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
-        mse_valid, h_valid = sess.run([mse_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
         mse_log_batch.append(mse_batch)
-        # mse_log_train.append(mse_train)
+        mse_valid, h_valid = sess.run([mse_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
         mse_log_valid.append(mse_valid)
         print('mse_batch, valid:', mse_batch, mse_valid)
+        # mse_train, h_train = sess.run([mse_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
+        # mse_log_train.append(mse_train)
         # print('mse_batch, train, valid:', mse_batch, mse_train, mse_valid)
 
         corr_batch = scimpute.median_corr(x_batch, h_batch)
-        # corr_train = scimpute.median_corr(df_train.values, h_train)
-        corr_valid = scimpute.median_corr(df_valid.values, h_valid)
         cell_corr_log_batch.append(corr_batch)
-        # cell_corr_log_train.append(corr_train)
+        corr_valid = scimpute.median_corr(df_valid.values, h_valid)
         cell_corr_log_valid.append(corr_valid)
         print("cell-pearsonr in batch, valid:", corr_batch, corr_valid)
+        # corr_train = scimpute.median_corr(df_train.values, h_train)
+        # cell_corr_log_train.append(corr_train)
         # print("cell-pearsonr in batch, train, valid:", corr_batch, corr_train, corr_valid)
 
-        toc_log = time.time()
         epoch_log.append(epoch)
-        print('log time for each epoch:', round(toc_log - tic_log, 1))
 
         # tb summary
         tb_summary()
 
         # temp: show weights in layer1, and see if it updates in deep network
-        print('encoder_w1: ', sess.run(e_w1)[0, 0:2])
+        print('encoder_w1[0, 0:2]: ', sess.run(e_w1)[0, 0:2])
+
+        toc_log = time.time()
+        print('log time for each epoch:', round(toc_log - tic_log, 1))
 
     # Log per observation interval
     if (epoch % snapshot_step == 0) or (epoch == training_epochs):
         tic_log2 = time.time()
-        h_train, h_valid, h_input = snapshot()
+        h_train, h_valid, h_input = snapshot()  # save session and imputation
         learning_curve()
-        hist = scimpute.gene_corr_hist(h_valid, df2_valid.values,
-                                       title="gene-corr (prediction vs ground-truth)"
-                                       )
-        hist = scimpute.cell_corr_hist(h_valid, df2_valid.values,
-                                       title="cell-corr (prediction vs ground-truth)"
-                                       )
-        visualization_of_dfs()
-        gene_gene_relationship()
-        groundTruth_vs_prediction()
+        scimpute.gene_corr_hist(h_valid, df2_valid.values,
+                                title="gene-corr (prediction vs ground-truth) (valid)")
+        scimpute.cell_corr_hist(h_valid, df2_valid.values,
+                                title="cell-corr (prediction vs ground-truth) (valid)")
         save_bottle_neck_representation()
-        visualize_weights()
         save_weights()
+        visualize_weights()
         toc_log2 = time.time()
         print('log2 time for observation intervals:', round(toc_log2 - tic_log2, 1))
 

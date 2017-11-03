@@ -510,33 +510,34 @@ def mean_df(df):
 def subset_df(df_big, df_subset):
     return (df_big.ix[df_subset.index, df_subset.columns])
 
+
 def read_data(data_name):
     if data_name is 'splatter':  # only this mode creates gene-gene plot
         file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
         file_benchmark = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"
-        Aname = '(E3)'
-        Bname = '(E3)'  # careful
+        name1 = '(E3)'
+        name2 = '(E3)'  # careful
         df = pd.read_hdf(file).transpose()  # [cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
     elif data_name is 'EMT2730':  # 2.7k cells used in magic paper
         file = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5" #data need imputation
         file_benchmark = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"
-        Aname = '(EMT2730)'
-        Bname = '(EMT2730)'
+        name1 = '(EMT2730)'
+        name2 = '(EMT2730)'
         df = pd.read_hdf(file).transpose() #[cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
     elif data_name is 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
         file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"  # data need imputation
         file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"
-        Aname = '(EMT9k)'
-        Bname = '(EMT9k)'
+        name1 = '(EMT9k)'
+        name2 = '(EMT9k)'
         df = pd.read_hdf(file).transpose()  # [cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
     elif data_name is 'EMT9k_log':  # magic imputation using 8.7k cells > 300 reads/cell
         file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
         file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"
-        Aname = '(EMT9kLog)'
-        Bname = '(EMT9kLog)'
+        name1 = '(EMT9kLog)'
+        name2 = '(EMT9kLog)'
         df = pd.read_hdf(file).transpose()  # .ix[:, 1:1000]  # [cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose()  #.ix[:, 1:1000]  # [cells,genes]
     else:
@@ -546,10 +547,10 @@ def read_data(data_name):
     # df2 = df.ix[1:1000]
 
     m, n = df.shape  # m: n_cells; n: n_genes
-    print("\ninput df: ", Aname, " ", file, "\n", df.values[0:4, 0:4], "\n")
-    print("ground-truth df: ", Bname, " ", file_benchmark, "\n", df2.values[0:4, 0:4], "\n")
+    print("\ninput df: ", name1, " ", file, "\n", df.values[0:4, 0:4], "\n")
+    print("ground-truth df: ", name2, " ", file_benchmark, "\n", df2.values[0:4, 0:4], "\n")
 
-    return(df, df2, Aname, Bname, m, n)
+    return(df, df2, name1, name2, m, n)
 
 
 def variable_summaries(name, var):
@@ -735,7 +736,10 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
 
 
 def learning_curve_corr(epoch, corr_batch, corr_valid,
-                       title='learning curve (corr)', xlabel='epochs', ylabel='cell-corr', range=None):
+                        title='learning curve (corr)',
+                        xlabel='epochs',
+                        ylabel='median cell-corr (100 cells)',
+                        range=None):
     """
     learning curve
     :param epoch: 
@@ -797,4 +801,3 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
 
     plt.savefig(fprefix + '.png', bbox_inches='tight')
     plt.close()
-
