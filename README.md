@@ -1,32 +1,54 @@
-# scImpute
+# Description
 * transAutoencoder: 
-- autoencoder structure
-- pre-trained Autoencoder on dataset A (bulk RNA-seq) (step1)
+- step1: pre-trained Autoencoder on dataset A (bulk RNA-seq)
+  - autoencoder structure
 - transfer weights/biases learned to a new alternate training multi-task network
-- re-train the network with non-zero (nz) cells for gene-j in dataset B (scRNA-seq) (step2)
-  - during re-train, learning rate should be smaller than step1
-  - expect slow converge in step2, because of the m-task mechanism
+- step2: re-train the network on dataset B (scRNA-seq)
+  - m-task structure
+  - traing process only included non-zero (nz) cells for gene-j
 
-# workflow (with new version of code, only step1 available now, 10/24/2017)
+# Workflow
+* working dir: **scImpute/one_gene_a_time/2steps3layers/bin/**
+
+## General
 * preprocessing (normalization/log-transformation):
   - download gene expression matrix (row: genes, column: cells)
-  - `python -u normalization.logXplus1.py`
+    - e.g.: 'All_Tissue_Site_Details.combined.reads.gct'
+  - run command: `python -u normalization.logXplus1.py`
     - tpm_like_normalization(rescaled back to median cell read counts)
     - log(x+1) transformation
-  - outputs:
+    - change 'in_name' and 'out_prefix' in the code
+  - select output:
     - tag.norm.log.hd5 (normed, log-transformed)(recommended)
     - tag.norm.hd5 (normed)
     - xxx.csv.gz (csv.gz format, slow, large, better compatability)
-    
-* splitting data (TBA):
-  - for large dataset, pre-splitting is preferred
   
 * step1: 
-  - script: scImpute/one_gene_a_time/2steps3layers/bin/step1.n_to_n.new.py (by default 7L, 11/03)
-  - modules: scImpute/one_gene_a_time/2steps3layers/bin/scimpute.py
-  - command: `python -u step1.n_to_n.new.7L.py`
+  - script: **step1.n_to_n.new.py** (7L, 11/03)
+  - library: scimpute.py
+  - parameter file: step1_params.py (where user change num_nodes, learning_rate...)
+  - run command: `python -u step1.n_to_n.new.7L.py`
   
  * step2:
+  - script: **step2.new.mtask.py** (7L, 11/03)
+  - library: scimpute.py
+  
+## On ibest cluster
+  1. create a step1.slurm file:
+  ```
+  #!/bin/bash
+  #SBATCH --mail-user=rui@uidaho.edu
+  #SBATCH --mail-type=BEGIN,END
+
+  echo $(hostname)
+  nvidia-smi -L
+  source /usr/modules/init/bash
+  module load python/3.5.2
+  python -u ./step1.n_to_n.new.py
+  python -u ./result_analysis.py step1
+  echo "*--done--*"
+  ```
+  2. create 
   
   
 # input data format
