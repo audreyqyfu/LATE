@@ -65,7 +65,7 @@ echo "*--done--*"
 ```bash
 sbatch -p gpu-long --gres=gpu:1 --nodelist=n105 step1.slurm
 ```
-3. login into 'fortyfour.ibest.uidaho.edu', start training: `sh step1.sh`
+3. login into 'fortyfour.ibest.uidaho.edu', start training with `sh step1.sh`
 
 
 # input data format
@@ -111,6 +111,8 @@ Here is a good start point for parameter setting
   - (num_nodes in bottle-neck) x (hidden_node retain rate) == data dimension after PCA reduce dim
   - learning rate = 3e-4 for 7L, 3e-5 for 9L 
   - rand_init_sd = 1e-4 for 7L, 1e-5 for 9L 
+  
+** test_flag ** = 1 makes the program runs very fast with a subset of data loaded and few epoch trained
 
 
 
