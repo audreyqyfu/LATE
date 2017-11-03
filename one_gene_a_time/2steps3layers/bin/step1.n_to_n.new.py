@@ -21,6 +21,8 @@ import matplotlib.pyplot as plt
 sys.path.append('./bin')
 print('sys.path', sys.path)
 import scimpute
+import step1_params as p  #import parameters
+
 # import hl_func
 # import importlib  # for development: reload modules in pycharm
 # importlib.reload(hl_func)
@@ -169,16 +171,6 @@ def save_weights():
         np.save('pre_train/'+decoder_bias_name, sess.run(eval(decoder_bias_name)))
 
 
-def visualization_of_dfs():
-    print('visualization of dfs')
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
-    # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df1.values])
-    scimpute.heatmap_vis(df_valid.values, title='df1.valid'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h_valid, title='h.valid'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(df1.values, title='df1'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(h, title='h'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
-
-
 # refresh pre_train folder
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
@@ -196,9 +188,16 @@ file1 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
 file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
 name1 = '(gtex_gene)'  # todo: uses 20GB of RAM
 name2 = '(gtex_gene)'
+
 # read
 df1 = pd.read_hdf(file1).transpose()  # [cells,genes]
 df2 = df1  # same for step1
+
+
+if p.test_flag > 0:
+    print('in test mode')
+    df1 = df1.ix[0:1000, 0:10000]
+    df2 = df1.ix[0:1000, 0:10000]
 
 m, n = df1.shape  # m: n_cells; n: n_genes
 print("\ninput df1: ", name1, " ", file1, "\n", df1.values[0:4, 0:4], "\n")
@@ -213,7 +212,6 @@ df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
 df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 
 # Parameters #
-import step1_params as p
 n_input = n
 print_parameters()  # todo: use logger, dict
 
