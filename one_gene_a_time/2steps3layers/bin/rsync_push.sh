@@ -1,0 +1,1 @@
+-avhz --delete ~/imputation/scImpute/one_gene_a_time/2steps3layers/bin/ rui@fortyfour.ibest.uidaho.edu:~/scImpute/one_gene_a_time/2steps3layers/bin/
