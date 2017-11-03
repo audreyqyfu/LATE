@@ -13,18 +13,25 @@ import os
 import time
 import scimpute
 
+flag = 'step2'
 # set filename #
-file_input = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
-file_groundTruth = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # data need imputation
-file_pred = 're_train/imputation.step2.hd5'
-tag = '(step2)'
+if flag is 'step2':
+    file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
+    file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # data need imputation
+    file_pred = 're_train/imputation.step2.hd5'
+    tag = '(step2)'
+elif flas is 'step1':
+    file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
+    file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
+    file_pred = 'pre_train/imputation.step1.hd5'
+    tag = '(step1)'
 
 # read data #
 h = scimpute.read_hd5(file_pred)
-df = scimpute.read_hd5(file_input).transpose()
+df = scimpute.read_hd5(file1).transpose()
 # df = scimpute.subset_df(df, h)
 print('df.shape', df.shape)
-df2 = scimpute.read_hd5(file_groundTruth).transpose()
+df2 = scimpute.read_hd5(file2).transpose()
 # df2 = scimpute.subset_df(df2, h)
 print('df2.shape', df2.shape)
 print('h:', h.ix[0:4, 0:4])
