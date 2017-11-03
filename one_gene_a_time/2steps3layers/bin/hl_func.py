@@ -1,4 +1,25 @@
 # high level functions
+from __future__ import division  # fix division // get float bug
+from __future__ import print_function  # fix printing \n
+
+import tensorflow as tf
+import numpy as np
+import math
+import seaborn as sns
+import pandas as pd
+from scipy.stats.stats import pearsonr
+import sys
+import os
+import time
+import matplotlib
+matplotlib.use('Agg')  # for plotting without GUI
+import matplotlib.pyplot as plt
+
+sys.path.append('./bin')
+print('sys.path', sys.path)
+import scimpute
+import hl_func as hl
+
 
 def print_parameters():
     print(os.getcwd(), "\n",
