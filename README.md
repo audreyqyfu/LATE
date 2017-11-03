@@ -1,5 +1,5 @@
 # Description
-* transAutoencoder: 
+Autoencoder -> transfer learning -> multi-task network 
 - step1: pre-trained Autoencoder on dataset A (bulk RNA-seq)
   - autoencoder structure
 - transfer weights/biases learned to a new alternate training multi-task network
