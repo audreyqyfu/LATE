@@ -25,10 +25,11 @@ def df_log_transformation (df, pseudocount=1):
 	return(df_log)
 
 # input
-in_name = "GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_tpm.gct.gz"
+in_name = 'All_Tissue_Site_Details.combined.reads.gct'
 # in_name = "test.gct.gz"
 out_prefix = "gtex_v7"
 
+# reading data
 print("started reading file: ", in_name)
 tic = time.time()
 data = pd.io.parsers.read_csv(in_name,
@@ -38,44 +39,46 @@ data = pd.io.parsers.read_csv(in_name,
 del data['Name']  # delete gene_id
 toc = time.time()
 print("reading input took {:.1f} seconds".format(toc-tic))
+print("input matrix:")
 print(data.ix[0:2, 0:2])
 print(data.shape)
 
 # filter out genes and cells with no reads
 tic = time.time()
 data_filtered = df_filter(data)
+toc = time.time()
 print("filtered matrix:")
 print(data_filtered.ix[0:2, 0:2])
-toc = time.time()
+print(data.shape)
 print("filtering took {:.1f} seconds".format(toc-tic))
 
 # normalization
 tic = time.time()
 data_normalized = df_normalization(data_filtered)
+toc = time.time()
 print("normalized matrix:")
 print(data_normalized.ix[0:2, 0:2])
-toc = time.time()
+print(data_normalized.shape)
 print("normalization took {:.1f} seconds".format(toc-tic))
 
 # log transformation
 tic = time.time()
 data_normalized_log = df_log_transformation (data_normalized)
+toc = time.time()
 print("log transformed matrix:")
 print(data_normalized_log.ix[0:2, 0:2])
-toc = time.time()
+print(data_normalized_log.shape)
 print("log-tansformation took {:.1f} seconds".format(toc-tic))
 
 # output
 print("saving output norm.hd5: " + os.getcwd())
 tic = time.time()
-#data_normalized.to_pickle(out_prefix+".norm.pkl")
 data_normalized.to_hdf(out_prefix+'.norm.hd5', key='null', mode='w', complevel=9,complib='blosc')
 toc = time.time()
 print("saving " + out_prefix + ".norm.hd5 took {:.1f} seconds".format(toc-tic))
 
 print("saving output norm.log.hd5: " + os.getcwd())
 tic = time.time()
-#data_normalized_log.to_pickle(out_prefix+".norm.log.pkl")
 data_normalized_log.to_hdf(out_prefix+'.norm.log.hd5', key='null', mode='w', complevel=9,complib='blosc')
 toc = time.time()
 print("saving " + out_prefix + ".norm.log.hd5 took {:.1f} seconds".format(toc-tic))
@@ -91,4 +94,3 @@ tic = time.time()
 data_normalized_log.to_csv(out_prefix + ".norm.log.csv.gz", compression='gzip')
 toc = time.time()
 print("saving " + out_prefix + ".norm.log.csv.gz took {:.1f} seconds".format(toc-tic))
-
