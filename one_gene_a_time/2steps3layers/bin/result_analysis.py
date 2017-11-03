@@ -17,16 +17,7 @@ import scimpute
 flag = sys.argv[1].strip()
 print(flag + ",\n")
 # set filename #
-if flag == 'step2':
-    print('in step2')
-    file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
-    file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # data need imputation
-    file_pred = 're_train/imputation.step2.hd5'
-    tag = '(step2)'
-    # read index
-    train_idx = scimpute.read_csv('re_train/df_train.step2_index.csv').index
-    valid_idx = scimpute.read_csv('re_train/df_valid.step2_index.csv').index
-elif flag == 'step1':
+if flag == 'step1':
     print('in step1')
     file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
     file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
@@ -35,6 +26,15 @@ elif flag == 'step1':
     # read index
     train_idx = scimpute.read_csv('pre_train/df_train.index.csv').index
     valid_idx = scimpute.read_csv('pre_train/df_valid.index.csv').index
+elif flag == 'step2':
+    print('in step2')
+    file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
+    file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth
+    file_pred = 're_train/imputation.step2.hd5'
+    tag = '(step2)'
+    # read index
+    train_idx = scimpute.read_csv('re_train/df_train.step2_index.csv').index
+    valid_idx = scimpute.read_csv('re_train/df_valid.step2_index.csv').index
 else:
     raise Exception('argument wrong')
 
