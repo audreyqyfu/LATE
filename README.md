@@ -2,10 +2,10 @@
 Autoencoder -> transfer learning -> multi-task network 
 - step1: pre-trained Autoencoder on dataset A (bulk RNA-seq)
   - autoencoder structure
-- transfer weights/biases learned to a new alternate training multi-task network
 - step2: re-train the network on dataset B (scRNA-seq)
   - m-task structure
   - traing process only included non-zero (nz) cells for gene-j
+  - weights/biases initialized to weights/biases trained in step1
 
 # Workflow
 * working dir: **scImpute/one_gene_a_time/2steps3layers/bin/**
@@ -14,20 +14,24 @@ Autoencoder -> transfer learning -> multi-task network
 * preprocessing (normalization/log-transformation):
   - download gene expression matrix (row: genes, column: cells)
     - e.g.: 'All_Tissue_Site_Details.combined.reads.gct'
+    
   - run command: `python -u normalization.logXplus1.py`
-    - tpm_like_normalization(rescaled back to median cell read counts)
-    - log(x+1) transformation
     - change 'in_name' and 'out_prefix' in the code
+    - code performs: tpm_like_normalization(rescaled back to median cell read counts)
+    - code perfroms: log(x+1) transformation
+
   - select output:
-    - tag.norm.log.hd5 (normed, log-transformed)(recommended)
-    - tag.norm.hd5 (normed)
+    - **xxx.norm.log.hd5** (normed, log-transformed)(recommended)
+    - xxx.norm.hd5 (normed)
     - xxx.csv.gz (csv.gz format, slow, large, better compatability)
   
 * step1: 
   - script: **step1.n_to_n.new.py** (7L, 11/03)
-  - library: scimpute.py
-  - parameter file: step1_params.py (where user change num_nodes, learning_rate...)
-  - run command: `python -u step1.n_to_n.new.7L.py`
+  - library: **scimpute.py**
+  - parameter file: **step1_params.py** (where user change num_nodes, learning_rate...)
+  1. put the 3 files in the same folder, 
+  2. edit step1_params.py
+  3. edit variables run command: `python -u step1.n_to_n.new.7L.py`
   
  * step2:
   - script: **step2.new.mtask.py** (7L, 11/03)
