@@ -45,11 +45,6 @@
 file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
 name1 = '(EMT_MAGIC_A)'
 name2 = '(EMT_MAGIC_A)'
-# gtex_gene
-# file = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
-# file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
-# name1 = '(gtex_gene)'  # todo: uses 20GB of RAM
-# name2 = '(gtex_gene)'
 df = pd.read_hdf(file).transpose()  # [cells,genes]
 df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
 `
