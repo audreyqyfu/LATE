@@ -15,9 +15,11 @@ batch_size = 256
 training_epochs = 1000  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 20  # interval on learning curve
 snapshot_step = 500  # interval of saving session, imputation
+[a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 
 # For development usage #
 test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+seed_tf = 3
 
 # file input #
 # EMT.MAGIC

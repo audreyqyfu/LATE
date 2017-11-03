@@ -30,7 +30,7 @@ import step1_params as p  #import parameters
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
 
-
+# Define functions #
 def print_parameters():
     print(os.getcwd(), "\n",
           "\n# Parameters: {}L".format(p.L),
@@ -58,8 +58,8 @@ def print_parameters():
 def evaluate_epoch0():
     print("> Evaluate epoch 0:")
     epoch_log.append(epoch)
-    mse_train = sess.run(mse_input, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
-    mse_valid = sess.run(mse_input, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_train = sess.run(mse1, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_valid = sess.run(mse1, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
     mse_log_batch.append(mse_train)  # approximation
     mse_log_train.append(mse_train)
     mse_log_valid.append(mse_valid)
@@ -189,10 +189,9 @@ if p.test_flag > 0:
 m, n = df1.shape  # m: n_cells; n: n_genes
 print("\ninput: ", p.name1, " ", p.file1, "\n", df1.values[0:4, 0:4], "\n")
 print("ground-truth: ", p.name2, " ", p.file2, "\n", df2.values[0:4, 0:4], "\n")
-# df1, df2, p.name1, p.name2, m, n = scimpute.read_data('EMT9k_log')  # used during development
 
 max = max(df1.values.max(), df2.values.max())
-df_train, df_valid, df_test = scimpute.split_df(df1, a=0.7, b=0.15, c=0.15)
+df_train, df_valid, df_test = scimpute.split_df(df1, a=p.a, b=p.b, c=p.c)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
 df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
 df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
@@ -213,7 +212,7 @@ pIn_holder = tf.placeholder(tf.float32, name='pIn')
 pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
 
 # init variables and build graph
-tf.set_random_seed(3)  # seed
+tf.set_random_seed(p.seed_tf)  # seed
 # update for different depth
 with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, p.n_hidden_1, p.sd)
@@ -256,12 +255,12 @@ h = d_a1
 
 # define loss
 with tf.name_scope("Metrics"):
-    mse_input = tf.reduce_mean(tf.pow(y_input - h, 2))
-    mse_groundTruth = tf.reduce_mean(tf.pow(y_groundTruth - h, 2))
-    tf.summary.scalar('mse_input', mse_input)
-    tf.summary.scalar('mse_groundTruth', mse_groundTruth)
+    mse1 = tf.reduce_mean(tf.pow(X - h, 2))
+    mse2 = tf.reduce_mean(tf.pow(M - h, 2))
+    tf.summary.scalar('mse1 (vs input)', mse1)
+    tf.summary.scalar('mse2 (vs ground truth)', mse2)
 
-trainer = tf.train.AdamOptimizer(p.learning_rate).minimize(mse_input)
+trainer = tf.train.AdamOptimizer(p.learning_rate).minimize(mse1)
 
 # Launch Session #
 sess = tf.Session()
@@ -282,7 +281,7 @@ evaluate_epoch0()
 
 # training
 for epoch in range(1, p.training_epochs+1):
-    # training model
+    # training model #
     tic_cpu, tic_wall = time.clock(), time.time()
     ridx_full = np.random.choice(len(df_train), len(df_train), replace=False)
     for i in range(num_batch):
@@ -292,7 +291,7 @@ for epoch in range(1, p.training_epochs+1):
         sess.run(trainer, feed_dict={X: x_batch, pIn_holder: p.pIn, pHidden_holder: p.pHidden})
     toc_cpu, toc_wall = time.clock(), time.time()
 
-     # Log per epoch
+    # Log per epoch #
     if (epoch == 1) or (epoch % p.display_step == 0):
         tic_log = time.time()
         # print training time
@@ -301,12 +300,12 @@ for epoch in range(1, p.training_epochs+1):
               round(toc_wall - tic_wall, 2), "Wall seconds")
 
         # Ad hoc summaries
-        mse_batch, h_batch = sess.run([mse_input, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
+        mse_batch, h_batch = sess.run([mse1, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
         mse_log_batch.append(mse_batch)
-        mse_valid, h_valid = sess.run([mse_input, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
+        mse_valid, h_valid = sess.run([mse1, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
         mse_log_valid.append(mse_valid)
         print('mse_batch, valid:', mse_batch, mse_valid)
-        # mse_train, h_train = sess.run([mse_input, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
+        # mse_train, h_train = sess.run([mse1, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
         # mse_log_train.append(mse_train)
         # print('mse_batch, train, valid:', mse_batch, mse_train, mse_valid)
 
@@ -330,7 +329,7 @@ for epoch in range(1, p.training_epochs+1):
         toc_log = time.time()
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
-    # Log per observation interval
+    # Log per observation interval #
     if (epoch % p.snapshot_step == 0) or (epoch == p.training_epochs):
         tic_log2 = time.time()
         h_train, h_valid, h_input = snapshot()  # save session and imputation
