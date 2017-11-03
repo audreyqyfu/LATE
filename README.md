@@ -1,5 +1,10 @@
 # scImpute
-* transAutoencoder: autoencoder structure, pre-trained on A, re-train on B.msk
+* transAutoencoder: 
+- autoencoder structure
+- pre-trained Autoencoder on dataset A (bulk RNA-seq) (step1)
+- transfer weights/biases learned to a new alternate training multi-task network
+- re-train the network with non-zero (nz) cells for gene-j in 
+
 # workflow (with new version of code, only step1 available now, 10/24/2017)
 1. preprocessing:
   - download gene expression matrix (row: genes, column: cells)
@@ -10,7 +15,6 @@
     - tag.norm.log.hd5 (normed, log-transformed)(for step1, step2)
     - tag.norm.hd5 (normed)
     - xxx.csv.gz (csv.gz format, slow, large, better compatability)
-    
 1. step1: 
   - script: scImpute/one_gene_a_time/2steps3layers/bin/step1.n_to_n.new.py (by default 7L, 11/03)
   - modules: scImpute/one_gene_a_time/2steps3layers/bin/scimpute.py
