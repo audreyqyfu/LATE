@@ -184,18 +184,21 @@ log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
 
 
-# read data and save indexes
-file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
-file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
-name1 = '(EMT_MAGIC_A)'
-name2 = '(EMT_MAGIC_A)'
+# read data and save indexes #
+
+# EMT.MAGIC
+# file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
+# file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
+# name1 = '(EMT_MAGIC_A)'
+# name2 = '(EMT_MAGIC_A)'
 # gtex_gene
-# file = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
-# file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
-# name1 = '(gtex_gene)'  # todo: uses 20GB of RAM
-# name2 = '(gtex_gene)'
+file = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
+file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
+name1 = '(gtex_gene)'  # todo: uses 20GB of RAM
+name2 = '(gtex_gene)'
+# read
 df = pd.read_hdf(file).transpose()  # [cells,genes]
-df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
+df2 = df  # same for step1
 
 m, n = df.shape  # m: n_cells; n: n_genes
 print("\ninput df: ", name1, " ", file, "\n", df.values[0:4, 0:4], "\n")
@@ -223,9 +226,9 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
-training_epochs = 1000  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 20  # interval on learning curve
-snapshot_step = 500  # interval of saving session, imputation
+training_epochs = 10  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 1  # interval on learning curve
+snapshot_step = 5  # interval of saving session, imputation
 print_parameters()  # todo: use logger, dict
 
 # Define model #
