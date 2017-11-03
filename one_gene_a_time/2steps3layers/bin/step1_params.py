@@ -17,10 +17,6 @@ display_step = 20  # interval on learning curve
 snapshot_step = 500  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 
-# For development usage #
-test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
-seed_tf = 3
-
 # file input #
 # EMT.MAGIC
 file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
@@ -33,3 +29,11 @@ name2 = '(EMT_MAGIC_A)'
 # file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
 # name1 = '(gtex_gene)'  # uses 20GB of RAM
 # name2 = '(gtex_gene)'
+
+# For development usage #
+seed_tf = 3
+test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+if test_flag == 1:
+    training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
+    display_step = 1  # interval on learning curve
+    snapshot_step = 5  # interval of saving session, imputation
