@@ -50,7 +50,7 @@ def print_parameters():
           "\ndf2_train.shape", df2_train.shape,
           "\ndf2_valid.values.shape", df2_valid.values.shape,
           "\n")
-    print("input_array:\n", df.values[0:4, 0:4], "\n")
+    print("input_array:\n", df1.values[0:4, 0:4], "\n")
 
 
 def evaluate_epoch0():
@@ -108,7 +108,7 @@ def snapshot():
     # inference
     h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
     h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
-    h_input = sess.run(h, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    h_input = sess.run(h, feed_dict={X: df1.values, pIn_holder: 1, pHidden_holder: 1})
     # print whole dataset pearsonr
     print("median cell-pearsonr(all train): ",
           scimpute.median_corr(df2_train.values, h_train, num=len(df_train)))
@@ -117,7 +117,7 @@ def snapshot():
     print("median cell-pearsonr in all imputation cells: ",
           scimpute.median_corr(df2.values, h_input, num=m))
     # save pred
-    df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
+    df_h_input = pd.DataFrame(data=h_input, columns=df1.columns, index=df1.index)
     scimpute.save_hd5(df_h_input, log_dir + "/imputation.step1.hd5")
     # save model
     save_path = saver.save(sess, log_dir + "/step1.ckpt")
@@ -128,7 +128,7 @@ def snapshot():
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     # todo: change variable name for each model
-    code_bottle_neck_input = sess.run(a_bottle_neck, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    code_bottle_neck_input = sess.run(a_bottle_neck, feed_dict={X: df1.values, pIn_holder: 1, pHidden_holder: 1})
     np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
     # clustermap = sns.clustermap(code_bottle_neck_input)
     # clustermap.savefig('./plots/bottle_neck.hclust.png')
@@ -172,10 +172,10 @@ def save_weights():
 def visualization_of_dfs():
     print('visualization of dfs')
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
-    # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df1.values])
+    scimpute.heatmap_vis(df_valid.values, title='df1.valid'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
     scimpute.heatmap_vis(h_valid, title='h.valid'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(df.values, title='df'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df1.values, title='df1'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
     # scimpute.heatmap_vis(h, title='h'+name1, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 
@@ -187,26 +187,26 @@ scimpute.refresh_logfolder(log_dir)
 # read data and save indexes #
 
 # EMT.MAGIC
-# file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
+# file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
 # file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
 # name1 = '(EMT_MAGIC_A)'
 # name2 = '(EMT_MAGIC_A)'
 # gtex_gene
-file = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
+file1 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
 file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
 name1 = '(gtex_gene)'  # todo: uses 20GB of RAM
 name2 = '(gtex_gene)'
 # read
-df = pd.read_hdf(file).transpose()  # [cells,genes]
-df2 = df  # same for step1
+df1 = pd.read_hdf(file1).transpose()  # [cells,genes]
+df2 = df1  # same for step1
 
-m, n = df.shape  # m: n_cells; n: n_genes
-print("\ninput df: ", name1, " ", file, "\n", df.values[0:4, 0:4], "\n")
-print("ground-truth df: ", name2, " ", file2, "\n", df2.values[0:4, 0:4], "\n")
-# df, df2, name1, name2, m, n = scimpute.read_data('EMT9k_log')  # used during development
+m, n = df1.shape  # m: n_cells; n: n_genes
+print("\ninput df1: ", name1, " ", file1, "\n", df1.values[0:4, 0:4], "\n")
+print("ground-truth df1: ", name2, " ", file2, "\n", df2.values[0:4, 0:4], "\n")
+# df1, df2, name1, name2, m, n = scimpute.read_data('EMT9k_log')  # used during development
 
-max = max(df.values.max(), df2.values.max())
-df_train, df_valid, df_test = scimpute.split_df(df, a=0.7, b=0.15, c=0.15)
+max = max(df1.values.max(), df2.values.max())
+df_train, df_valid, df_test = scimpute.split_df(df1, a=0.7, b=0.15, c=0.15)
 df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
 df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
 df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
