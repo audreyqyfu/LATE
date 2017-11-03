@@ -31,7 +31,7 @@ print('tf.__version__', tf.__version__)
 
 def print_parameters():
     print(os.getcwd(), "\n",
-          "\n# Parameters: {}p.L".format(p.L),
+          "\n# Parameters: {}L".format(p.L),
           "\nn_features: ", n)
     for l1 in range(1, p.l+1):
       print("n_hidden{}: {}".format(l1, eval('p.n_hidden_'+str(l1))))
