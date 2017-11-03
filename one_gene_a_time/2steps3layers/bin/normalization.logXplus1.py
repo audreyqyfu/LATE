@@ -26,7 +26,6 @@ def df_log_transformation (df, pseudocount=1):
 
 # input
 in_name = 'All_Tissue_Site_Details.combined.reads.gct'
-# in_name = "test.gct"
 out_prefix = "gtex_v7"
 
 # reading data
@@ -36,7 +35,7 @@ data = pd.io.parsers.read_csv(in_name,
 							  index_col=0, # col=1 as rownames (gene names)
 							  sep="\t",
 							  skiprows=2) #col=0 as rownames, first row as colnames(default)print("input matrix:"); print(data.ix[0:2, 0:2]);
-del data['Description']  # delete gene_id
+del data['Description']  # delete column gene_id
 toc = time.time()
 print("reading input took {:.1f} seconds".format(toc-tic))
 print("input matrix:")

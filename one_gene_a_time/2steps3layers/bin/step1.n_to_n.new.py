@@ -177,32 +177,19 @@ scimpute.refresh_logfolder(log_dir)
 
 
 # read data and save indexes #
-
-# EMT.MAGIC
-# file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
-# file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
-# name1 = '(EMT_MAGIC_A)'
-# name2 = '(EMT_MAGIC_A)'
-# gtex_gene
-file1 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
-file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
-name1 = '(gtex_gene)'  # todo: uses 20GB of RAM
-name2 = '(gtex_gene)'
-
-# read
-df1 = pd.read_hdf(file1).transpose()  # [cells,genes]
+df1 = pd.read_hdf(p.file1).transpose()  # [cells,genes]
 df2 = df1  # same for step1
 
-
+# Test or not
 if p.test_flag > 0:
     print('in test mode')
     df1 = df1.ix[0:1000, 0:10000]
     df2 = df1.ix[0:1000, 0:10000]
 
 m, n = df1.shape  # m: n_cells; n: n_genes
-print("\ninput df1: ", name1, " ", file1, "\n", df1.values[0:4, 0:4], "\n")
-print("ground-truth df1: ", name2, " ", file2, "\n", df2.values[0:4, 0:4], "\n")
-# df1, df2, name1, name2, m, n = scimpute.read_data('EMT9k_log')  # used during development
+print("\ninput: ", p.name1, " ", p.file1, "\n", df1.values[0:4, 0:4], "\n")
+print("ground-truth: ", p.name2, " ", p.file2, "\n", df2.values[0:4, 0:4], "\n")
+# df1, df2, p.name1, p.name2, m, n = scimpute.read_data('EMT9k_log')  # used during development
 
 max = max(df1.values.max(), df2.values.max())
 df_train, df_valid, df_test = scimpute.split_df(df1, a=0.7, b=0.15, c=0.15)
