@@ -60,6 +60,12 @@
   - tf.__version__ 1.2.1
 
 
+# parameter setting
+Here is a good start point for parameter setting
+  - (num_nodes in bottle-neck) x (hidden_node retain rate) == data dimension after PCA reduce dim
+  - learning rate = 3e-4 for 7L, 3e-5 for 9L 
+  - rand_init_sd = 1e-4 for 7L, 1e-5 for 9L 
+
 
 
 
