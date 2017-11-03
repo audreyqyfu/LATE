@@ -217,12 +217,12 @@ def hist_arr_flat (arr, title='', xlab='', ylab=''):
     plt.close(fig)
     print("histogram ", title, ' done')
 
-def split_arr(arr, a=0.8, b=0.1, c=0.1):
+def split_arr(arr, a=0.8, b=0.1, c=0.1, seed_var=1):
     """input array, output rand split arrays
     a: train, b: valid, c: test
     e.g.: [arr_train, arr_valid, arr_test] = split(df.values)"""
     print(">splitting data")
-    np.random.seed(1)  # for splitting consistency
+    np.random.seed(seed_var)  # for splitting consistency
     train_indices = np.random.choice(arr.shape[0], int(round(arr.shape[0] * a // (a + b + c))), replace=False)
     remain_indices = np.array(list(set(range(arr.shape[0])) - set(train_indices)))
     valid_indices = np.random.choice(remain_indices, int(round(len(remain_indices) * b // (b + c))), replace=False)
@@ -238,11 +238,11 @@ def split_arr(arr, a=0.8, b=0.1, c=0.1):
     return (arr_train, arr_valid, arr_test)
 
 
-def split_df(df, a=0.8, b=0.1, c=0.1):
+def split_df(df, a=0.8, b=0.1, c=0.1, seed_var=1):
     """input df, output rand split dfs
     a: train, b: valid, c: test
     e.g.: [df_train, df2, df_test] = split(df, a=0.7, b=0.15, c=0.15)"""
-    np.random.seed(1)  # for splitting consistency
+    np.random.seed(seed_var)  # for splitting consistency
     train_indices = np.random.choice(df.shape[0], int(df.shape[0] * a // (a + b + c)), replace=False)
     remain_indices = np.array(list(set(range(df.shape[0])) - set(train_indices)))
     valid_indices = np.random.choice(remain_indices, int(len(remain_indices) * b // (b + c)), replace=False)
@@ -258,15 +258,15 @@ def split_df(df, a=0.8, b=0.1, c=0.1):
     return df_train, df_valid, df_test
 
 
-def median_corr(arr1, arr2, num=100, accuracy=3):
+def median_corr(arr1, arr2, num=100, accuracy=3, seed_var=100):
     """arr1 & arr2 must have same shape
     will calculate correlation between corresponding rows"""
     # from scipy.stats.stats import pearsonr
     pearsonrlog = []
     m, n = arr1.shape
-    num = min(100, m)  # same 100 cells being evaluated for learning curves
+    num = min(num, m)  # same 100 cells being evaluated for learning curves
     # print(num, 'samples being used to calculate pearsonr')
-    np.random.seed(100)
+    np.random.seed(seed_var)
     idx = np.random.choice(range(m), num, replace=False)
     for i in idx:
         pearsonrlog.append(pearsonr(arr1[i], arr2[i]))
