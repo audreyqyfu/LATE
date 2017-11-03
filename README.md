@@ -11,50 +11,63 @@ Autoencoder -> transfer learning -> multi-task network
 * working dir: **scImpute/one_gene_a_time/2steps3layers/bin/**
 
 ## General
-* preprocessing (normalization/log-transformation):
-  - download gene expression matrix (row: genes, column: cells)
-    - e.g.: 'All_Tissue_Site_Details.combined.reads.gct'
-    
-  - run command: `python -u normalization.logXplus1.py`
-    - change 'in_name' and 'out_prefix' in the code
-    - code performs: tpm_like_normalization(rescaled back to median cell read counts)
-    - code perfroms: log(x+1) transformation
+### preprocessing (normalization/log-transformation):
+- download gene expression matrix (row: genes, column: cells)
+  - e.g.: 'All_Tissue_Site_Details.combined.reads.gct'
+  
+- script: **normalization.logXplus1.py**
 
-  - select output:
-    - **xxx.norm.log.hd5** (normed, log-transformed)(recommended)
-    - xxx.norm.hd5 (normed)
-    - xxx.csv.gz (csv.gz format, slow, large, better compatability)
+- run command: `python -u normalization.logXplus1.py`
+  - change 'in_name' and 'out_prefix' in the code
+  - code performs: tpm_like_normalization(rescaled back to median cell read counts)
+  - code performs: log(x+1) transformation
+
+- select output:
+  - **xxx.norm.log.hd5** (normed, log-transformed)(recommended)
+  - xxx.norm.hd5 (normed)
+  - xxx.csv.gz (csv.gz format, slow, large, better compatability)
   
-* step1: 
-  - script: **step1.n_to_n.new.py** (7L, 11/03)
-  - library: **scimpute.py**
-  - parameter file: **step1_params.py** (where user change num_nodes, learning_rate...)
-  1. put the 3 files in the same folder, 
-  2. edit step1_params.py
-  3. edit variables run command: `python -u step1.n_to_n.new.7L.py`
+### step1_training: 
+- script: **step1.n_to_n.new.py** (7L, 11/03)
+- library: **scimpute.py**
+- parameter file: **step1_params.py** (where user change num_nodes, learning_rate...)
+1. put the 3 files in the same folder, 
+2. edit step1_params.py
+3. edit variables run command: `python -u step1.n_to_n.new.7L.py`
+
+### step1_result analysis:
+`python -u ./result_analysis.py step1`
   
- * step2:
-  - script: **step2.new.mtask.py** (7L, 11/03)
-  - library: scimpute.py
-  
+### step2(To Be Adapted to 7L):
+- script: **step2.new.mtask.py** (7L, 11/03)
+- library: scimpute.py
+- run command: `python -u step2.new.mtask.py`
+
+### step2_result analysis:
+`python -u ./result_analysis.py step2`
+
 ## On ibest cluster
-  1. create a step1.slurm file:
-  ```
-  #!/bin/bash
-  #SBATCH --mail-user=rui@uidaho.edu
-  #SBATCH --mail-type=BEGIN,END
+1. create a step1.slurm file:
+```slurm
+#!/bin/bash
+#SBATCH --mail-user=rui@uidaho.edu
+#SBATCH --mail-type=BEGIN,END
 
-  echo $(hostname)
-  nvidia-smi -L
-  source /usr/modules/init/bash
-  module load python/3.5.2
-  python -u ./step1.n_to_n.new.py
-  python -u ./result_analysis.py step1
-  echo "*--done--*"
-  ```
-  2. create 
-  
-  
+echo $(hostname)
+nvidia-smi -L
+source /usr/modules/init/bash
+module load python/3.5.2
+python -u ./step1.n_to_n.new.py
+python -u ./result_analysis.py step1
+echo "*--done--*"
+```
+2. create a step1.sh file
+```bash
+sbatch -p gpu-long --gres=gpu:1 --nodelist=n105 step1.slurm
+```
+3. login into 'fortyfour.ibest.uidaho.edu', start training: `sh step1.sh`
+
+
 # input data format
 - read hd5 or csv into pandas data-frames
   - 'df' contains input_data_matrix [cell, genes]
