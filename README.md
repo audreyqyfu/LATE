@@ -50,12 +50,14 @@
   df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
   ```
   - step2 example: 
-  `file = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # input`
-  `file2 = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth (same as input in step1)`
-  `name1 = '(EMT_MAGIC_B.msk90)'`
-  `name2 = '(EMT_MAGIC_B)'`
-  `df = pd.read_hdf(file).transpose()  # [cells,genes]`
-  `df2 = pd.read_hdf(file2).transpose()  # [cells,genes]`
+  ```python
+  file = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # input
+  file2 = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth
+  name1 = '(EMT_MAGIC_B.msk90)'
+  name2 = '(EMT_MAGIC_B)'
+  df = pd.read_hdf(file).transpose()  # [cells,genes]
+  df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
+  ```
 
 # development environment:
   - python version: 3.5.2 (default, Dec 13 2016, 14:11:32)
