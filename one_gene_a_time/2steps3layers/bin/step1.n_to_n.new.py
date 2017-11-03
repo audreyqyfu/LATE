@@ -31,19 +31,19 @@ print('tf.__version__', tf.__version__)
 
 def print_parameters():
     print(os.getcwd(), "\n",
-          "\n# Parameters: {}L".format(L),
+          "\n# Parameters: {}p.L".format(p.L),
           "\nn_features: ", n)
-    for l1 in range(1, l+1):
-      print("n_hidden{}: {}".format(l1, eval('n_hidden_'+str(l1))))
+    for l1 in range(1, p.l+1):
+      print("n_hidden{}: {}".format(l1, eval('p.n_hidden_'+str(l1))))
     print(
-          "\nlearning_rate :", learning_rate,
-          "\nbatch_size: ", batch_size,
-          "\nepoches: ", training_epochs,
-          "\ndisplay_step (interval on learning curve): {}epochs".format(display_step),
-          "\nsnapshot_step (interval of saving session, imputation): {}epochs".format(snapshot_step),
+          "\np.learning_rate :", p.learning_rate,
+          "\np.batch_size: ", p.batch_size,
+          "\nepoches: ", p.training_epochs,
+          "\np.display_step (interval on learning curve): {}epochs".format(p.display_step),
+          "\np.snapshot_step (interval of saving session, imputation): {}epochs".format(p.snapshot_step),
           "\n",
-          "\npIn_holder: ", pIn,
-          "\npHidden_holder: ", pHidden,
+          "\npIn_holder: ", p.pIn,
+          "\npHidden_holder: ", p.pHidden,
           "\n",
           "\ndf_train.values.shape", df_train.values.shape,
           "\ndf_valid.values.shape", df_valid.values.shape,
@@ -146,7 +146,7 @@ def visualize_weight(w_name, b_name):
 
 def visualize_weights():
     # todo: update when model changes depth
-    for l1 in range(1, l+1):
+    for l1 in range(1, p.l+1):
         encoder_weight = 'e_w'+str(l1)
         encoder_bias = 'e_b'+str(l1)
         visualize_weight(encoder_weight, encoder_bias)
@@ -158,7 +158,7 @@ def visualize_weights():
 def save_weights():
     # todo: update when model changes depth
     print('save weights in npy')
-    for l1 in range(1, l+1):
+    for l1 in range(1, p.l+1):
         encoder_weight_name = 'e_w'+str(l1)
         encoder_bias_name = 'e_b'+str(l1)
         decoder_bias_name = 'd_b'+str(l1)
@@ -213,22 +213,8 @@ df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
 df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 
 # Parameters #
-L = 7
-l = L//2
+import step1_params as p
 n_input = n
-n_hidden_1 = 800
-n_hidden_2 = 400  # update for different depth
-n_hidden_3 = 200
-n_hidden_4 = -1
-
-pIn = 0.8
-pHidden = 0.5
-learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
-sd = 0.0001  # 3-7L:1e-3, 9L:1e-4, update for different depth
-batch_size = 256
-training_epochs = 10  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 1  # interval on learning curve
-snapshot_step = 5  # interval of saving session, imputation
 print_parameters()  # todo: use logger, dict
 
 # Define model #
@@ -245,35 +231,35 @@ pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
 tf.set_random_seed(3)  # seed
 # update for different depth
 with tf.name_scope('Encoder_L1'):
-    e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
+    e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, p.n_hidden_1, p.sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
 
 with tf.name_scope('Encoder_L2'):
-    e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
+    e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', p.n_hidden_1, p.n_hidden_2, p.sd)
     e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
 
 with tf.name_scope('Encoder_L3'):
-    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
+    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', p.n_hidden_2, p.n_hidden_3, p.sd)
     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 
 # with tf.name_scope('Encoder_L4'):
-#     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
+#     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', p.n_hidden_3, p.n_hidden_4, p.sd)
 #     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
 #
 # with tf.name_scope('Decoder_L4'):
-#     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
+#     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', p.n_hidden_4, p.n_hidden_3, p.sd)
 #     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
 
 with tf.name_scope('Decoder_L3'):
-    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
+    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', p.n_hidden_3, p.n_hidden_2, p.sd)
     d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
 
 with tf.name_scope('Decoder_L2'):
-    d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
+    d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', p.n_hidden_2, p.n_hidden_1, p.sd)
     d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
 
 with tf.name_scope('Decoder_L1'):
-    d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
+    d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', p.n_hidden_1, n, p.sd)
     d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
 
 a_bottle_neck = e_a3
@@ -290,7 +276,7 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('mse_input', mse_input)
     tf.summary.scalar('mse_groundTruth', mse_groundTruth)
 
-trainer = tf.train.AdamOptimizer(learning_rate).minimize(mse_input)
+trainer = tf.train.AdamOptimizer(p.learning_rate).minimize(mse_input)
 
 # Launch Session #
 sess = tf.Session()
@@ -302,7 +288,7 @@ batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 
 epoch = 0
-num_batch = int(math.floor(len(df_train) // batch_size))  # floor
+num_batch = int(math.floor(len(df_train) // p.batch_size))  # floor
 epoch_log = []
 mse_log_batch, mse_log_valid, mse_log_train = [], [], []
 cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
@@ -310,19 +296,19 @@ cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
 evaluate_epoch0()
 
 # training
-for epoch in range(1, training_epochs+1):
+for epoch in range(1, p.training_epochs+1):
     # training model
     tic_cpu, tic_wall = time.clock(), time.time()
     ridx_full = np.random.choice(len(df_train), len(df_train), replace=False)
     for i in range(num_batch):
-        indices = np.arange(batch_size * i, batch_size*(i+1))
+        indices = np.arange(p.batch_size * i, p.batch_size*(i+1))
         ridx_batch = ridx_full[indices]
         x_batch = df_train.values[ridx_batch, :]
-        sess.run(trainer, feed_dict={X: x_batch, pIn_holder: pIn, pHidden_holder: pHidden})
+        sess.run(trainer, feed_dict={X: x_batch, pIn_holder: p.pIn, pHidden_holder: p.pHidden})
     toc_cpu, toc_wall = time.clock(), time.time()
 
      # Log per epoch
-    if (epoch == 1) or (epoch % display_step == 0):
+    if (epoch == 1) or (epoch % p.display_step == 0):
         tic_log = time.time()
         # print training time
         print("\n#Epoch ", epoch, " took: ",
@@ -360,7 +346,7 @@ for epoch in range(1, training_epochs+1):
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
     # Log per observation interval
-    if (epoch % snapshot_step == 0) or (epoch == training_epochs):
+    if (epoch % p.snapshot_step == 0) or (epoch == p.training_epochs):
         tic_log2 = time.time()
         h_train, h_valid, h_input = snapshot()  # save session and imputation
         learning_curve()
