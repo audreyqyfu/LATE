@@ -32,7 +32,7 @@ name2 = '(EMT_MAGIC_A)'
 
 # For development usage #
 seed_tf = 3
-test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
