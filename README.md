@@ -41,12 +41,14 @@
   
   - function 'scimpute.read_csv', 'scimpute.read_hd5) are good options in implementation
   - step1 example: 
-  `file = "EMT.MAGIC.9k.A.log.hd5"  # input`
-  `file2 = "EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)`
-  `name1 = '(EMT_MAGIC_A)'`
-  `name2 = '(EMT_MAGIC_A)'`
-  `df = pd.read_hdf(file).transpose()  # [cells,genes]`
-  `df2 = pd.read_hdf(file2).transpose()  # [cells,genes]`
+  ```python
+  file = "EMT.MAGIC.9k.A.log.hd5"  # input
+  file2 = "EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
+  name1 = '(EMT_MAGIC_A)'
+  name2 = '(EMT_MAGIC_A)'
+  df = pd.read_hdf(file).transpose()  # [cells,genes]
+  df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
+  ```
   - step2 example: 
   `file = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # input`
   `file2 = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth (same as input in step1)`
