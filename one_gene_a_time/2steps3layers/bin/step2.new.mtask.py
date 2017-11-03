@@ -4,7 +4,7 @@
 # 1. [x] restore (TL)
 # 2. [x] use functions in model
 # 3. [x] mtask (one gene a time with one network)
-# 4. [-] exclude zeros or not
+# 4. [x] exclude zeros or not
 # 5. [ ] search for 'change with layer' after changing layers
 # 6. [ ] split analysis of final result from imputation; only plot learning curve here
 
@@ -115,105 +115,7 @@ def snapshot():
     return (h_train, h_valid, h_input)
 
 
-def save_bottle_neck_representation():
-    print("> save bottle-neck_representation")
-    code_bottle_neck_input = sess.run(e_a1, feed_dict={X: df.values,
-                                                       pIn_holder: 1, pHidden_holder: 1})  # change with layer
-    np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
-    clustermap = sns.clustermap(code_bottle_neck_input)
-    clustermap.savefig('./plots/bottle_neck.hclust.png')
 
-
-def groundTruth_vs_prediction():
-    print("> Ground truth vs prediction")
-    for j in [2, 3, 205, 206, 4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
-            scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j], range='same',
-                                  title=str('scatterplot1, gene-' + str(j) + ', valid, step1'),
-                                  xlabel='Ground Truth ' + Bname,
-                                  ylabel='Prediction ' + Aname
-                                  )
-            scimpute.scatterplot2(df2_valid.values[:, j], h_valid[:, j], range='flexible',
-                                      title=str('scatterplot2, gene-' + str(j) + ', valid, step1'),
-                                      xlabel='Ground Truth ' + Bname,
-                                      ylabel='Prediction ' + Aname
-                                      )
-
-
-def gene_gene_relationship():
-    print('> gene-gene relationship before/after inference')
-    List = [[2, 3],
-            [205, 206],
-            [4058, 7496],
-            [8495, 12871]
-            ]
-    # Valid set: Prediction
-    for i, j in List:
-        scimpute.scatterplot2(h_valid[:, i], h_valid[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.valid',
-                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j + 1))
-    # Valid set: GroundTruth
-    for i, j in List:
-        scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.valid',
-                              xlabel='Gene' + str(i) + '.valid', ylabel='Gene' + str(j))
-    # Input set: Prediction
-    for i, j in List:
-        scimpute.scatterplot2(h_train[:, i], h_train[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Aname + '.pred.input',
-                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j + 1))
-
-    # Input set: GroundTruth
-    for i, j in List:
-        scimpute.scatterplot2(df2.ix[:, i], df2.ix[:, j],
-                              title="Gene" + str(i) + 'vs Gene' + str(j) + '.in ' + Bname + '.GroundTruth.input',
-                              xlabel='Gene' + str(i) + '.input', ylabel='Gene' + str(j))
-
-
-def weights_visualization(w_name, b_name):
-    print('visualization of weights/biases for each layer')
-    w = eval(w_name)
-    b = eval(b_name)
-    w_arr = sess.run(w)
-    b_arr = sess.run(b)
-    b_arr = b_arr.reshape(len(b_arr), 1)
-    b_arr_T = b_arr.T
-    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: update name (low priority)
-
-
-def visualize_weights():
-    # todo: update when model changes depth
-    weights_visualization('e_w1', 'e_b1')
-    weights_visualization('d_w1', 'd_b1')
-    # weights_visualization('e_w2', 'e_b2')
-    # weights_visualization('d_w2', 'd_b2')
-    # weights_visualization('e_w3', 'e_b3')
-    # weights_visualization('d_w3', 'd_b3')
-    # weights_visualization('e_w4', 'e_b4')
-    # weights_visualization('d_w4', 'd_b4')
-
-
-def save_weights():
-    # todo: update when model changes depth
-    print('save weights in csv')
-    np.save('pre_train/e_w1', sess.run(e_w1))
-    np.save('pre_train/d_w1', sess.run(d_w1))
-    # np.save('pre_train/e_w2', sess.run(e_w2))
-    # np.save('pre_train/d_w2', sess.run(d_w2))
-    # np.save('pre_train/e_w3', sess.run(e_w3))
-    # np.save('pre_train/d_w3', sess.run(d_w3))
-    # np.save('pre_train/e_w4', sess.run(e_w4))
-    # np.save('pre_train/d_w4', sess.run(d_w4))
-    # scimpute.save_csv(sess.run(d_w2), 'pre_train/d_w2.csv.gz')
-
-
-def visualization_of_dfs():
-    print('visualization of dfs')
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
-    # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 # print versions / sys.path
 print ('python version:', sys.version)
@@ -284,10 +186,10 @@ df_test.to_csv('re_train/df_test.step2_index.csv', columns=[], header=False)
 
 # parameters
 n_input = n
-n_hidden_1 = 200  # change with layer
-n_hidden_2 = 600
-n_hidden_3 = 400
-n_hidden_4 = 200
+n_hidden_1 = 800  # change with layer
+n_hidden_2 = 400
+n_hidden_3 = 200
+n_hidden_4 = -1
 pIn = 0.8
 pHidden = 0.5
 learning_rate = 0.000003  # 0.0003 for 3-7L, 0.00003 for 9L # change with layer
@@ -315,29 +217,30 @@ tf.set_random_seed(3)  # seed
 with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
-# with tf.name_scope('Encoder_L2'):
-#     e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
-#     e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
-# with tf.name_scope('Encoder_L3'):
-#     e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
-#     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
+with tf.name_scope('Encoder_L2'):
+    e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', n_hidden_1, n_hidden_2, sd)
+    e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
+with tf.name_scope('Encoder_L3'):
+    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
+    e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 # with tf.name_scope('Encoder_L4'):
 #     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
 #     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
 # with tf.name_scope('Decoder_L4'):
 #     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
 #     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
-# with tf.name_scope('Decoder_L3'):
-#     d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-#     d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
-# with tf.name_scope('Decoder_L2'):
-#     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
-#     d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+with tf.name_scope('Decoder_L3'):
+    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
+    d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
+with tf.name_scope('Decoder_L2'):
+    d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
+    d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-    d_a1 = scimpute.dense_layer('decoder1', e_a1, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
+    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
 
 # define input/output
+a_bottle_neck = e_a3
 h = d_a1
 
 # define loss

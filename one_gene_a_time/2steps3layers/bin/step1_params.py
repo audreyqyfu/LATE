@@ -11,8 +11,8 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
-training_epochs = 4  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 1  # interval on learning curve
-snapshot_step = 2  # interval of saving session, imputation
+training_epochs = 1000  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 20  # interval on learning curve
+snapshot_step = 500  # interval of saving session, imputation
 
-test_flag = 1
+test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
