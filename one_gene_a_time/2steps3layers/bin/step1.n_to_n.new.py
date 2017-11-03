@@ -1,33 +1,185 @@
 #!/usr/bin/python
+# this is the wrapper for step1
+
+# import modules and print versions
 from __future__ import division  # fix division // get float bug
 from __future__ import print_function  # fix printing \n
 
 import tensorflow as tf
-import sys
 import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from scipy.stats.stats import pearsonr
 import math
+import seaborn as sns
+import pandas as pd
+from scipy.stats.stats import pearsonr
+import sys
 import os
 import time
-import seaborn as sns
-
-print('python version:', sys.version)
-print('tf.__version__', tf.__version__)
+import matplotlib
+matplotlib.use('Agg')  # for plotting without GUI
+import matplotlib.pyplot as plt
 
 sys.path.append('./bin')
 print('sys.path', sys.path)
 import scimpute
+import hl_func
+
+import importlib  # for development: reload modules in pycharm
+importlib.reload(hl_func)
+
+print('python version:', sys.version)
+print('tf.__version__', tf.__version__)
 
 
+def print_parameters():
+    print(os.getcwd(), "\n",
+          "\n# Parameters: 9L",
+          "\nn_features: ", n,
+          "\nn_hidden1: ", n_hidden_1,  # todo: adjust based on model
+          "\nn_hidden2: ", n_hidden_2,
+          "\nn_hidden3: ", n_hidden_3,
+          "\nn_hidden4: ", n_hidden_4,
+          "\nlearning_rate :", learning_rate,
+          "\nbatch_size: ", batch_size,
+          "\nepoches: ", training_epochs, "\n",
+          "\npIn_holder: ", pIn,
+          "\npHidden_holder: ", pHidden, "\n",
+          "\ndf_train.values.shape", df_train.values.shape,
+          "\ndf_valid.values.shape", df_valid.values.shape,
+          "\ndf2_train.shape", df2_train.shape,
+          "\ndf2_valid.values.shape", df2_valid.values.shape,
+          "\n")
+    print("input_array:\n", df.values[0:4, 0:4], "\n")
+
+
+def evaluate_epoch0():
+    print("> Evaluate epoch 0:")
+    epoch_log.append(epoch)
+    mse_train = sess.run(mse_input, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_valid = sess.run(mse_input, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_log_batch.append(mse_train)  # approximation
+    mse_log_train.append(mse_train)
+    mse_log_valid.append(mse_valid)
+    print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
+
+    h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    corr_train = scimpute.median_corr(df_train.values, h_train)
+    corr_valid = scimpute.median_corr(df_valid.values, h_valid)
+    cell_corr_log_batch.append(corr_train)
+    cell_corr_log_train.append(corr_train)
+    cell_corr_log_valid.append(corr_valid)
+    print("Cell-pearsonr train, valid:", corr_train, corr_valid)
+    # tb
+    merged_summary = tf.summary.merge_all()
+    summary_batch = sess.run(merged_summary, feed_dict={X: df_train, M: df2_train,  # M is not used here, just dummy
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    batch_writer.add_summary(summary_batch, epoch)
+    valid_writer.add_summary(summary_valid, epoch)
+
+
+def tb_summary():
+    print('> Tensorboard summaries')
+    tic = time.time()
+    # run_metadata = tf.RunMetadata()
+    # batch_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
+    merged_summary = tf.summary.merge_all()
+    summary_batch = sess.run(merged_summary, feed_dict={X: x_batch, M: x_batch,  # M is not used here, just dummy
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
+                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    batch_writer.add_summary(summary_batch, epoch)
+    valid_writer.add_summary(summary_valid, epoch)
+    toc = time.time()
+    print('tb_summary time:', round(toc-tic,2))
+
+
+def learning_curve():
+    print('> plotting learning curves')
+    scimpute.learning_curve_mse(epoch_log, mse_log_batch, mse_log_valid)
+    scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid)
+
+
+def snapshot():
+    print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
+    # inference
+    h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    h_input = sess.run(h, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    # print whole dataset pearsonr
+    print("median cell-pearsonr(all train): ",
+          scimpute.median_corr(df2_train.values, h_train, num=len(df_train)))
+    print("median cell-pearsonr(all valid): ",
+          scimpute.median_corr(df2_valid.values, h_valid, num=len(df_valid)))
+    print("median cell-pearsonr in all imputation cells: ",
+          scimpute.median_corr(df2.values, h_input, num=m))
+    # save pred
+    df_h_input = pd.DataFrame(data=h_input, columns=df.columns, index=df.index)
+    scimpute.save_hd5(df_h_input, log_dir + "/imputation.step1.hd5")
+    # save model
+    save_path = saver.save(sess, log_dir + "/step1.ckpt")
+    print("Model saved in: %s" % save_path)
+    return (h_train, h_valid, h_input)
+
+
+def save_bottle_neck_representation():
+    print("> save bottle-neck_representation")
+    # todo: change variable name for each model
+    code_bottle_neck_input = sess.run(a_bottle_neck, feed_dict={X: df.values, pIn_holder: 1, pHidden_holder: 1})
+    np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
+    # clustermap = sns.clustermap(code_bottle_neck_input)
+    # clustermap.savefig('./plots/bottle_neck.hclust.png')
+
+def visualize_weight(w_name, b_name):
+    w = eval(w_name)
+    b = eval(b_name)
+    w_arr = sess.run(w)
+    b_arr = sess.run(b)
+    b_arr = b_arr.reshape(len(b_arr), 1)
+    b_arr_T = b_arr.T
+    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: update name (low priority)
+
+
+def visualize_weights():
+    # todo: update when model changes depth
+    for l1 in range(1, l+1):
+        encoder_weight = 'e_w'+str(l1)
+        encoder_bias = 'e_b'+str(l1)
+        visualize_weight(encoder_weight, encoder_bias)
+        decoder_bias = 'd_b'+str(l1)
+        decoder_weight = 'd_w'+str(l1)
+        visualize_weight(decoder_weight, decoder_bias)
+
+
+def save_weights():
+    # todo: update when model changes depth
+    print('save weights in npy')
+    for l1 in range(1, l+1):
+        encoder_weight_name = 'e_w'+str(l1)
+        encoder_bias_name = 'e_b'+str(l1)
+        decoder_bias_name = 'd_b'+str(l1)
+        decoder_weight_name = 'd_w'+str(l1)
+        np.save('pre_train/'+encoder_weight_name, sess.run(eval(encoder_weight_name)))
+        np.save('pre_train/'+decoder_weight_name, sess.run(eval(decoder_weight_name)))
+        np.save('pre_train/'+encoder_bias_name, sess.run(eval(encoder_bias_name)))
+        np.save('pre_train/'+decoder_bias_name, sess.run(eval(decoder_bias_name)))
+
+
+def visualization_of_dfs():
+    print('visualization of dfs')
+    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
+    # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
+    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    # scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
 
 
 # refresh pre_train folder
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
+
 
 # read data and save indexes
 df, df2, Aname, Bname, m, n = scimpute.read_data('EMT9k_log')
@@ -39,23 +191,23 @@ df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
 df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
 
 # Parameters #
-# todo: update for different depth
+L = 7
+l = L//2
 n_input = n
 n_hidden_1 = 800
-n_hidden_2 = 600
-n_hidden_3 = 400
-n_hidden_4 = 200
+n_hidden_2 = 400  # update for different depth
+n_hidden_3 = 200
+n_hidden_4 = -1
 
-# todo: adjust to optimized hyper-parameters when different layers used
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L
-sd = 0.00001  # 3-7L:1e-3, 9L:1e-4
+learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
+sd = 0.00001  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
 training_epochs = 3  #3L:100, 5L:1000, 7L:1000, 9L:3000
 display_step = 20
 snapshot_step = 1000
-print_parameters()  # todo: use logger
+print_parameters()  # todo: use logger, dict
 
 # Define model #
 tf.reset_default_graph()
@@ -69,7 +221,7 @@ pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
 
 # init variables and build graph
 tf.set_random_seed(3)  # seed
-# todo: adjust based on depth
+# update for different depth
 with tf.name_scope('Encoder_L1'):
     e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, n_hidden_1, sd)
     e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
@@ -82,17 +234,17 @@ with tf.name_scope('Encoder_L3'):
     e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', n_hidden_2, n_hidden_3, sd)
     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 
-with tf.name_scope('Encoder_L4'):
-    e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
-    e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
-
-with tf.name_scope('Decoder_L4'):
-    d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
-    d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
+# with tf.name_scope('Encoder_L4'):
+#     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', n_hidden_3, n_hidden_4, sd)
+#     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L4'):
+#     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', n_hidden_4, n_hidden_3, sd)
+#     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
 
 with tf.name_scope('Decoder_L3'):
     d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', n_hidden_3, n_hidden_2, sd)
-    d_a3 = scimpute.dense_layer('decoder3', d_a4, d_w3, d_b3, pHidden_holder)
+    d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
 
 with tf.name_scope('Decoder_L2'):
     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', n_hidden_2, n_hidden_1, sd)
@@ -100,7 +252,9 @@ with tf.name_scope('Decoder_L2'):
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', n_hidden_1, n, sd)
-    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
+    d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
+
+a_bottle_neck = e_a3
 
 # define input/output
 y_input = X
@@ -121,6 +275,10 @@ sess = tf.Session()
 saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 sess.run(init)
+
+
+
+
 batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 epoch = 0
@@ -163,9 +321,9 @@ for epoch in range(1, training_epochs+1):
         print('mse_batch, valid:', mse_batch, mse_valid)
         # print('mse_batch, train, valid:', mse_batch, mse_train, mse_valid)
 
-        corr_batch = scimpute.medium_corr(x_batch, h_batch)
-        # corr_train = scimpute.medium_corr(df_train.values, h_train)
-        corr_valid = scimpute.medium_corr(df_valid.values, h_valid)
+        corr_batch = scimpute.median_corr(x_batch, h_batch)
+        # corr_train = scimpute.median_corr(df_train.values, h_train)
+        corr_valid = scimpute.median_corr(df_valid.values, h_valid)
         cell_corr_log_batch.append(corr_batch)
         # cell_corr_log_train.append(corr_train)
         cell_corr_log_valid.append(corr_valid)
