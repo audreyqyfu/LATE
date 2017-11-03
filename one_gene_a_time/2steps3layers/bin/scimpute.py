@@ -391,6 +391,7 @@ def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
             hist.append(corr)
     hist.sort()
     median = round(np.median(hist), 3)
+    mean = round(np.mean(hist), 3)
 
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
