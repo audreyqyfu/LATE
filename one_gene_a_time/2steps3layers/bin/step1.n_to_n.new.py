@@ -246,11 +246,9 @@ with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', p.n_hidden_1, n, p.sd)
     d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)
 
-a_bottle_neck = e_a3
 
 # define input/output
-y_input = X
-y_groundTruth = M
+a_bottle_neck = e_a3
 h = d_a1
 
 # define loss
@@ -260,7 +258,9 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('mse1 (vs input)', mse1)
     tf.summary.scalar('mse2 (vs ground truth)', mse2)
 
-trainer = tf.train.AdamOptimizer(p.learning_rate).minimize(mse1)
+# trainer
+optimizer = tf.train.AdamOptimizer(p.learning_rate)
+trainer = optimizer.minimize(mse1)
 
 # Launch Session #
 sess = tf.Session()
