@@ -48,10 +48,12 @@ print('nz_rate after downsampling to {} libsize: {}'.
 # further masking (zero_inflation)
 if nz_rate_resampled > percentage_goal:
     masked_df = scimpute.mask_df(resampled_df, percentage_goal)
-    del resampled_df
-    # summary
-    nz_rate_masked = scimpute.nnzero_rate_df(masked_df)
-    print('nz_rate after further zero_inflation(masking) is: {}'.format(nz_rate_masked))
+else:
+    masked_df = resampled_df
+# summary
+del resampled_df
+nz_rate_masked = scimpute.nnzero_rate_df(masked_df)
+print('nz_rate after further zero_inflation(masking) is: {}'.format(nz_rate_masked))
 
 
 # output result dataframe
