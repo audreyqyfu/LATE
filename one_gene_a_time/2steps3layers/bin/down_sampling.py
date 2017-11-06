@@ -27,6 +27,7 @@ else:
     percentage_goal = float(sys.argv[3])/100  # e.g.: 0.1
     out_name = str(sys.argv[4])
 
+print("> command: ", sys.argv)
 
 # read data
 input_df = pd.read_hdf(in_name).transpose()  # so that output matrix is [sample, gene]
