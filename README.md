@@ -29,7 +29,7 @@ Autoencoder -> transfer learning -> multi-task network
 
 ### creating simulation single cell RNA-seq dataset
 Can down-sample from bulk RNA-seq dataset or other high quality dataset and simulate zero_inflated scRNA-seq dataset
-Example Command: `python -u down_sampling.py gtex_v7.norm.hd5 60000 10 gtex_v7.ds_60000_10.hd5`
+- Example Command: `python -u down_sampling.py gtex_v7.norm.hd5 60000 10 gtex_v7.ds_60000_10.hd5`
 - first, each sample in data matrix was downsampled to typical scRNA-seq lib-size
 - then, additional random zeros introduced to meet the user-defined zero percentage
 
