@@ -8,6 +8,8 @@ from scipy.stats.stats import pearsonr
 import math
 import tensorflow as tf
 
+
+# Data I/O #
 def read_csv(fname):
     '''read_csv into pd.df, assuming index_col=0, and header=True'''
     print('reading ', fname)
@@ -40,7 +42,10 @@ def save_hd5(df, out_name):
 
 
 def read_hd5(in_name):
-    '''read in_name into df'''
+    '''
+    :param in_name: 
+    :return df: 
+    '''
     print('reading: ', in_name)
     df = pd.read_hdf(in_name)
     print(df.ix[0:3, 0:3])
@@ -48,6 +53,7 @@ def read_hd5(in_name):
     return (df)
 
 
+# Pre-processing of data frames #
 def df_filter(df):
     df_filtered = df.loc[(df.sum(axis=1) != 0), (df.sum(axis=0) != 0)]
     print("filtered out any rows and columns with sum of zero")
@@ -65,6 +71,26 @@ def df_log_transformation(df, pseudocount=1):
     return (df_log)
 
 
+def multinormial_downsampling(in_df, libsize_out):
+    out_df = in_df.copy()
+    for i in range(len(in_df)):
+        slice_arr = in_df.values[i, :]
+        libsize = slice_arr.sum()
+        p_lst = slice_arr / libsize
+        slice_resample = np.random.multinomial(libsize_out, p_lst)
+        out_df.ix[i, :] = slice_resample
+    return out_df
+
+
+def mask_df(df, zero_percentage):
+    df_msked = df.copy()
+    nz_now = nnzero_rate_df(df)
+    zero_percentage = zero_percentage/nz_now
+    df_msked = df_msked.where(np.random.uniform(size=df.shape) > (1-zero_percentage), 0)
+    return df_msked
+
+
+# Plots #
 def density_plot(x, y, title, fname):
     # create plots directory
     if not os.path.exists("plots"):
@@ -151,7 +177,7 @@ def bone_marrow_biaxial_plots(scdata):
 
 
 def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="rainbow",
-    vmin=None, vmax=None, xlab='', ylab='', dir='plots'):
+                vmin=None, vmax=None, xlab='', ylab='', dir='plots'):
     '''heatmap visualization of 2D matrix, with plt.imshow(), in a square manner
     cmap options PiYG for [neg, 0, posi]
     Greys Reds for [0, max]
@@ -177,7 +203,7 @@ def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="r
 
 
 def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
-    vmin = None, vmax = None, xlab = '', ylab = '', dir='plots'):
+                 vmin=None, vmax=None, xlab='', ylab='', dir='plots'):
     '''heatmap visualization of 2D matrix, with plt.pcolor()
     cmap options PiYG for [neg, 0, posi]
     Greys Reds for [0, max]
@@ -192,7 +218,7 @@ def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
         vmax = np.max(arr)
 
     fig = plt.figure(figsize=(9, 9))
-    plt.pcolor(arr, cmap=cmap, vmin = vmin, vmax = vmax)
+    plt.pcolor(arr, cmap=cmap, vmin=vmin, vmax=vmax)
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel(ylab)
@@ -202,13 +228,13 @@ def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
     print('heatmap vis ', title, ' done')
 
 
-def hist_arr_flat (arr, title='', xlab='', ylab=''):
+def hist_arr_flat(arr, title='', xlab='', ylab=''):
     '''create histogram for flattened arr'''
     if not os.path.exists("plots"):
         os.makedirs("plots")
     fname = "./plots/" + title + '.hist.png'
 
-    fig = plt.figure(figsize=(9,9))
+    fig = plt.figure(figsize=(9, 9))
     n, bins, patches = plt.hist(arr.flatten(), 100, normed=1, facecolor='green', alpha=0.75)
     plt.title(title)
     plt.xlabel(xlab)
@@ -216,6 +242,7 @@ def hist_arr_flat (arr, title='', xlab='', ylab=''):
     plt.savefig(fname, bbox_inches='tight')
     plt.close(fig)
     print("histogram ", title, ' done')
+
 
 def split_arr(arr, a=0.8, b=0.1, c=0.1, seed_var=1):
     """input array, output rand split arrays
@@ -327,13 +354,13 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
     corr, _ = pearsonr(x, y)
     corr = str(round(corr, 4))
     plt.plot(x, y, 'o')
-    plt.title(str(title+"\ncorr: "+corr))
-    plt.xlabel(xlabel+"\nmean: "+str(round(np.mean(x), 2)) )
-    plt.ylabel(ylabel+"\nmean: "+str(round(np.mean(y), 2)) )
+    plt.title(str(title + "\ncorr: " + corr))
+    plt.xlabel(xlabel + "\nmean: " + str(round(np.mean(x), 2)))
+    plt.ylabel(ylabel + "\nmean: " + str(round(np.mean(y), 2)))
     if range is 'same':
-        max, min = max_min_element_in_arrs([x,y])
+        max, min = max_min_element_in_arrs([x, y])
         plt.xlim(min, max)
-        plt.ylim(min,max)
+        plt.ylim(min, max)
     elif range is 'flexible':
         next
     else:
@@ -366,7 +393,7 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100)
-    plt.xlabel('Gene-corr (Pearson)'+'\nmedian='+str(median)+', mean='+str(mean))
+    plt.xlabel('Gene-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
     plt.ylabel('Freq')
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
@@ -396,7 +423,7 @@ def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100)
-    plt.xlabel('Cell-corr (Pearson)'+'\nmedian='+str(median)+', mean='+str(mean))
+    plt.xlabel('Cell-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
     plt.ylabel('Freq')
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
@@ -478,33 +505,33 @@ def visualize_weights_biases(weight, bias, title, cmap='rainbow'):
     plt.close(fig)
 
 
-def corr_one_gene(col1, col2, accuracy = 3):
+def corr_one_gene(col1, col2, accuracy=3):
     """will calculate pearsonr for gene(i)"""
     # from scipy.stats.stats import pearsonr
     result = pearsonr(col1, col2)[0][0]
     result = round(result, accuracy)
-    return(result)
+    return (result)
 
 
 def hist_df(df, title="hist of df"):
     df_flat = df.values.reshape(df.size, 1)
     plt.hist(df_flat, bins=200)
     plt.title(title)
-    plt.savefig('./plots/', title+'.png', bbox_inches='tight')
+    plt.savefig('./plots/', title + '.png', bbox_inches='tight')
     plt.close()
     print('hist of ', title, 'is done')
 
 
 def nnzero_rate_df(df):
     idx = df != 0
-    nnzero_rate = round(sum(sum(idx.values))/df.size,3)
-    return(nnzero_rate)
+    nnzero_rate = round(sum(sum(idx.values)) / df.size, 3)
+    return (nnzero_rate)
 
 
 def mean_df(df):
     Sum = sum(sum(df.values))
-    Mean = Sum/df.size
-    return(Mean)
+    Mean = Sum / df.size
+    return (Mean)
 
 
 def subset_df(df_big, df_subset):
@@ -520,12 +547,12 @@ def read_data(data_name):
         df = pd.read_hdf(file).transpose()  # [cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
     elif data_name is 'EMT2730':  # 2.7k cells used in magic paper
-        file = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5" #data need imputation
+        file = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"  # data need imputation
         file_benchmark = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"
         name1 = '(EMT2730)'
         name2 = '(EMT2730)'
-        df = pd.read_hdf(file).transpose() #[cells,genes]
-        df2 = pd.read_hdf(file_benchmark).transpose() #[cells,genes]
+        df = pd.read_hdf(file).transpose()  # [cells,genes]
+        df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
     elif data_name is 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
         file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"  # data need imputation
         file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"
@@ -539,7 +566,7 @@ def read_data(data_name):
         name1 = '(EMT9kLog)'
         name2 = '(EMT9kLog)'
         df = pd.read_hdf(file).transpose()  # .ix[:, 1:1000]  # [cells,genes]
-        df2 = pd.read_hdf(file_benchmark).transpose()  #.ix[:, 1:1000]  # [cells,genes]
+        df2 = pd.read_hdf(file_benchmark).transpose()  # .ix[:, 1:1000]  # [cells,genes]
     else:
         raise Warning("data name not recognized!")
 
@@ -550,7 +577,7 @@ def read_data(data_name):
     print("\ninput df: ", name1, " ", file, "\n", df.values[0:4, 0:4], "\n")
     print("ground-truth df: ", name2, " ", file_benchmark, "\n", df2.values[0:4, 0:4], "\n")
 
-    return(df, df2, name1, name2, m, n)
+    return (df, df2, name1, name2, m, n)
 
 
 def variable_summaries(name, var):
@@ -578,9 +605,9 @@ def weight_variable(name_scope, dim_in, dim_out, sd):
     """
     with tf.name_scope(name_scope):
         W = tf.Variable(tf.random_normal([dim_in, dim_out], stddev=sd),
-                        name=name_scope+'_W')
+                        name=name_scope + '_W')
 
-    variable_summaries(name_scope+'_W', W)
+    variable_summaries(name_scope + '_W', W)
 
     return W
 
@@ -595,7 +622,6 @@ def bias_variable(name_scope, dim_out, sd):
     :return: 
     """
     with tf.name_scope(name_scope):
-
         b = tf.Variable(tf.random_normal([dim_out], mean=100 * sd, stddev=sd),
                         name=name_scope + '_b')
 
@@ -641,12 +667,12 @@ def dense_layer(name, input, W, b, pRetain):
     z = tf.add(tf.matmul(x_drop, W), b)
     a = tf.nn.relu(z)
 
-    variable_summaries(name+'_a', a)
+    variable_summaries(name + '_a', a)
 
     return a
 
 
-def dense_layer_BN(name, input, W, b, pRetain, epsilon = 1e-3):
+def dense_layer_BN(name, input, W, b, pRetain, epsilon=1e-3):
     """
     define a layer and return output
 
@@ -707,7 +733,7 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
     if range is None:
         max, min = max_min_element_in_arrs([mse_batch, mse_valid])
         # max, min = max_min_element_in_arrs([mse_batch, mse_train, mse_valid])
-        plt.ylim(min,max)
+        plt.ylim(min, max)
     else:
         plt.ylim(range[0], range[1])
 
@@ -775,7 +801,7 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
     if range is None:
         max, min = max_min_element_in_arrs([corr_batch, corr_valid])
         # max, min = max_min_element_in_arrs([corr_batch, corr_train, corr_valid])
-        plt.ylim(min,max)
+        plt.ylim(min, max)
     else:
         plt.ylim(range[0], range[1])
 
