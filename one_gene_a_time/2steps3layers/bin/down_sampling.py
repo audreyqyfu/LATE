@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# first downsample to typical single cell RNA-seq lib-size
+# then add random zeros so that desired zero percentage reached
 import numpy as np
 import pandas as pd
 import sys
