@@ -9,10 +9,10 @@ n_hidden_4 = -1  # -1 means no such layer
 # Training parameters #
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 0.00003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
+learning_rate = 0.00001  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 600
-training_epochs = 1000000
+training_epochs = 20000
 display_step = 200  # interval on learning curve
 snapshot_step = 5000  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
