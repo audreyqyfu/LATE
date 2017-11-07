@@ -14,6 +14,7 @@ if len(sys.argv) is not 3:
 	raise Exception ('usage: log_transformation <in.hd5> <out.hd5>')
 else:
 	print(sys.argv)
+    print('this is log10(x+1) transformation')
 
 file_in = sys.argv[1] #training set
 file_out = sys.argv[2]
