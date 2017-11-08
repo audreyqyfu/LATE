@@ -20,7 +20,7 @@ j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 
 # file input #
 # EMT.MAGIC
-file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
+file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.ds_10k_10.log.hd5"  # data need imputation
 file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth
 name1 = '(EMT_MAGIC_B.msk90)'
 name2 = '(EMT_MAGIC_B)'
