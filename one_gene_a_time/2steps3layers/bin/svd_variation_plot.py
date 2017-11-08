@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # read gene expression matrix into df [genes, cells]
 # perform randomized SVD to know the internal dimension complexity of datasets
+# 'usage: <svd_variation_plot.py> <input.hd5> <out_prefix> <n_rank>'
 
 import numpy as np
 import pandas as pd
