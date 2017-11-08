@@ -4,9 +4,10 @@
 
 import numpy as np
 import pandas as pd
-import pylab
 from sklearn.utils.extmath import randomized_svd #https://stackoverflow.com/questions/31523575/get-u-sigma-v-matrix-from-truncated-svd-in-scikit-learn
 from sklearn.decomposition import TruncatedSVD
+import matplotlib
+matplotlib.use('Agg')  # for plotting without GUI
 import matplotlib.pyplot as plt
 import time
 import os
@@ -18,6 +19,9 @@ print('default input is a gene expression matrix [cell, gene]')
 print('so that df in program is [gene, cell]')
 print('n_rank is the num of dims you want to check, if not specified, will be n_gene')
 print(sys.argv)
+
+if len(sys.argv) < 3 or len(sys.argv) > 4:
+    raise Exception('cmd err')
 
 file = sys.argv[1]
 out_prefix = sys.argv[2]
