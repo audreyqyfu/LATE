@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 import time
 import os
-import matplotlib.pyplot as plt
 import matplotlib
+matplotlib.use('Agg')  # for plotting without GUI
+import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
 import tensorflow as tf
@@ -61,6 +62,10 @@ def df_filter(df):
 
 
 def df_normalization(df):
+    '''
+    :param df: assume df.shape = [gene, cell]
+    :return: 
+    '''
     read_counts = df.sum(axis=0)  # colsum
     df_normalized = df.div(read_counts, axis=1).mul(np.median(read_counts)).mul(1)
     return (df_normalized)
@@ -139,7 +144,7 @@ def hist_list(list, xlab='xlab', title='histogram', bins=100):
     '''output histogram of a list into png'''
     if not os.path.exists("plots"):
         os.makedirs("plots")
-    fname = str(title) + '.hist.png'
+    fname = str(title) + '.png'
     fname = "./plots/" + fname
     fig, ax = plt.subplots()
     plt.title(title)
@@ -228,14 +233,14 @@ def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
     print('heatmap vis ', title, ' done')
 
 
-def hist_arr_flat(arr, title='', xlab='', ylab=''):
+def hist_arr_flat(arr, title='hist', xlab='x', ylab='Frequency', bins=100):
     '''create histogram for flattened arr'''
     if not os.path.exists("plots"):
         os.makedirs("plots")
-    fname = "./plots/" + title + '.hist.png'
+    fname = "./plots/" + title + '.png'
 
     fig = plt.figure(figsize=(9, 9))
-    n, bins, patches = plt.hist(arr.flatten(), 100, normed=1, facecolor='green', alpha=0.75)
+    n, bins, patches = plt.hist(arr.flatten(), bins, normed=1, facecolor='green', alpha=0.75)
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel(ylab)
@@ -513,11 +518,14 @@ def corr_one_gene(col1, col2, accuracy=3):
     return (result)
 
 
-def hist_df(df, title="hist of df"):
+def hist_df(df, title="hist of df", xlab='xlab', bins=100):
     df_flat = df.values.reshape(df.size, 1)
-    plt.hist(df_flat, bins=200)
+    # fig = plt.figure(figsize=(9, 9))
+    plt.hist(df_flat, bins=bins)
     plt.title(title)
-    plt.savefig('./plots/', title + '.png', bbox_inches='tight')
+    plt.xlabel(xlab)
+    plt.ylabel('Frequency')
+    plt.savefig('./plots/' + title + '.png', bbox_inches='tight')
     plt.close()
     print('hist of ', title, 'is done')
 
