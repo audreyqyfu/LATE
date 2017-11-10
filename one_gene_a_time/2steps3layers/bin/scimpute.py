@@ -135,7 +135,7 @@ def genescatterplot3d(gene1, gene2, gene3, scdata):
     plt.close(fig)
 
 
-def hist_list(list, xlab='xlab', title='histogram'):
+def hist_list(list, xlab='xlab', title='histogram', bins=100):
     '''output histogram of a list into png'''
     if not os.path.exists("plots"):
         os.makedirs("plots")
@@ -145,7 +145,7 @@ def hist_list(list, xlab='xlab', title='histogram'):
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel('Frequency')
-    plt.hist(list)
+    plt.hist(list, bins=bins)
     plt.savefig(fname, bbox_inches='tight')
     plt.close(fig)
 
