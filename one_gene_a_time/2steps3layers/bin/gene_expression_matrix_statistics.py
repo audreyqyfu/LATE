@@ -66,6 +66,6 @@ scimpute.hist_list(read_per_cell_filtered_norm_log.values, xlab='log10(normed-co
 scimpute.hist_list(read_per_gene_filtered_norm_log.values, xlab='log10(normed-counts+1)/gene',
                    title='Histogram of log10(normed_counts+1) per gene' + tag)
 scimpute.hist_df(df_filtered_norm_log, xlab='log10(normed-counts+1)',
-                 title='Histogram of log10(normed-counts+1) in expression matrix' + tag)
+                 title='Histogram of expression matrix' + tag)
 
 
