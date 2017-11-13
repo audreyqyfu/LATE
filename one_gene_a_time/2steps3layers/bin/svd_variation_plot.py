@@ -31,6 +31,8 @@ out_prefix = sys.argv[2]
 df = pd.read_hdf(file)  # df: [gene, cell]
 print("reading complete")
 print("original data matrix shape: ", df.shape, "\n")
+print('sample: ', df.ix[0:3, 0:3])
+print('this inner df should be [gene, cell]')
 
 if len(sys.argv) == 4:
     n_rank = int(sys.argv[3])
@@ -61,9 +63,11 @@ plt.close(fig)
 
 print("Plotting explained_variance_ratio_cumsum: ")
 explained_variance_ratio_cumsum = np.cumsum(svd.explained_variance_ratio_)
-# print(explained_variance_ratio_cumsum)
+x_lst = np.arange(1, n_rank+1)
+print(explained_variance_ratio_cumsum)
 fig = plt.figure(figsize=(9, 9))
-plt.plot(explained_variance_ratio_cumsum, 'r-')
+plt.ylim((0, 1))
+plt.plot(x_lst, explained_variance_ratio_cumsum, 'r-')
 plt.xlabel('rank')
 plt.ylabel('explained_variance_ratio_cumsum')
 plt.title("explained_variance_ratio_cumsum")
