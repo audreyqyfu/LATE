@@ -2,7 +2,6 @@
 print('10/17/2017, reads h.hd5 and data.hd5, then analysis the result')
 print('python -u result_analysis.py [step1/step2]')
 
-import tensorflow as tf
 import sys
 import numpy as np
 import pandas as pd
