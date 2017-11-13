@@ -18,8 +18,9 @@ print(flag + ",\n")
 # set filename #
 if flag == 'step1':
     print('in step1')
-    file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
-    file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
+    import step1_params as p
+    file1 = p.file1
+    file2 = p.file1
     file_pred = 'pre_train/imputation.step1.hd5'
     tag = '(step1)'
     # read index
@@ -27,8 +28,9 @@ if flag == 'step1':
     valid_idx = scimpute.read_csv('pre_train/df_valid.index.csv').index
 elif flag == 'step2':
     print('in step2')
-    file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
-    file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth
+    import step2_params as p
+    file1 = p.file1
+    file2 = p.file2
     file_pred = 're_train/imputation.step2.hd5'
     tag = '(step2)'
     # read index
