@@ -12,23 +12,23 @@ pHidden = 0.5
 learning_rate = 0.0003  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
 sd = 0.0001  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
-training_epochs = 1000  #3L:100, 5L:1000, 7L:1000, 9L:3000
-display_step = 20  # interval on learning curve
-snapshot_step = 500  # interval of saving session, imputation
+training_epochs = 25000  #3L:100, 5L:1000, 7L:1000, 9L:3000
+display_step = 50  # interval on learning curve
+snapshot_step = 1000  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 
 # file input #
 # EMT.MAGIC
-file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
-file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
-name1 = '(EMT_MAGIC_A)'
-name2 = '(EMT_MAGIC_A)'
+# file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
+# file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
+# name1 = '(EMT_MAGIC_A)'
+# name2 = '(EMT_MAGIC_A)'
 
 # GTEx
-# file1 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # input
-# file2 = "../../../../data/gtex/gtex_v7.norm.log.hd5"  # ground truth (same as input in step1)
-# name1 = '(gtex_gene)'  # uses 20GB of RAM
-# name2 = '(gtex_gene)'
+file1 = "../../../../data/gtex/tpm/gtex_v7.log.hd5"  # input
+file2 = "../../../../data/gtex/tpm/gtex_v7.log.hd5"  # ground truth (same as input in step1)
+name1 = '(gtex_tpm)'  # uses 20GB of RAM
+name2 = '(gtex_tpm)'
 
 # For development usage #
 seed_tf = 3
