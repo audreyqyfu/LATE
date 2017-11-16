@@ -6,6 +6,6 @@ echo "*--result analysis--*"
 python -u ./result_analysis.py step1
 
 echo "*--cluster map--*"
-for file in pre_train/*w*npy; do python weight_visualization.py $file sns_tag; done
+for file in pre_train/*npy; do python weight_visualization.py $file clust; done
 
 echo "*--done--*"
