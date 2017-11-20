@@ -46,6 +46,7 @@ print('nz_rate_in: {}'.format(nz_rate_in))
 
 # read list
 list_df = pd.read_csv(list_name, index_col=0, sep='\t', header=None)
+print('list:', list_df.shape, list_df.index)
 
 # filter
 df_yes = df.ix[list_df.index]
@@ -56,5 +57,5 @@ print('matrix yes: ', df_yes.shape, df_yes.ix[0:3, 0:2])
 print('matrix no: ', df_no.shape, df_no.ix[0:3, 0:2])
 
 # output result dataframe
-scimpute.save_hd5(df_yes, out_prefix+'yes.hd5')
-scimpute.save_hd5(df_no, out_prefix+'no.hd5')
+scimpute.save_hd5(df_yes, out_prefix+'_yes.hd5')
+scimpute.save_hd5(df_no, out_prefix+'_no.hd5')
