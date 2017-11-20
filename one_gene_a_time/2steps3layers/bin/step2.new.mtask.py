@@ -116,10 +116,10 @@ def snapshot():
     return (h_train, h_valid, h_input)
 
 
-
+print("Usage: python -u <step2.py>")
 
 # print versions / sys.path
-print ('python version:', sys.version)
+print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
 print('sys.path', sys.path)
 
@@ -127,17 +127,19 @@ print('sys.path', sys.path)
 log_dir = './re_train'
 scimpute.refresh_logfolder(log_dir)
 
-# read data
-data = 'EMT9k_log_msk90'  # EMT2730 or splatter
+# read data into df1/2 [cells, genes]
+if p.file_orientation == 'gene_row':
+    df1 = pd.read_hdf(p.file1).transpose()
+    df2 = pd.read_hdf(p.file2).transpose()
+elif p.file_orientation == 'cell_row':
+    df1 = pd.read_hdf(p.file1)
+    df2 = pd.read_hdf(p.file2)
+else:
+    raise Exception('parameter err: file_orientation not correctly spelled')
 
-file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # data need imputation
-file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"
-name1 = '(EMT9kLog_Bmsk90)'
-name2 = '(EMT9kLog_B)'
-df1 = pd.read_hdf(file1).transpose()  # [cells,genes]
 print("input_array:\n", df1.values[0:4, 0:4], "\n")
-df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
 m, n = df1.shape  # m: n_cells; n: n_genes
+print('{} genes, {} cells'.format(n, m))
 
 
 # split data and save indexes
