@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# first downsample to typical single cell RNA-seq lib-size
+# first down-sample to typical single cell RNA-seq lib-size
 # then add random zeros so that desired zero percentage reached
 # do log10(x+1) transformation
 import numpy as np
@@ -12,11 +12,11 @@ np.random.seed(1120)
 
 # instructions
 print('usage: down_sampling.py <file> <libsize-resampled> <zero-inflation-goal> <outname>',
-      'file: count or tpm data matrix in hd5 format ([row = gene, column = cell]) (e.g. MAGIC.B.hd5)',
-      'lib-size-resampled: the lib-size for each sample in the output (e.g. 60000)',
-      'zero-inflation goal: a percentage (e.g. 10 represents 10%),',
-      ' if the goal is not met, random zeros will be added to meet the goal',
-      'the output will be log10(x+1) transformed',
+      '<file>: count or tpm data matrix in hd5 format ([row = gene, column = cell]) (e.g. MAGIC.B.hd5)',
+      '<lib-size-resampled>: the lib-size for each sample in the output (e.g. 60000)',
+      '<zero-inflation goal>: a percentage (e.g. 10 represents 10%),',
+      'if the goal is not met, random zeros will be added to meet the goal',
+      'the output will be log10(x+1) transformed, and transposed [cells, genes]',
       'outname example: inname + ds_70k_10p.log.hd5',
       'the random seed has been set to 1120 in the beginning of this script',
       '', sep='\n')
