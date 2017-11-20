@@ -7,6 +7,8 @@ import pandas as pd
 import sys
 import scimpute
 
+np.random.seed(1120)
+
 
 # instructions
 print('usage: down_sampling.py <file> <libsize-resampled> <zero-inflation-goal> <outname>',
@@ -16,6 +18,7 @@ print('usage: down_sampling.py <file> <libsize-resampled> <zero-inflation-goal> 
       ' if the goal is not met, random zeros will be added to meet the goal',
       'the output will be log10(x+1) transformed',
       'outname example: inname + ds_70k_10p.log.hd5',
+      'the random seed has been set to 1120 in the beginning of this script',
       '', sep='\n')
 
 
@@ -33,39 +36,43 @@ print("> command: ", sys.argv)
 
 
 # read data
-input_df = pd.read_hdf(in_name).transpose()  # so that output matrix is [sample, gene]
+df = pd.read_hdf(in_name).transpose()  # so that output matrix is [sample, gene]
 # summary
-print('> input shape [samples, genes]:', input_df.shape)
-nz_rate_in = scimpute.nnzero_rate_df(input_df)
-print('nz_rate: {}\n'.format(nz_rate_in))
-print(input_df.ix[0:3, 0:3])
+print('> input shape [samples, genes]:', df.shape)
+nz_rate = scimpute.nnzero_rate_df(df)
+print('nz_rate: {}\n'.format(nz_rate))
+print(df.ix[0:3, 0:2])
 
 
 # down-sampling with Multinomial distribution
-resampled_df = scimpute.multinormial_downsampling(input_df, libsize_resampled)
-del input_df
+df = scimpute.multinormial_downsampling(df, libsize_resampled)
 # summary
-nz_rate_resampled = scimpute.nnzero_rate_df(resampled_df)
+nz_rate = scimpute.nnzero_rate_df(df)
 print('> after down-sampling to {} reads/cell\nnz_rate is {}'.
-      format(libsize_resampled, nz_rate_resampled))
-print(resampled_df.ix[0:3, 0:3])
+      format(libsize_resampled, nz_rate))
+print(df.ix[0:3, 0:2])
 
 
 # further masking (zero_inflation)
-if nz_rate_resampled > percentage_goal:
-    masked_df = scimpute.mask_df(resampled_df, percentage_goal)
+if nz_rate > percentage_goal:
+    df = scimpute.mask_df(df, percentage_goal)
 else:
-    masked_df = resampled_df
+    df = df
 # summary
-del resampled_df
-nz_rate_masked = scimpute.nnzero_rate_df(masked_df)
-print('after masking(random zero injection), nz_rate is: {}'.format(nz_rate_masked))
-print(masked_df.ix[0:3, 0:3])
+nz_rate = scimpute.nnzero_rate_df(df)
+print('> after masking(random zero injection)\nnz_rate is: {}'.format(nz_rate))
+print(df.ix[0:3, 0:2])
+
+
+# # lib-size normalization
+# df = df.transpose()
+# df = scimpute.df_normalization(df)
+# df = df.transpose()
+# print('> after RPM normalization: ', df.ix[0:3, 0:2])
 
 # log-transformation
-log_transformed_df = scimpute.df_log_transformation(masked_df, 1)
-del masked_df
-print('after log_transformation: ', log_transformed_df.ix[0:3, 0:3])
+df = scimpute.df_log_transformation(df, 1)
+print('> after log10(x+1) transformation: ', df.ix[0:3, 0:2])
 
 # output result dataframe
-scimpute.save_hd5(log_transformed_df, out_name)
+scimpute.save_hd5(df, out_name)
