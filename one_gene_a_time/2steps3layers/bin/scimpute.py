@@ -58,22 +58,23 @@ def read_hd5(in_name):
 def df_filter(df):
     df_filtered = df.loc[(df.sum(axis=1) != 0), (df.sum(axis=0) != 0)]
     print("filtered out any rows and columns with sum of zero")
-    return (df_filtered)
+    return df_filtered
 
 
 def df_normalization(df):
     '''
     :param df: assume df.shape = [gene, cell]
-    :return: 
+    :return: Reads Per Million (RPM)
     '''
     read_counts = df.sum(axis=0)  # colsum
-    df_normalized = df.div(read_counts, axis=1).mul(np.median(read_counts)).mul(1)
-    return (df_normalized)
+    # df_normalized = df.div(read_counts, axis=1).mul(np.median(read_counts)).mul(1)
+    df_normalized = df.div(read_counts, axis=1).mul(1e6)
+    return df_normalized
 
 
 def df_log_transformation(df, pseudocount=1):
     df_log = np.log10(np.add(df, pseudocount))
-    return (df_log)
+    return df_log
 
 
 def multinormial_downsampling(in_df, libsize_out):
