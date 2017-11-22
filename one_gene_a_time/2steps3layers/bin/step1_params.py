@@ -37,7 +37,7 @@ if test_flag == 1:
     display_step = 1  # interval on learning curve
     snapshot_step = 5  # interval of saving session, imputation
     m = 1000
-    n = 15000
+    n = 5500
 
 
 # print parameters
@@ -62,3 +62,4 @@ print('pHidden:', pHidden)
 print('max_training_epochs:', max_training_epochs)
 print('display_step', display_step)
 print('snapshot_step', snapshot_step)
+print()
