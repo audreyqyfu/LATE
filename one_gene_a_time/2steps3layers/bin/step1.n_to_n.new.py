@@ -97,21 +97,32 @@ def learning_curve():
 
 
 def snapshot():
-    print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
+    '''save inference, 
+    save session'''
+    print("\n> Snapshot: ")
     # inference
-    h_train = sess.run(h, feed_dict={X: df1_train.values, pIn_holder: 1, pHidden_holder: 1})
-    h_valid = sess.run(h, feed_dict={X: df1_valid.values, pIn_holder: 1, pHidden_holder: 1})
-    h_input = sess.run(h, feed_dict={X: df1.values, pIn_holder: 1, pHidden_holder: 1})
-    # print whole dataset pearsonr
-    print("median cell-pearsonr(all train): ",
-          scimpute.median_corr(df1_train.values, h_train, num=len(df1_train)))
-    print("median cell-pearsonr(all valid): ",
-          scimpute.median_corr(df1_valid.values, h_valid, num=len(df1_valid)))
-    print("median cell-pearsonr in all imputation cells: ",
-          scimpute.median_corr(df1.values, h_input, num=m))
+    h_train = sess.run(h,
+                       feed_dict={
+                           X: df1_train.values,
+                           pIn_holder: 1,
+                           pHidden_holder: 1})
+    h_valid = sess.run(h,
+                       feed_dict={
+                           X: df1_valid.values,
+                           pIn_holder: 1,
+                           pHidden_holder: 1})
+    h_input = sess.run(h,
+                       feed_dict={
+                           X: df1.values,
+                           pIn_holder: 1,
+                           pHidden_holder: 1})
+
     # save pred
-    df1_h_input = pd.DataFrame(data=h_input, columns=df1.columns, index=df1.index)
-    scimpute.save_hd5(df1_h_input, log_dir + "/imputation.step1.hd5")
+    df1_h_input = pd.DataFrame(data=h_input,
+                               columns=df1.columns,
+                               index=df1.index)
+    scimpute.save_hd5(df1_h_input,
+                      log_dir + "/imputation.step1.hd5")
     # save model
     save_path = saver.save(sess, log_dir + "/step1.ckpt")
     print("Model saved in: %s" % save_path)
@@ -120,11 +131,12 @@ def snapshot():
 
 def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
-    # todo: change variable name for each model
-    code_bottle_neck_input = sess.run(a_bottle_neck, feed_dict={X: df1.values, pIn_holder: 1, pHidden_holder: 1})
-    np.save('pre_train/code_neck_valid.npy', code_bottle_neck_input)
-    # clustermap = sns.clustermap(code_bottle_neck_input)
-    # clustermap.savefig('./plots/bottle_neck.hclust.png')
+    code_bottle_neck_input = sess.run(a_bottle_neck,
+                                      feed_dict={
+                                          X: df1.values,
+                                          pIn_holder: 1,
+                                          pHidden_holder: 1})
+    np.save('pre_train/code_neck_valid.{}.npy'.format(p.stage), code_bottle_neck_input)
 
 
 def visualize_weight(w_name, b_name):
@@ -134,7 +146,8 @@ def visualize_weight(w_name, b_name):
     b_arr = sess.run(b)
     b_arr = b_arr.reshape(len(b_arr), 1)
     b_arr_T = b_arr.T
-    scimpute.visualize_weights_biases(w_arr, b_arr_T, w_name + ',' + b_name)  # todo: update name (low priority)
+    scimpute.visualize_weights_biases(w_arr, b_arr_T,
+                                      '{},{}.{}'.format(w_name, b_name, p.stage))
 
 
 def visualize_weights():
@@ -349,10 +362,12 @@ for epoch in range(1, p.max_training_epochs+1):
         tic_log2 = time.time()
         h_train, h_valid, h_input = snapshot()  # save
         learning_curve()
-        scimpute.gene_corr_hist(h_valid, df1_valid.values,
-                                title="Gene-corr (H vs X) (valid)")
-        scimpute.cell_corr_hist(h_valid, df1_valid.values,
-                                title="Cell-corr (H vs X) (valid)")
+        scimpute.gene_corr_hist(
+            h_valid, df1_valid.values,
+            title="Gene-corr(H vs X)(valid).{}".format(p.stage))
+        scimpute.cell_corr_hist(
+            h_valid, df1_valid.values,
+            title="Cell-corr(H vs X)(valid).{}".format(p.stage))
         save_bottle_neck_representation()
         save_weights()
         visualize_weights()

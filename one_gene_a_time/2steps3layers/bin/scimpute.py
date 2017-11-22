@@ -395,6 +395,7 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
     hist.sort()
     median = round(np.median(hist), 3)
     mean = round(np.mean(hist), 3)
+    print('median gene_corr: {}'.format(median))
 
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
@@ -425,6 +426,7 @@ def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
     hist.sort()
     median = round(np.median(hist), 3)
     mean = round(np.mean(hist), 3)
+    print('median cell_corr: {}'.format(median))
 
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
@@ -443,7 +445,7 @@ def refresh_logfolder(log_dir):
         tf.gfile.DeleteRecursively(log_dir)
         print(log_dir, "deleted")
     tf.gfile.MakeDirs(log_dir)
-    print(log_dir, 'created')
+    print(log_dir, 'created\n')
 
 
 def max_min_element_in_arrs(arr_list):
