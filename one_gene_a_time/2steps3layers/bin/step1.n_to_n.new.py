@@ -1,10 +1,4 @@
 #!/usr/bin/python
-# this is the wrapper for step1
-
-# import modules and print versions
-from __future__ import division  # fix division // get float bug
-from __future__ import print_function  # fix printing \n
-
 import tensorflow as tf
 import numpy as np
 import math
@@ -14,70 +8,42 @@ from scipy.stats.stats import pearsonr
 import sys
 import os
 import time
-import matplotlib
-matplotlib.use('Agg')  # for plotting without GUI
+import matplotlib; matplotlib.use('Agg')  # for plotting without GUI
 import matplotlib.pyplot as plt
+import scimpute
 
 sys.path.append('./bin')
-print('sys.path', sys.path)
-import scimpute
+print('Sys.path:\n', sys.path, '\n')
+print('python version:', sys.version)
+print('tf.__version__', tf.__version__, '\n')
+
 import step1_params as p  #import parameters
 
-# import hl_func
-# import importlib  # for development: reload modules in pycharm
-# importlib.reload(hl_func)
-
-print('python version:', sys.version)
-print('tf.__version__', tf.__version__)
 
 # Define functions #
-def print_parameters():
-    print(os.getcwd(), "\n",
-          "\n# Parameters: {}L".format(p.L),
-          "\nn_features: ", n)
-    for l1 in range(1, p.l+1):
-      print("n_hidden{}: {}".format(l1, eval('p.n_hidden_'+str(l1))))
-    print(
-          "\np.learning_rate :", p.learning_rate,
-          "\np.batch_size: ", p.batch_size,
-          "\nepoches: ", p.training_epochs,
-          "\np.display_step (interval on learning curve): {}epochs".format(p.display_step),
-          "\np.snapshot_step (interval of saving session, imputation): {}epochs".format(p.snapshot_step),
-          "\n",
-          "\npIn_holder: ", p.pIn,
-          "\npHidden_holder: ", p.pHidden,
-          "\n",
-          "\ndf_train.values.shape", df_train.values.shape,
-          "\ndf_valid.values.shape", df_valid.values.shape,
-          "\ndf2_train.shape", df2_train.shape,
-          "\ndf2_valid.values.shape", df2_valid.values.shape,
-          "\n")
-    print("input_array:\n", df1.values[0:4, 0:4], "\n")
-
-
 def evaluate_epoch0():
     print("> Evaluate epoch 0:")
     epoch_log.append(epoch)
-    mse_train = sess.run(mse1, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
-    mse_valid = sess.run(mse1, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_train = sess.run(mse1, feed_dict={X: df1_train.values, pIn_holder: 1, pHidden_holder: 1})
+    mse_valid = sess.run(mse1, feed_dict={X: df1_valid.values, pIn_holder: 1, pHidden_holder: 1})
     mse_log_batch.append(mse_train)  # approximation
     mse_log_train.append(mse_train)
     mse_log_valid.append(mse_valid)
     print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
 
-    h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
-    h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
-    corr_train = scimpute.median_corr(df_train.values, h_train)
-    corr_valid = scimpute.median_corr(df_valid.values, h_valid)
+    h_train = sess.run(h, feed_dict={X: df1_train.values, pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: df1_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    corr_train = scimpute.median_corr(df1_train.values, h_train)
+    corr_valid = scimpute.median_corr(df1_valid.values, h_valid)
     cell_corr_log_batch.append(corr_train)
     cell_corr_log_train.append(corr_train)
     cell_corr_log_valid.append(corr_valid)
     print("Cell-pearsonr train, valid:", corr_train, corr_valid)
     # tb
     merged_summary = tf.summary.merge_all()
-    summary_batch = sess.run(merged_summary, feed_dict={X: df_train, M: df2_train,  # M is not used here, just dummy
+    summary_batch = sess.run(merged_summary, feed_dict={X: df1_train, M: df2_train,  # M is not used here, just dummy
                                                         pIn_holder: 1.0, pHidden_holder: 1.0})
-    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
+    summary_valid = sess.run(merged_summary, feed_dict={X: df1_valid.values, M: df2_valid.values,
                                                         pIn_holder: 1.0, pHidden_holder: 1.0})
     batch_writer.add_summary(summary_batch, epoch)
     valid_writer.add_summary(summary_valid, epoch)
@@ -91,7 +57,7 @@ def tb_summary():
     merged_summary = tf.summary.merge_all()
     summary_batch = sess.run(merged_summary, feed_dict={X: x_batch, M: x_batch,  # M is not used here, just dummy
                                                         pIn_holder: 1.0, pHidden_holder: 1.0})
-    summary_valid = sess.run(merged_summary, feed_dict={X: df_valid.values, M: df2_valid.values,
+    summary_valid = sess.run(merged_summary, feed_dict={X: df1_valid.values, M: df2_valid.values,
                                                         pIn_holder: 1.0, pHidden_holder: 1.0})
     batch_writer.add_summary(summary_batch, epoch)
     valid_writer.add_summary(summary_valid, epoch)
@@ -108,14 +74,14 @@ def learning_curve():
 def snapshot():
     print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
     # inference
-    h_train = sess.run(h, feed_dict={X: df_train.values, pIn_holder: 1, pHidden_holder: 1})
-    h_valid = sess.run(h, feed_dict={X: df_valid.values, pIn_holder: 1, pHidden_holder: 1})
+    h_train = sess.run(h, feed_dict={X: df1_train.values, pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: df1_valid.values, pIn_holder: 1, pHidden_holder: 1})
     h_input = sess.run(h, feed_dict={X: df1.values, pIn_holder: 1, pHidden_holder: 1})
     # print whole dataset pearsonr
     print("median cell-pearsonr(all train): ",
-          scimpute.median_corr(df2_train.values, h_train, num=len(df_train)))
+          scimpute.median_corr(df2_train.values, h_train, num=len(df1_train)))
     print("median cell-pearsonr(all valid): ",
-          scimpute.median_corr(df2_valid.values, h_valid, num=len(df_valid)))
+          scimpute.median_corr(df2_valid.values, h_valid, num=len(df1_valid)))
     print("median cell-pearsonr in all imputation cells: ",
           scimpute.median_corr(df2.values, h_input, num=m))
     # save pred
@@ -171,41 +137,47 @@ def save_weights():
         np.save('pre_train/'+decoder_bias_name, sess.run(eval(decoder_bias_name)))
 
 
+# Start
+print('step1: pre-training on reference RNA-seq data')
+print('cmd: ', sys.argv)
+
 # refresh pre_train folder
 log_dir = './pre_train'
 scimpute.refresh_logfolder(log_dir)
 
-
-# read data and save indexes #
-df1 = pd.read_hdf(p.file1).transpose()  # [cells,genes]
+# read data
+if p.file_orientation == 'gene_row':
+    df1 = pd.read_hdf(p.file1).transpose()
+elif p.file_orientation == 'cell_row':
+    df1 = pd.read_hdf(p.file1)  # [cell, gene] in our model
+else:
+    raise Exception('parameter err: file_orientation not correctly spelled')
 df2 = df1  # same for step1
 
 # Test or not
 if p.test_flag > 0:
-    print('in test mode')
-    df1 = df1.ix[0:1000, 0:10000]
-    df2 = df1.ix[0:1000, 0:10000]
+    print('* in test mode')
+    df1 = df1.ix[0:p.m, 0:p.n]
+    df2 = df1
 
+# Summary of data
+print("input_df:\n", df1.ix[0:3, 0:2], "\n")
 m, n = df1.shape  # m: n_cells; n: n_genes
-print("\ninput: ", p.name1, " ", p.file1, "\n", df1.values[0:4, 0:4], "\n")
+print('{} genes, {} cells\n'.format(n, m))
 
-max = max(df1.values.max(), df2.values.max())
-df_train, df_valid, df_test = scimpute.split_df(df1, a=p.a, b=p.b, c=p.c)
-df2_train, df2_valid, df2_test = df2.ix[df_train.index], df2.ix[df_valid.index], df2.ix[df_test.index]
-df_train.to_csv('pre_train/df_train.index.csv', columns=[], header=False)  # save index for future use
-df_valid.to_csv('pre_train/df_valid.index.csv', columns=[], header=False)
-df_test.to_csv('pre_train/df_test.index.csv', columns=[], header=False)
-
-# Parameters #
-n_input = n
-print_parameters()  # todo: use logger, dict
+# split data, save index
+df1_train, df1_valid, df1_test = scimpute.split_df(df1, a=p.a, b=p.b, c=p.c)
+df2_train, df2_valid, df2_test = df2.ix[df1_train.index], df2.ix[df1_valid.index], df2.ix[df1_test.index]
+df1_train.to_csv('pre_train/df1_train.index.csv', columns=[], header=False)  # save index for future use
+df1_valid.to_csv('pre_train/df1_valid.index.csv', columns=[], header=False)
+df1_test.to_csv('pre_train/df1_test.index.csv', columns=[], header=False)
 
 # Define model #
 tf.reset_default_graph()
 
 # placeholders
-X = tf.placeholder(tf.float32, [None, n_input], name='X_input')  # input
-M = tf.placeholder(tf.float32, [None, n_input], name='M_ground_truth')  # benchmark
+X = tf.placeholder(tf.float32, [None, n], name='X_input')  # input
+M = tf.placeholder(tf.float32, [None, n], name='M_ground_truth')  # benchmark
 
 pIn_holder = tf.placeholder(tf.float32, name='pIn')
 pHidden_holder = tf.placeholder(tf.float32, name='pHidden')
@@ -271,7 +243,7 @@ batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
 valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 
 epoch = 0
-num_batch = int(math.floor(len(df_train) // p.batch_size))  # floor
+num_batch = int(math.floor(len(df1_train) // p.batch_size))  # floor
 epoch_log = []
 mse_log_batch, mse_log_valid, mse_log_train = [], [], []
 cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
@@ -279,14 +251,14 @@ cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
 evaluate_epoch0()
 
 # training
-for epoch in range(1, p.training_epochs+1):
+for epoch in range(1, p.max_training_epochs+1):
     # training model #
     tic_cpu, tic_wall = time.clock(), time.time()
-    ridx_full = np.random.choice(len(df_train), len(df_train), replace=False)
+    ridx_full = np.random.choice(len(df1_train), len(df1_train), replace=False)
     for i in range(num_batch):
         indices = np.arange(p.batch_size * i, p.batch_size*(i+1))
         ridx_batch = ridx_full[indices]
-        x_batch = df_train.values[ridx_batch, :]
+        x_batch = df1_train.values[ridx_batch, :]
         sess.run(trainer, feed_dict={X: x_batch, pIn_holder: p.pIn, pHidden_holder: p.pHidden})
     toc_cpu, toc_wall = time.clock(), time.time()
 
@@ -301,19 +273,19 @@ for epoch in range(1, p.training_epochs+1):
         # Ad hoc summaries
         mse_batch, h_batch = sess.run([mse1, h], feed_dict={X: x_batch, pIn_holder: 1.0, pHidden_holder: 1.0})
         mse_log_batch.append(mse_batch)
-        mse_valid, h_valid = sess.run([mse1, h], feed_dict={X: df_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
+        mse_valid, h_valid = sess.run([mse1, h], feed_dict={X: df1_valid, pIn_holder: 1.0, pHidden_holder: 1.0})
         mse_log_valid.append(mse_valid)
         print('mse_batch, valid:', mse_batch, mse_valid)
-        # mse_train, h_train = sess.run([mse1, h], feed_dict={X: df_train, pIn_holder:1.0, pHidden_holder:1.0})
+        # mse_train, h_train = sess.run([mse1, h], feed_dict={X: df1_train, pIn_holder:1.0, pHidden_holder:1.0})
         # mse_log_train.append(mse_train)
         # print('mse_batch, train, valid:', mse_batch, mse_train, mse_valid)
 
         corr_batch = scimpute.median_corr(x_batch, h_batch)
         cell_corr_log_batch.append(corr_batch)
-        corr_valid = scimpute.median_corr(df_valid.values, h_valid)
+        corr_valid = scimpute.median_corr(df1_valid.values, h_valid)
         cell_corr_log_valid.append(corr_valid)
         print("cell-pearsonr in batch, valid:", corr_batch, corr_valid)
-        # corr_train = scimpute.median_corr(df_train.values, h_train)
+        # corr_train = scimpute.median_corr(df1_train.values, h_train)
         # cell_corr_log_train.append(corr_train)
         # print("cell-pearsonr in batch, train, valid:", corr_batch, corr_train, corr_valid)
 
@@ -329,7 +301,7 @@ for epoch in range(1, p.training_epochs+1):
         print('log time for each epoch:', round(toc_log - tic_log, 1))
 
     # Log per observation interval #
-    if (epoch % p.snapshot_step == 0) or (epoch == p.training_epochs):
+    if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
         h_train, h_valid, h_input = snapshot()  # save session and imputation
         learning_curve()
