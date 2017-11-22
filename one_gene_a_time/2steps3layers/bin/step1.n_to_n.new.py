@@ -188,7 +188,6 @@ if p.test_flag > 0:
 
 m, n = df1.shape  # m: n_cells; n: n_genes
 print("\ninput: ", p.name1, " ", p.file1, "\n", df1.values[0:4, 0:4], "\n")
-print("ground-truth: ", p.name2, " ", p.file2, "\n", df2.values[0:4, 0:4], "\n")
 
 max = max(df1.values.max(), df2.values.max())
 df_train, df_valid, df_test = scimpute.split_df(df1, a=p.a, b=p.b, c=p.c)
