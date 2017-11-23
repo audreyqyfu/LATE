@@ -24,44 +24,46 @@ import step1_params as p  #import parameters
 
 # Define functions #
 def evaluate_epoch0():
-    print("> Evaluate epoch 0:")
+    print("> Epoch 0:")
     epoch_log.append(epoch)
-    mse_train = sess.run(mse1,
+
+    # MSE1, h
+    mse_train, h_train = sess.run([mse1, h],
                          feed_dict={
                              X: df1_train.values,
                              pIn_holder: 1,
                              pHidden_holder: 1}
                          )
-    mse_valid = sess.run(mse1,
+    mse_valid, h_valid = sess.run([mse1,h],
                          feed_dict={
                              X: df1_valid.values,
                              pIn_holder: 1,
                              pHidden_holder: 1}
                          )
+    print('MSE1: train: {}, valid: {}'.format(mse_train, mse_valid))
     mse_log_batch.append(mse_train)  # approximation
     mse_log_train.append(mse_train)
     mse_log_valid.append(mse_valid)
-    print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
 
-    h_train = sess.run(h,
-                       feed_dict={
-                           X: df1_train.values,
-                           pIn_holder: 1,
-                           pHidden_holder: 1}
-                       )
-    h_valid = sess.run(h,
-                       feed_dict={
-                           X: df1_valid.values,
-                           pIn_holder: 1,
-                           pHidden_holder: 1}
-                       )
-    corr_train = scimpute.median_corr(df1_train.values, h_train)
-    corr_valid = scimpute.median_corr(df1_valid.values, h_valid)
-    cell_corr_log_batch.append(corr_train)
-    cell_corr_log_train.append(corr_train)
-    cell_corr_log_valid.append(corr_valid)
-    print("Cell-pearsonr train, valid:", corr_train, corr_valid)
-    # tb
+    # cell-corr
+    cell_corr_train = scimpute.median_corr(df1_train.values, h_train)
+    cell_corr_valid = scimpute.median_corr(df1_valid.values, h_valid)
+    print("Cell-corr(full): train: {}, valid: {}".
+          format(cell_corr_train, cell_corr_valid))
+    cell_corr_log_batch.append(cell_corr_train)
+    cell_corr_log_valid.append(cell_corr_valid)
+
+    # gene-corr
+    gene_corr_batch = scimpute.median_corr(
+        df1_train.values.transpose(), h_train.transpose(), num=1000)
+    gene_corr_valid = scimpute.median_corr(
+        df1_valid.values.transpose(), h_valid.transpose(), num=1000)
+    print("Gene-corr(full): batch: {}, valid: {}".
+          format(gene_corr_batch, gene_corr_valid))
+    gene_corr_log_batch.append(gene_corr_batch)
+    gene_corr_log_valid.append(gene_corr_valid)
+
+    # tensorboard (tb)
     merged_summary = tf.summary.merge_all()
     summary_batch = sess.run(merged_summary, feed_dict={X: df1_train,
                                                         pIn_holder: 1.0,
@@ -90,10 +92,23 @@ def tb_summary():
     print('tb_summary time:', round(toc-tic, 2))
 
 
-def learning_curve():
-    print('> plotting learning curves')
-    scimpute.learning_curve_mse(epoch_log, mse_log_batch, mse_log_valid)
-    scimpute.learning_curve_corr(epoch_log, cell_corr_log_batch, cell_corr_log_valid)
+def learning_curves():
+    print('plotting learning curves')
+    scimpute.learning_curve(
+        epoch_log, mse_log_batch, mse_log_valid,
+        title='Learning curve (MSE).{}'.format(p.stage),
+        ylabel='MSE'
+    )
+    scimpute.learning_curve(
+        epoch_log, cell_corr_log_batch, cell_corr_log_valid,
+        title='Learning curve (cell_corr).{}'.format(p.stage),
+        ylabel='Cell-corr'
+    )
+    scimpute.learning_curve(
+        epoch_log, gene_corr_log_batch, gene_corr_log_valid,
+        title='Learning curve (gene_corr).{}'.format(p.stage),
+        ylabel='Gene-corr'
+    )
 
 
 def snapshot():
@@ -151,7 +166,6 @@ def visualize_weight(w_name, b_name):
 
 
 def visualize_weights():
-    # todo: update when model changes depth
     for l1 in range(1, p.l+1):
         encoder_weight = 'e_w'+str(l1)
         encoder_bias = 'e_b'+str(l1)
@@ -162,7 +176,6 @@ def visualize_weights():
 
 
 def save_weights():
-    # todo: update when model changes depth
     print('save weights in npy')
     for l1 in range(1, p.l+1):
         encoder_weight_name = 'e_w'+str(l1)
@@ -176,7 +189,7 @@ def save_weights():
 
 
 # Start
-print('> cmd: ', sys.argv)
+print('Cmd: ', sys.argv)
 
 # refresh pre_train folder
 log_dir = './pre_train'
@@ -294,6 +307,9 @@ num_batch = int(math.floor(len(df1_train) // p.batch_size))  # floor
 epoch_log = []
 mse_log_batch, mse_log_valid, mse_log_train = [], [], []
 cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
+gene_corr_log_batch, gene_corr_log_valid, gene_corr_log_train = [], [], []
+increasing_epochs = 0
+previous_mse = -1  # neg is impossible for true mse
 
 evaluate_epoch0()
 
@@ -312,6 +328,7 @@ for epoch in range(1, p.max_training_epochs+1):
     # Log per epoch #
     if (epoch == 1) or (epoch % p.display_step == 0):
         tic_log = time.time()
+        epoch_log.append(epoch)
         # print training time
         cpu_time = round(toc_cpu - tic_cpu, 2)
         wall_time = round(toc_wall - tic_wall, 2)
@@ -338,14 +355,24 @@ for epoch in range(1, p.max_training_epochs+1):
               format(mse_batch, mse_valid))
 
         # cell-corr
-        corr_batch = scimpute.median_corr(x_batch, h_batch)
-        cell_corr_log_batch.append(corr_batch)
-        corr_valid = scimpute.median_corr(df1_valid.values, h_valid)
-        cell_corr_log_valid.append(corr_valid)
-        print("Cell-corr: batch: {}, valid: {}".
-              format(corr_batch, corr_valid))
+        cell_corr_batch = scimpute.median_corr(x_batch, h_batch)
+        cell_corr_valid = scimpute.median_corr(df1_valid.values, h_valid)
+        print("Cell-corr(fast): batch: {}, valid: {}".
+              format(cell_corr_batch, cell_corr_valid))
+        cell_corr_log_batch.append(cell_corr_batch)
+        cell_corr_log_valid.append(cell_corr_valid)
 
-        epoch_log.append(epoch)
+        # gene-corr
+        gene_corr_batch = scimpute.median_corr(
+            x_batch.transpose(), h_batch.transpose(), num=1000)
+        gene_corr_valid = scimpute.median_corr(
+            x_batch.transpose(), h_batch.transpose(), num=1000)
+        print("Gene-corr(fast): batch: {}, valid: {}".
+              format(gene_corr_batch, gene_corr_valid))
+        gene_corr_log_batch.append(gene_corr_batch)
+        gene_corr_log_valid.append(gene_corr_valid)
+
+        # tensor-board
         tb_summary()
 
         # todo: see if w1 updates
@@ -361,7 +388,7 @@ for epoch in range(1, p.max_training_epochs+1):
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
         h_train, h_valid, h_input = snapshot()  # save
-        learning_curve()
+        learning_curves()
         scimpute.gene_corr_hist(
             h_valid, df1_valid.values,
             title="Gene-corr(H vs X)(valid).{}".format(p.stage))
@@ -373,7 +400,22 @@ for epoch in range(1, p.max_training_epochs+1):
         visualize_weights()
         toc_log2 = time.time()
         log2_time = round(toc_log2 - tic_log2, 1)
+        min_mse1_valid = min(mse_log_valid)
+        print('min_MSE1_valid till now: {}'.format(min_mse1_valid))
         print('snapshot_step: {}s'.format(log2_time))
+
+    # early stop (not used yet)
+    if previous_mse > 0:  # skip if MSE == -1, no previous mse yet
+        if mse_valid > previous_mse:
+            increasing_epochs += 1
+        else:
+            increasing_epochs = 0
+    previous_mse = mse_valid
+
+    if increasing_epochs >= p.patience:
+        print('* Warning: {} epochs with increasing MSE_valid'.
+              format(increasing_epochs))
+
 
 batch_writer.close()
 valid_writer.close()

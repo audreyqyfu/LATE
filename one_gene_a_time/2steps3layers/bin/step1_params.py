@@ -17,6 +17,7 @@ max_training_epochs = int(3e3)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
 display_step = 50  # interval on learning curve
 snapshot_step = 1000  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
+patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 # file input #
 # EMT.MAGIC
