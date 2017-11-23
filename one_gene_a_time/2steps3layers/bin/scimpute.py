@@ -453,15 +453,15 @@ def max_min_element_in_arrs(arr_list):
     e.g: max_element_in_arrs([df_valid.values, h_valid])'''
     max_list = []
     for x in arr_list:
-        max_tmp = np.max(x)
+        max_tmp = np.nanmax(x)
         max_list.append(max_tmp)
-    max_all = max(max_list)
+    max_all = np.nanmax(max_list)
 
     min_list = []
     for x in arr_list:
-        min_tmp = np.min(x)
+        min_tmp = np.nanmin(x)
         min_list.append(min_tmp)
-    min_all = min(min_list)
+    min_all = np.nanmin(min_list)
 
     return max_all, min_all
 
@@ -710,16 +710,7 @@ def dense_layer_BN(name, input, W, b, pRetain, epsilon=1e-3):
 def learning_curve_mse(epoch, mse_batch, mse_valid,
                        title='learning curve (MSE)', xlabel='epochs', ylabel='MSE', range=None):
     """
-    learning curve
-    :param epoch: 
-    :param mse_batch: 
-    # :param mse_train: 
-    :param mse_valid: 
-    :param title: 
-    :param xlabel: 
-    :param ylabel: 
-    :param range: 
-    :return: 
+    depreciated
     """
 
     # create plots directory
@@ -778,16 +769,7 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
                         ylabel='median cell-corr (100 cells)',
                         range=None):
     """
-    learning curve
-    :param epoch: 
-    :param corr_batch: 
-    # :param corr_train: 
-    :param corr_valid: 
-    :param title: 
-    :param xlabel: 
-    :param ylabel: 
-    :param range: 
-    :return: 
+    depreciated
     """
 
     # create plots directory
@@ -832,6 +814,68 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
     if range is None:
         max, min = max_min_element_in_arrs([corr_batch[zoom], corr_valid[zoom]])
         # max, min = max_min_element_in_arrs([corr_batch, corr_train, corr_valid])
+        plt.ylim(min, max)
+    else:
+        plt.ylim(range[0], range[1])
+
+    plt.savefig(fprefix + '.png', bbox_inches='tight')
+    plt.close()
+
+def learning_curve(epoch, metrics_batch, metrics_valid,
+                   title='Learning curve (Metrics)',
+                   xlabel='epochs',
+                   ylabel='Metrics',
+                   range=None,
+                   skip=1):
+    '''
+    plot learning curve
+    :param epoch: vector
+    :param metrics_batch: vector
+    :param metrics_valid: vector
+    :param title: 
+    :param xlabel: 
+    :param ylabel: 
+    :param range: 
+    :return: 
+    '''
+
+    # create plots directory
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
+
+    # list to np.array, to use index
+    epoch = np.array(epoch)
+    metrics_batch = np.array(metrics_batch)
+    metrics_valid = np.array(metrics_valid)
+
+    # plot (full range)
+    fprefix = "./plots/" + title
+    plt.plot(epoch, metrics_batch, 'b--', label='batch')
+    plt.plot(epoch, metrics_valid, 'r-', label='valid')
+    plt.title(title)
+    plt.xlabel(xlabel + '\nfinal valid:' + str(metrics_valid[-1]))
+    plt.ylabel(ylabel)
+    plt.legend()
+    if range is None:
+        max, min = max_min_element_in_arrs([metrics_batch, metrics_valid])
+        plt.ylim(min, max)
+    else:
+        plt.ylim(range[0], range[1])
+
+    plt.savefig(fprefix + '.png', bbox_inches='tight')
+    plt.close()
+
+    # plot (no epoch0)
+    fprefix = "./plots/" + title + '.cropped'
+    zoom = np.arange(skip, len(metrics_batch))
+    plt.plot(epoch[zoom], metrics_batch[zoom], 'b--', label='batch')
+    plt.plot(epoch[zoom], metrics_valid[zoom], 'r-', label='valid')
+    plt.title(title)
+    plt.xlabel(xlabel + '\nfinal valid:' + str(metrics_valid[-1]))
+    plt.ylabel(ylabel)
+    plt.legend()
+    if range is None:
+        max, min = max_min_element_in_arrs([metrics_batch[zoom], metrics_valid[zoom]])
         plt.ylim(min, max)
     else:
         plt.ylim(range[0], range[1])
