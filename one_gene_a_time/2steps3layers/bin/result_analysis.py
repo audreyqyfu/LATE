@@ -39,13 +39,33 @@ elif flag == 'step2':
 else:
     raise Exception('argument wrong')
 
+
 # read data #
-df1 = scimpute.read_hd5(file1).transpose()
-print('input:', df1.ix[0:4, 0:4])
+if p.file_orientation == 'gene_row':
+    df1 = scimpute.read_hd5(file1).transpose()
+    df2 = scimpute.read_hd5(file2).transpose()
+    h = scimpute.read_hd5(file_pred)
+elif p.file_orientation == 'cell_row':
+    df1 = scimpute.read_hd5(file1)
+    df2 = scimpute.read_hd5(file2)
+    h = scimpute.read_hd5(file_pred)
+else:
+    raise Exception('p.file_orientation spelled wrong')
+
+
+# If test
+if p.test_flag > 0:
+    print('in test mode')
+    df1 = df1.ix[0:p.m, 0:p.n]
+    df2 = df2.ix[0:p.m, 0:p.n]
+
+# input summary
+print('df1:', df1.ix[0:3, 0:2])
+print('df2:', df2.ix[0:3, 0:2])
+print('h:', h.ix[0:3, 0:2])
+
 print('df1.shape', df1.shape)
-df2 = scimpute.read_hd5(file2).transpose()
 print('df2.shape', df2.shape)
-h = scimpute.read_hd5(file_pred)
 print('h.shape', h.shape)
 
 # split data

@@ -17,10 +17,10 @@ def read_csv(fname):
     tic = time.time()
     df = pd.read_csv(fname, index_col=0)
     # print("read matrix: [genes, cells]")
-    print('data shape: ', df.shape)
-    print(df.ix[0:3, 0:3])
-    print(df.ix[-3:, -3:])
+    print(df.shape)
     # print(df.axes)
+    if df.shape[0] > 2 and df.shape[1] > 2:
+        print(df.ix[0:3, 0:2])
     toc = time.time()
     print("reading took {:.1f} seconds".format(toc - tic))
     return (df)
@@ -49,8 +49,10 @@ def read_hd5(in_name):
     '''
     print('reading: ', in_name)
     df = pd.read_hdf(in_name)
-    print(df.ix[0:3, 0:3])
     print(df.shape)
+    # print(df.axes)
+    if df.shape[0] > 2 and df.shape[1] > 2:
+        print(df.ix[0:3, 0:2])
     return (df)
 
 
