@@ -13,5 +13,6 @@ python -u ./step1.n_to_n.new.py
 
 echo "*--result analysis--*"
 python -u ./result_analysis.py step1
+python -u weight_visualization.step1.sh
 
 echo "*--done--*"

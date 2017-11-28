@@ -13,5 +13,7 @@ python -u ./step2.new.mtask.py
 
 echo "*--result analysis--*"
 python -u ./result_analysis.py step2
+python -u weight_visualization.step2.sh
+
 
 echo "*--done--*"

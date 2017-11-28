@@ -29,6 +29,7 @@ print('matrix sample', arr[0:3, 0:3])
 print('matrix shape:', arr.shape)
 
 # seaborn clustering
-heatmap = sns.clustermap(arr)
+heatmap = sns.clustermap(arr, method='average', cmap="summer", robust=True)
 heatmap.savefig(in_name+'.'+tag+'.png', bbox_inches='tight')
+print('\n\n')
 
