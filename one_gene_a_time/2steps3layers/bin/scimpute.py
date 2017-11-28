@@ -99,11 +99,11 @@ def mask_df(df, zero_percentage):
 
 
 # Plots #
-def density_plot(x, y, title, fname):
+def density_plot(x, y, title, fname, dir='plots'):
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fname = "./plots/" + fname
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fname = "./{}/{}".format(dir, fname)
     # Calculate the point density
     xy = np.vstack([x, y])
     z = gaussian_kde(xy)(xy)
@@ -143,12 +143,12 @@ def genescatterplot3d(gene1, gene2, gene3, scdata):
     plt.close(fig)
 
 
-def hist_list(list, xlab='xlab', title='histogram', bins=100):
+def hist_list(list, xlab='xlab', title='histogram', bins=100, dir='plots'):
     '''output histogram of a list into png'''
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
+    if not os.path.exists(dir):
+        os.makedirs(dir)
     fname = str(title) + '.png'
-    fname = "./plots/" + fname
+    fname = "./{}/{}".format(dir, fname)
     fig, ax = plt.subplots()
     plt.title(title)
     plt.xlabel(xlab)
@@ -236,11 +236,11 @@ def heatmap_vis2(arr, title='visualization of matrix', cmap="rainbow",
     print('heatmap vis ', title, ' done')
 
 
-def hist_arr_flat(arr, title='hist', xlab='x', ylab='Frequency', bins=100):
+def hist_arr_flat(arr, title='hist', xlab='x', ylab='Frequency', bins=100, dir='plots'):
     '''create histogram for flattened arr'''
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fname = "./plots/" + title + '.png'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fname = "./{}/{}".format(dir, title) + '.png'
 
     fig = plt.figure(figsize=(9, 9))
     n, bins, patches = plt.hist(arr.flatten(), bins, normed=1, facecolor='green', alpha=0.75)
@@ -311,15 +311,15 @@ def median_corr(arr1, arr2, num=100, accuracy=3, seed_var=100):
     return result
 
 
-def curveplot(x, y, title, xlabel, ylabel):
+def curveplot(x, y, title, xlabel, ylabel, dir='plots'):
     # scimpute.curveplot(epoch_log, corr_log_valid,
     #                      title='learning_curve_pearsonr.step2.gene'+str(j)+", valid",
     #                      xlabel='epoch',
     #                      ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fprefix = "./plots/" + title
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fprefix = "./{}/{}".format(dir, title)
     # plot
     plt.plot(x, y)
     plt.title(title)
@@ -329,16 +329,16 @@ def curveplot(x, y, title, xlabel, ylabel):
     plt.close()
 
 
-def curveplot2(x, y, z, title, xlabel, ylabel):
+def curveplot2(x, y, z, title, xlabel, ylabel, dir='plots'):
     '''curveplot2(epoch_log, train_log, valid_log, title="t", xlabel="x", ylabel="y")'''
     # scimpute.curveplot2(epoch_log, corr_log_train, corr_log_valid,
     #                      title='learning_curve_pearsonr.step2.gene'+str(j)+", train_valid",
     #                      xlabel='epoch',
     #                      ylabel='Pearson corr (predction vs ground truth, valid, including cells with zero gene-j)')
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fprefix = "./plots/" + title
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fprefix = "./{}/{}".format(dir, title)
     # plot
     plt.plot(x, y, label='train')
     plt.plot(x, z, label='valid')
@@ -350,14 +350,14 @@ def curveplot2(x, y, z, title, xlabel, ylabel):
     plt.close()
 
 
-def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
+def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same', dir='plots'):
     '''x is slice, y is a slice
     have to be slice to help pearsonr(x,y)[0] work
     range=[min, max]'''
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fprefix = "./plots/" + title
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fprefix = "./{}/{}".format(dir, title)
     # plot
     corr, _ = pearsonr(x, y)
     corr = str(round(corr, 4))
@@ -379,13 +379,13 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same'):
     plt.close()
 
 
-def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
+def gene_corr_hist(arr1, arr2, title='hist_gene_corr', dir='plots'):
     '''calculate correlation between genes [columns]
     arr [cells, genes]'''
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fprefix = "./plots/" + title
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fprefix = "./{}/{}".format(dir, title)
 
     # if arr1.shape is arr2.shape:
     range_size = arr2.shape[1]
@@ -410,13 +410,13 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr'):
     return hist
 
 
-def cell_corr_hist(arr1, arr2, title='hist_cell_corr'):
+def cell_corr_hist(arr1, arr2, title='hist_cell_corr', dir='plots'):
     '''calculate correlation between genes [columns]
     arr [cells, genes]'''
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fprefix = "./plots/" + title
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fprefix = "./{}/{}".format(dir, title)
 
     # if arr1.shape is arr2.shape:
     range_size = arr2.shape[0]
@@ -468,15 +468,15 @@ def max_min_element_in_arrs(arr_list):
     return max_all, min_all
 
 
-def visualize_weights_biases(weight, bias, title, cmap='rainbow'):
+def visualize_weights_biases(weight, bias, title, cmap='rainbow', dir='plots'):
     '''heatmap visualization of weight and bias
     weights: [1000, 500]
     bias: [1, 500]
     '''
     # https://stackoverflow.com/questions/43076488/single-row-or-column-heat-map-in-python
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
-    fname = "./plots/" + title + '.vis.png'
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fname = "./{}/{}".format(dir, title) + '.vis.png'
 
     vmax_w, vmin_w = max_min_element_in_arrs([weight])
     vmax_b, vmin_b = max_min_element_in_arrs([bias])
@@ -523,14 +523,14 @@ def corr_one_gene(col1, col2, accuracy=3):
     return (result)
 
 
-def hist_df(df, title="hist of df", xlab='xlab', bins=100):
+def hist_df(df, title="hist of df", xlab='xlab', bins=100, dir='plots'):
     df_flat = df.values.reshape(df.size, 1)
     # fig = plt.figure(figsize=(9, 9))
     plt.hist(df_flat, bins=bins)
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel('Frequency')
-    plt.savefig('./plots/' + title + '.png', bbox_inches='tight')
+    plt.savefig('./' + dir + title + '.png', bbox_inches='tight')
     plt.close()
     print('hist of ', title, 'is done')
 
@@ -710,14 +710,16 @@ def dense_layer_BN(name, input, W, b, pRetain, epsilon=1e-3):
 
 
 def learning_curve_mse(epoch, mse_batch, mse_valid,
-                       title='learning curve (MSE)', xlabel='epochs', ylabel='MSE', range=None):
+                       title='learning curve (MSE)', xlabel='epochs', ylabel='MSE',
+                       range=None,
+                       dir='plots'):
     """
     depreciated
     """
 
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
     # list to np.array, to use index
     epoch = np.array(epoch)
@@ -726,7 +728,7 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
     mse_valid = np.array(mse_valid)
 
     # plot (full range)
-    fprefix = "./plots/" + title
+    fprefix = "./{}/{}".format(dir, title)
     plt.plot(epoch, mse_batch, 'b--', label='mse_batch')
     # plt.plot(epoch, mse_train, 'g--', label='mse_train')
     plt.plot(epoch, mse_valid, 'r-', label='mse_valid')
@@ -745,7 +747,7 @@ def learning_curve_mse(epoch, mse_batch, mse_valid,
     plt.close()
 
     # plot (no epoch0)
-    fprefix = "./plots/" + title + '.cropped'
+    fprefix = "./{}/{}".format(dir, title) + '.cropped'
     zoom = np.arange(1, len(mse_batch))
     plt.plot(epoch[zoom], mse_batch[zoom], 'b--', label='mse_batch')
     # plt.plot(epoch[zoom], mse_train[zoom], 'g--', label='mse_train')
@@ -769,14 +771,15 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
                         title='learning curve (corr)',
                         xlabel='epochs',
                         ylabel='median cell-corr (100 cells)',
-                        range=None):
+                        range=None,
+                        dir='plots'):
     """
     depreciated
     """
 
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
     # list to np.array, to use index
     epoch = np.array(epoch)
@@ -785,7 +788,7 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
     corr_valid = np.array(corr_valid)
 
     # plot (full range)
-    fprefix = "./plots/" + title
+    fprefix = "./{}/{}".format(dir, title)
     plt.plot(epoch, corr_batch, 'b--', label='corr_batch')
     # plt.plot(epoch, corr_train, 'g--', label='corr_train')
     plt.plot(epoch, corr_valid, 'r-', label='corr_valid')
@@ -804,7 +807,7 @@ def learning_curve_corr(epoch, corr_batch, corr_valid,
     plt.close()
 
     # plot (no epoch0)
-    fprefix = "./plots/" + title + '.cropped'
+    fprefix = "./{}/{}".format(dir, title) + '.cropped'
     zoom = np.arange(1, len(corr_batch))
     plt.plot(epoch[zoom], corr_batch[zoom], 'b--', label='corr_batch')
     # plt.plot(epoch[zoom], corr_train[zoom], 'g--', label='corr_train')
@@ -828,7 +831,8 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
                    xlabel='epochs',
                    ylabel='Metrics',
                    range=None,
-                   skip=1):
+                   skip=1,
+                   dir='plots'):
     '''
     plot learning curve
     :param epoch: vector
@@ -838,12 +842,13 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
     :param xlabel: 
     :param ylabel: 
     :param range: 
+    :param dir:
     :return: 
     '''
 
     # create plots directory
-    if not os.path.exists("plots"):
-        os.makedirs("plots")
+    if not os.path.exists(dir):
+        os.makedirs(dir)
 
     # list to np.array, to use index
     epoch = np.array(epoch)
@@ -851,7 +856,7 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
     metrics_valid = np.array(metrics_valid)
 
     # plot (full range)
-    fprefix = "./plots/" + title
+    fprefix = "./{}/{}".format(dir, title)
     plt.plot(epoch, metrics_batch, 'b--', label='batch')
     plt.plot(epoch, metrics_valid, 'r-', label='valid')
     plt.title(title)
@@ -868,7 +873,7 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
     plt.close()
 
     # plot (no epoch0)
-    fprefix = "./plots/" + title + '.cropped'
+    fprefix = "./{}/{}".format(dir, title) + '.cropped'
     zoom = np.arange(skip, len(metrics_batch))
     plt.plot(epoch[zoom], metrics_batch[zoom], 'b--', label='batch')
     plt.plot(epoch[zoom], metrics_valid[zoom], 'r-', label='valid')

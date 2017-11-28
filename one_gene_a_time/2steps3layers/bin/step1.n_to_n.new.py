@@ -97,17 +97,20 @@ def learning_curves():
     scimpute.learning_curve(
         epoch_log, mse_log_batch, mse_log_valid,
         title='Learning curve (MSE).{}'.format(p.stage),
-        ylabel='MSE'
+        ylabel='MSE',
+        dir=p.stage
     )
     scimpute.learning_curve(
         epoch_log, cell_corr_log_batch, cell_corr_log_valid,
         title='Learning curve (cell_corr).{}'.format(p.stage),
-        ylabel='Cell-corr'
+        ylabel='Cell-corr',
+        dir=p.stage
     )
     scimpute.learning_curve(
         epoch_log, gene_corr_log_batch, gene_corr_log_valid,
         title='Learning curve (gene_corr).{}'.format(p.stage),
-        ylabel='Gene-corr'
+        ylabel='Gene-corr',
+        dir=p.stage
     )
 
 
@@ -137,21 +140,21 @@ def snapshot():
                                columns=df1.columns,
                                index=df1.index)
     scimpute.save_hd5(df1_h_input,
-                      log_dir + "/imputation.step1.hd5")
+                      "{}/imputation.{}.hd5".format(p.stage, p.stage))
     # save model
-    save_path = saver.save(sess, log_dir + "/step1.ckpt")
+    save_path = saver.save(sess, p.stage + "/step1.ckpt")
     print("Model saved in: %s" % save_path)
     return (h_train, h_valid, h_input)
 
 
 def save_bottle_neck_representation():
-    print("> save bottle-neck_representation")
+    print("save bottle-neck_representation")
     code_bottle_neck_input = sess.run(a_bottle_neck,
                                       feed_dict={
                                           X: df1.values,
                                           pIn_holder: 1,
                                           pHidden_holder: 1})
-    np.save('pre_train/code_neck_valid.{}.npy'.format(p.stage), code_bottle_neck_input)
+    np.save('{}/code_neck_valid.{}.npy'.format(p.stage, p.stage), code_bottle_neck_input)
 
 
 def visualize_weight(w_name, b_name):
@@ -162,7 +165,8 @@ def visualize_weight(w_name, b_name):
     b_arr = b_arr.reshape(len(b_arr), 1)
     b_arr_T = b_arr.T
     scimpute.visualize_weights_biases(w_arr, b_arr_T,
-                                      '{},{}.{}'.format(w_name, b_name, p.stage))
+                                      '{},{}.{}'.format(w_name, b_name, p.stage),
+                                      dir=p.stage)
 
 
 def visualize_weights():
@@ -182,18 +186,21 @@ def save_weights():
         encoder_bias_name = 'e_b'+str(l1)
         decoder_bias_name = 'd_b'+str(l1)
         decoder_weight_name = 'd_w'+str(l1)
-        np.save('pre_train/'+encoder_weight_name, sess.run(eval(encoder_weight_name)))
-        np.save('pre_train/'+decoder_weight_name, sess.run(eval(decoder_weight_name)))
-        np.save('pre_train/'+encoder_bias_name, sess.run(eval(encoder_bias_name)))
-        np.save('pre_train/'+decoder_bias_name, sess.run(eval(decoder_bias_name)))
+        np.save('{}/{}.{}'.format(p.stage, encoder_weight_name, p.stage),
+                sess.run(eval(encoder_weight_name)))
+        np.save('{}/{}.{}'.format(p.stage, decoder_weight_name, p.stage),
+                sess.run(eval(decoder_weight_name)))
+        np.save('{}/{}.{}'.format(p.stage, encoder_bias_name, p.stage),
+                sess.run(eval(encoder_bias_name)))
+        np.save('{}/{}.{}'.format(p.stage, decoder_bias_name, p.stage),
+                sess.run(eval(decoder_bias_name)))
 
 
 # Start
 print('Cmd: ', sys.argv)
 
 # refresh pre_train folder
-log_dir = './pre_train'
-scimpute.refresh_logfolder(log_dir)
+scimpute.refresh_logfolder(p.stage)
 
 # read data
 if p.file_orientation == 'gene_row':
@@ -217,11 +224,11 @@ print('{} genes, {} samples\n'.format(n, m))
 df1_train, df1_valid, df1_test = scimpute.split_df(df1,
                                                    a=p.a, b=p.b, c=p.c,
                                                    seed_var=1)
-df1_train.to_csv('pre_train/df1_train.index.csv',
+df1_train.to_csv('{}/df1_train.{}_index.csv'.format(p.stage, p.stage),
                  columns=[], header=False)
-df1_valid.to_csv('pre_train/df1_valid.index.csv',
+df1_valid.to_csv('{}/df1_valid.{}_index.csv'.format(p.stage, p.stage),
                  columns=[], header=False)
-df1_test.to_csv('pre_train/df1_test.index.csv',
+df1_test.to_csv('{}/df1_test.{}_index.csv'.format(p.stage, p.stage),
                 columns=[], header=False)
 
 # Define model #
@@ -299,8 +306,8 @@ saver = tf.train.Saver()
 init = tf.global_variables_initializer()
 sess.run(init)
 
-batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
-valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
+batch_writer = tf.summary.FileWriter(p.stage + '/batch', sess.graph)
+valid_writer = tf.summary.FileWriter(p.stage + '/valid', sess.graph)
 
 epoch = 0
 num_batch = int(math.floor(len(df1_train) // p.batch_size))  # floor
@@ -391,10 +398,14 @@ for epoch in range(1, p.max_training_epochs+1):
         learning_curves()
         scimpute.gene_corr_hist(
             h_valid, df1_valid.values,
-            title="Gene-corr(H vs X)(valid).{}".format(p.stage))
+            title="Gene-corr(H vs X)(valid).{}".format(p.stage),
+            dir=p.stage
+        )
         scimpute.cell_corr_hist(
             h_valid, df1_valid.values,
-            title="Cell-corr(H vs X)(valid).{}".format(p.stage))
+            title="Cell-corr(H vs X)(valid).{}".format(p.stage),
+            dir=p.stage
+        )
         save_bottle_neck_representation()
         save_weights()
         visualize_weights()
