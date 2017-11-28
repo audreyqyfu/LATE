@@ -111,6 +111,11 @@ def learning_curve_step2():
                                  ylabel='Cell-corr2',
                                  dir=p.stage
                             )
+    scimpute.learning_curve(epoch_log, gene_corr2_batch_vec, gene_corr2_valid_vec,
+                                 title='Learning curve gene-corr2.{}'.format(p.stage),
+                                 ylabel='Gene-corr2',
+                                 dir=p.stage
+                            )
 
 
 def snapshot():
@@ -411,10 +416,14 @@ for epoch in range(1, p.max_training_epochs+1):
         learning_curve_step2()
         scimpute.gene_corr_hist(
             h_valid, df1_valid.values,
-            title="Gene-corr(H vs X)(valid).{}".format(p.stage))
+            title="Gene-corr(H vs X)(valid).{}".format(p.stage),
+            dir=p.stage
+        )
         scimpute.cell_corr_hist(
             h_valid, df1_valid.values,
-            title="Cell-corr(H vs X)(valid).{}".format(p.stage))
+            title="Cell-corr(H vs X)(valid).{}".format(p.stage),
+            dir=p.stage
+        )
         save_bottle_neck_representation()
         save_weights()
         visualize_weights()

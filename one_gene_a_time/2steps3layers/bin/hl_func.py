@@ -1,4 +1,5 @@
 # high level functions
+# not working, passing sess a failure
 import step2_params as p
 import numpy as np
 
