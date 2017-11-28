@@ -1,22 +1,24 @@
 # Hyper structure #
+stage = 'step2'  # step1/step2
 L = 7  # only a reporter, changing it can't alter the model structure
 l = L//2
 n_hidden_1 = 800
 n_hidden_2 = 400  # update for different depth
 n_hidden_3 = 200
-n_hidden_4 = -1  # -1 means no such layer
+# n_hidden_4 = 100 # add more after changing model structure
 
 
 # Training parameters #
-pIn = 0.9
-pHidden = 0.8
-learning_rate = 0.0000001  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
-sd = 0.0001  # 3-7L:1e-3, 9L:1e-4, update for different depth
+pIn = 0.8
+pHidden = 0.5
+learning_rate = 3e-5  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
+sd = 1e-4  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 393
-training_epochs = 2000000
-display_step = 200  # interval on learning curve
-snapshot_step = 5000  # interval of saving session, imputation
+max_training_epochs = int(2e5)
+display_step = 1000  # interval on learning curve
+snapshot_step = int(2e4)  # interval of saving session, imputation
 [a, b, c] = [0.85, 0.15, 0]  # splitting proportion: train/valid/test
+patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 
 
@@ -28,30 +30,59 @@ j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 # name2 = '(EMT_MAGIC_B)'
 
 # GTEx Muscle
-file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X
+# file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X
+file1 = "../../../../data/gtex/tpm_msk_muscle/gtex_v7.tpm.log.msk90.muscle_yes.hd5"  # input X
 file2 = "../../../../data/gtex/tpm_muscle/gtex_v7.tpm.log.muscle_yes.hd5"  # ground truth M
 # file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X
 # file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M
 file_orientation = 'cell_row'  # cell_row/gene_row
-# name1 = '(muscle_ds70k)'  # uses 20GB of RAM
-# name2 = '(GTEx_muscle)'
+name1 = '(muscle_ds70k)'  # uses 20GB of RAM
+name2 = '(GTEx_muscle)'
 
 
 # For development usage #
 seed_tf = 3
-test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
-    training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
+    max_training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
     snapshot_step = 5  # interval of saving session, imputation
+    m = 1000
+    n = 15000
+
+# Gene list
+pair_list = [[4058, 7496],
+            [8495, 12871],
+            # [2, 3],
+            # [205, 206]
+            ]
+
+gene_list = [4058, 7496, 8495, 12871]
 
 
-# Print parameters
+# print parameters
+print('Files:')
+print('file1:', file1)
+print('name1:', name1)
+print('file2:', file2)
+print('name2:', name2)
+print('data_frame_orientation:', file_orientation)
+print()
 
-print("\n# Parameters: {}L".format(L))
-print(
-      "\np.learning_rate :", learning_rate,
-      "\np.batch_size: ", batch_size,
-      "\nepoches: ", training_epochs,
-      "\npIn_holder: ", pIn,
-      "\npHidden_holder: ", pHidden)
+print('Parameters:')
+print('stage:', stage)
+print('test_mode:', test_flag)
+print('{}L'.format(L))
+print('{} Genes'.format(n))
+for l_tmp in range(1, l+1):
+  print("n_hidden{}: {}".format(l_tmp, eval('n_hidden_'+str(l_tmp))))
+
+print('learning_rate:', learning_rate)
+print('batch_size:', batch_size)
+print('pIn:', pIn)
+print('pHidden:', pHidden)
+print('max_training_epochs:', max_training_epochs)
+print('display_step', display_step)
+print('snapshot_step', snapshot_step)
+print()
+

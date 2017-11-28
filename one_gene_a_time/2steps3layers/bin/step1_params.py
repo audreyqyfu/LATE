@@ -30,6 +30,15 @@ file1 = "../../../../data/gtex/tpm/gtex_v7.log.hd5"  # input
 name1 = '(gtex_tpm_log_all)'  # uses 20GB of RAM
 file_orientation = 'gene_row'  # cell_row/gene_row
 
+# Gene list
+pair_list = [[4058, 7496],
+            [8495, 12871],
+            # [2, 3],
+            # [205, 206]
+            ]
+
+gene_list = [4058, 7496, 8495, 12871]
+
 # For Test Run #
 seed_tf = 3
 test_flag = 1  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
@@ -38,7 +47,7 @@ if test_flag == 1:
     display_step = 1  # interval on learning curve
     snapshot_step = 5  # interval of saving session, imputation
     m = 1000
-    n = 5500
+    n = 15000
 
 
 # print parameters
