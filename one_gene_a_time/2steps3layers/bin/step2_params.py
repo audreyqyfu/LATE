@@ -13,13 +13,12 @@ pIn = 0.8
 pHidden = 0.5
 learning_rate = 3e-5  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
 sd = 1e-4  # 3-7L:1e-3, 9L:1e-4, update for different depth
-batch_size = 393
+batch_size = 479
 max_training_epochs = int(2e5)
 display_step = 1000  # interval on learning curve
 snapshot_step = int(2e4)  # interval of saving session, imputation
 [a, b, c] = [0.85, 0.15, 0]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
-j_lst = [4058, 7496, 8495, 12871]  # Cd34, Gypa, Klf1, Sfpi1
 
 
 # file input #

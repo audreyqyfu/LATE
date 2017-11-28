@@ -31,32 +31,43 @@ import step2_params as p
 def evaluate_epoch_step2():
     print("> Evaluation:")
     epoch_log.append(epoch)
-    # mse2 (h vs M)
+    # MSE: mse2 (H vs M), mse1 (H vs X)
     mse2_train = sess.run(mse2, feed_dict={X: df1_train, M: df2_train,
                                            pIn_holder: 1, pHidden_holder: 1})
     mse2_valid = sess.run(mse2, feed_dict={X: df1_valid, M: df2_valid,
                                            pIn_holder: 1, pHidden_holder: 1})
-    mse2_batch_vec.append(mse2_train)  # approximation
-    mse2_valid_vec.append(mse2_valid)
-    print("mse2_train=", round(mse2_train, 3), "mse2_valid=", round(mse2_valid, 3))
-
-    # mse1 (h vs X)
     mse1_train = sess.run(mse1, feed_dict={X: df1_train, M: df2_train,
                                            pHidden_holder: 1.0, pIn_holder: 1.0})
-    mse1_batch_vec.append(mse1_train)
-
     mse1_valid = sess.run(mse1, feed_dict={X: df1_valid, M: df2_valid,
                                            pHidden_holder: 1.0, pIn_holder: 1.0})
+    mse1_batch_vec.append(mse1_train)
     mse1_valid_vec.append(mse1_valid)
+    mse2_batch_vec.append(mse2_train)  # approximation
+    mse2_valid_vec.append(mse2_valid)
     print("mse1_train=", round(mse1_train, 3), "mse1_valid=", round(mse1_valid, 3))
+    print("mse2_train=", round(mse2_train, 3), "mse2_valid=", round(mse2_valid, 3))
+    # Cell-corr
+    h_train = sess.run(h, feed_dict={X: df1_train.values,
+                                     pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: df1_valid.values,
+                                     pIn_holder: 1, pHidden_holder: 1})
+    cell_corr2_train = scimpute.median_corr(df2_train.values, h_train)
+    cell_corr2_valid = scimpute.median_corr(df2_valid.values, h_valid)
+    cell_corr2_batch_vec.append(cell_corr2_train)
+    cell_corr2_valid_vec.append(cell_corr2_valid)
+    print("Cell-corr2: train:{}; valid:{}".format(cell_corr2_train, cell_corr2_valid))
 
-    h_train = sess.run(h, feed_dict={X: df1_train.values, pIn_holder: 1, pHidden_holder: 1})
-    h_valid = sess.run(h, feed_dict={X: df1_valid.values, pIn_holder: 1, pHidden_holder: 1})
-    corr2_train = scimpute.median_corr(df2_train.values, h_train)
-    corr2_valid = scimpute.median_corr(df2_valid.values, h_valid)
-    median_cell_corr2_batch_vec.append(corr2_train)
-    median_cell_corr2_valid_vec.append(corr2_valid)
-    print("Medium-cell-corr2, train, valid:", corr2_train, corr2_valid)
+    # Gene-corr
+    gene_corr2_train = scimpute.median_corr(
+        df2_train.values.transpose(), h_train.transpose(), num=1000)
+    gene_corr2_valid = scimpute.median_corr(
+        df2_valid.values.transpose(), h_valid.transpose(), num=1000)
+    print("Gene-corr2(rand 1000 genes): train: {}, valid: {}".
+          format(gene_corr2_train, gene_corr2_valid))
+    gene_corr2_batch_vec.append(gene_corr2_train)
+    gene_corr2_valid_vec.append(gene_corr2_valid)
+
+
     # # tb todo
     # merged_summary = tf.summary.merge_all()
     # summary_batch = sess.run(merged_summary, feed_dict={X: df1_train, M: df2_train,  # M is not used here, just dummy
@@ -85,13 +96,21 @@ def tb_summary():
 
 def learning_curve_step2():
     print('> plotting learning curves')
-    scimpute.learning_curve_mse(epoch_log, mse2_batch_vec, mse2_valid_vec,
+    scimpute.learning_curve(epoch_log, mse2_batch_vec, mse2_valid_vec,
                                 title="Learning Curve MSE2.{}".format(p.stage),
-                                ylabel='MSE2')
-    scimpute.learning_curve_mse(epoch_log, mse1_batch_vec, mse1_valid_vec,
+                                ylabel='MSE2',
+                                dir=p.stage
+                            )
+    scimpute.learning_curve(epoch_log, mse1_batch_vec, mse1_valid_vec,
                                 title="Learning Curve MSE1.{}".format(p.stage),
-                                ylabel="MSE1")
-    # scimpute.learning_curve_corr(epoch_log, median_cell_corr2_batch_vec, median_cell_corr2_valid_vec)
+                                ylabel="MSE1",
+                                dir=p.stage
+                            )
+    scimpute.learning_curve(epoch_log, cell_corr2_batch_vec, cell_corr2_valid_vec,
+                                 title='Learning curve cell-corr2.{}'.format(p.stage),
+                                 ylabel='Cell-corr2',
+                                 dir=p.stage
+                            )
 
 
 def snapshot():
@@ -134,7 +153,8 @@ def visualize_weight(w_name, b_name):
     b_arr = b_arr.reshape(len(b_arr), 1)
     b_arr_T = b_arr.T
     scimpute.visualize_weights_biases(w_arr, b_arr_T,
-                                      '{},{}.{}'.format(w_name, b_name, p.stage))
+                                      '{},{}.{}'.format(w_name, b_name, p.stage),
+                                      dir=p.stage)
 
 
 def visualize_weights():
@@ -202,7 +222,7 @@ print('{} genes, {} cells\n'.format(n, m))
 
 # split data and save indexes
 df1_train, df1_valid, df1_test = scimpute.split_df(df1,
-                                                   a=0.7, b=0.15, c=0.15)
+                                                   a=p.a, b=p.b, c=p.c)
 df2_train, df2_valid, df2_test = [df2.ix[df1_train.index],
                                   df2.ix[df1_valid.index],
                                   df2.ix[df1_test.index]]
@@ -227,7 +247,7 @@ X = tf.placeholder(tf.float32, [None, n_input], name='X_input')  # input
 M = tf.placeholder(tf.float32, [None, n_input], name='M_ground_truth')  # benchmark
 pIn_holder = tf.placeholder(tf.float32, name='p.pIn')
 pHidden_holder = tf.placeholder(tf.float32, name='p.pHidden')
-J = tf.placeholder(tf.int32, name='j')
+j_holder = tf.placeholder(tf.int32, name='j')
 
 # define layers and variables
 tf.set_random_seed(3)  # seed
@@ -263,7 +283,7 @@ h = d_a1
 
 # define loss
 with tf.name_scope("Metrics"):
-    mse1_j = tf.reduce_mean(tf.pow(X[:, J] - h[:, J], 2))  # for training
+    mse1_j = tf.reduce_mean(tf.pow(X[:, j_holder] - h[:, j_holder], 2))  # for training
     mse1 = tf.reduce_mean(tf.pow(X - h, 2))  # for report
     mse2 = tf.reduce_mean(tf.pow(M - h, 2))
     tf.summary.scalar('mse1_j', mse1_j)
@@ -279,7 +299,7 @@ sess = tf.Session()
 
 # restore variables
 saver = tf.train.Saver()
-saver.restore(sess, "./pre_train/step1.ckpt")
+saver.restore(sess, "./step1/step1.ckpt")
 
 # define tensor_board writer
 batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)
@@ -290,9 +310,13 @@ epoch = 0
 num_batch = int(math.floor(len(df1_train) // p.batch_size))  # floor
 epoch_log = []
 mse1_batch_vec, mse1_valid_vec = [], []  # mse1 = MSE(X, h)
+mse1j_batch_vec, mse1j_valid_vec = [], []  # mse1j = MSE(X, h), for genej, nz_cells
 mse2_batch_vec, mse2_valid_vec = [], []  # mse2 = MSE(M, h)
-median_cell_corr1_batch_vec, median_cell_corr1_valid_vec = [], []  # median_cell_corr, for subset of cells
-median_cell_corr2_batch_vec, median_cell_corr2_valid_vec = [], []  # 1 ~ (X, h); 2 ~ (M, h)
+cell_corr1_batch_vec, cell_corr1_valid_vec = [], []  # median_cell_corr, for subset of cells
+cell_corr2_batch_vec, cell_corr2_valid_vec = [], []  # 1 ~ (X, h); 2 ~ (M, h)
+gene_corr1_batch_vec, gene_corr1_valid_vec = [], []
+gene_corr2_batch_vec, gene_corr2_valid_vec = [], []
+
 
 # evaluate epoch0
 evaluate_epoch_step2()
@@ -301,24 +325,23 @@ evaluate_epoch_step2()
 for epoch in range(1, p.max_training_epochs+1):
     # training on non-zero(nz) cells for gene-j #
     tic_cpu, tic_wall = time.clock(), time.time()
-    # rand mini-batch  todo: sort randx out
-    # random_indices = np.random.choice(len(df1_train), p.batch_size, replace=False)
+    ridx_full = np.random.choice(len(df1_train), len(df1_train), replace=False)
+
     # inner loop (mini-batches)
     for i in range(num_batch):
         # x_batch
-        # indices = np.arange(p.batch_size * i, p.batch_size*(i+1))
-        # x_batch = df1_train.ix[indices, :]  # [bs, n]
-        # x_idx = np.random.choice(m, p.batch_size, replace=False)
-        x_batch = df1_train  #todo: still batch
-        # j_batch
-        j = np.random.choice(range(n_input), 1)[0]  # todo: change to jlist for test, range(n_input) for real usage
-        # solid data
+        indices = np.arange(p.batch_size * i, p.batch_size*(i+1))
+        ridx_batch = ridx_full[indices]
+        x_batch = df1_train.ix[ridx_batch, :]
+        # j_rand
+        j = np.random.choice(range(n_input), 1)[0]
+        # nz_j_data
         nz_indices = (x_batch.ix[:, j:j + 1] > 0).values  #todo: get nz first then choose mini-batch
         x_batch_nz = x_batch[nz_indices]
 
         sess.run(trainer, feed_dict={X: x_batch_nz,
                                      pIn_holder: p.pIn, pHidden_holder: p.pHidden,
-                                     J: j})
+                                     j_holder: j})
     toc_cpu, toc_wall = time.clock(), time.time()
 
 
@@ -338,31 +361,48 @@ for epoch in range(1, p.max_training_epochs+1):
         # debug
         # print('d_w1', sess.run(d_w1[1, 0:4]))  # verified when GradDescent used
 
-        # log mse2 (h vs M)
-        mse2_batch = sess.run(mse2, feed_dict={X: x_batch, M: df2.ix[x_batch.index],
+        # log mse1 (M vs X) and mse2 (M vs H)
+        df2_batch = df2.ix[x_batch.index]
+        mse1_batch, mse2_batch, h_batch = sess.run([mse1, mse2, h],
+                              feed_dict={X: x_batch, M: df2_batch,
                                                pHidden_holder: 1.0, pIn_holder: 1.0})
-        mse2_batch_vec.append(mse2_batch)
-        print('mse2_batch:', mse2_batch)
-
-        mse2_valid = sess.run(mse2, feed_dict={X: df1_valid, M: df2_valid,
-                                               pHidden_holder: 1.0, pIn_holder: 1.0})
-        mse2_valid_vec.append(mse2_valid)
-        print('mse2_valid:', mse2_valid)
-
-        # log mse1 (h vs X)
-        mse1_batch = sess.run(mse1, feed_dict={X: x_batch, M: df2.ix[x_batch.index],
+        mse1_valid, mse2_valid, h_valid = sess.run([mse1, mse2, h],
+                                          feed_dict={X: df1_valid, M: df2_valid,
                                                pHidden_holder: 1.0, pIn_holder: 1.0})
         mse1_batch_vec.append(mse1_batch)
-        print('mse1_batch:', mse1_batch)
-
-        mse1_valid = sess.run(mse1, feed_dict={X: df1_valid, M: df2_valid,
-                                               pHidden_holder: 1.0, pIn_holder: 1.0})
+        mse2_batch_vec.append(mse2_batch)
+        mse2_valid_vec.append(mse2_valid)
         mse1_valid_vec.append(mse1_valid)
-        print('mse1_valid:', mse1_valid)
+
+        # cell-corr
+        cell_corr2_batch = scimpute.median_corr(
+            df2_batch.values, h_batch, num=100
+        )
+        cell_corr2_valid = scimpute.median_corr(
+            df2_valid.values, h_valid, num=100
+        )
+        cell_corr2_batch_vec.append(cell_corr2_batch)
+        cell_corr2_valid_vec.append(cell_corr2_valid)
+
+
+        # gene-corr
+        gene_corr2_batch = scimpute.median_corr(
+            df2_batch.values.transpose(), h_batch.transpose(), num=1000)
+        gene_corr2_valid = scimpute.median_corr(
+            df2_valid.values.transpose(), h_valid.transpose(), num=1000)
+        gene_corr2_batch_vec.append(gene_corr2_batch)
+        gene_corr2_valid_vec.append(gene_corr2_valid)
 
         toc_log = time.time()
         epoch_log.append(epoch)
+        print('mse1_batch:', mse1_batch, '; mse1_valid:', mse1_valid)
+        print('mse2_batch:', mse2_batch, '; mse2_valid:', mse2_valid)
+        print("cell-corr2(rand 100 cells): batch: {}, valid: {}".
+              format(cell_corr2_batch, cell_corr2_valid))
+        print("gene-corr2(rand 1000 genes): batch: {}, valid: {}".
+              format(gene_corr2_batch, gene_corr2_valid))
         print('log time for each epoch:', round(toc_log - tic_log, 1))
+        print()
 
     # report and save sess per observation interval
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
@@ -380,7 +420,7 @@ for epoch in range(1, p.max_training_epochs+1):
         visualize_weights()
         toc_log2 = time.time()
         log2_time = round(toc_log2 - tic_log2, 1)
-        min_mse2_valid = min(mse2_log_valid)
+        min_mse2_valid = min(mse2_valid_vec)
         print('min_MSE2_valid till now: {}'.format(min_mse2_valid))
         print('snapshot_step: {}s'.format(log2_time))
 
