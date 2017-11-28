@@ -6,6 +6,15 @@ echo $(hostname)
 nvidia-smi -L
 source /usr/modules/init/bash
 module load python/3.5.2
+
+
+echo "*--training NN--*"
 python -u ./step2.new.mtask.py
-python -u ./result_analysis.py step2
+
+echo "*--result analysis--*"
+python -u ./result_analysis.py step1
+
+echo "*--cluster map--*"
+for file in pre_train/*w*npy; do python weight_visualization.py $file sns_tag; done
+
 echo "*--done--*"
