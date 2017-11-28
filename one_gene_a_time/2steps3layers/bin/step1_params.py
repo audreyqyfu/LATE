@@ -31,13 +31,17 @@ name1 = '(gtex_tpm_log_all)'  # uses 20GB of RAM
 file_orientation = 'gene_row'  # cell_row/gene_row
 
 # Gene list
-pair_list = [[4058, 7496],
+pair_list = [
+            [4058, 7496],
             [8495, 12871],
             # [2, 3],
             # [205, 206]
             ]
 
-gene_list = [4058, 7496, 8495, 12871]
+gene_list = [
+            4058, 7496, 8495, 12871,
+            # 2, 3
+             ]
 
 # For Test Run #
 seed_tf = 3

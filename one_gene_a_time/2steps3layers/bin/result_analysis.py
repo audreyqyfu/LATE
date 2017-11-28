@@ -15,29 +15,25 @@ import scimpute
 
 flag = sys.argv[1].strip()
 print(flag + ",\n")
-# set filename #
+# stage specific params
 if flag == 'step1':
     print('in step1')
     import step1_params as p
     file1 = p.file1
     file2 = p.file1
-    file_pred = 'pre_train/imputation.step1.hd5'
-    tag = '(step1)'
-    # read index
-    train_idx = scimpute.read_csv('pre_train/df_train.index.csv').index
-    valid_idx = scimpute.read_csv('pre_train/df_valid.index.csv').index
 elif flag == 'step2':
     print('in step2')
     import step2_params as p
     file1 = p.file1
     file2 = p.file2
-    file_pred = 're_train/imputation.step2.hd5'
-    tag = '(step2)'
-    # read index
-    train_idx = scimpute.read_csv('re_train/df_train.step2_index.csv').index
-    valid_idx = scimpute.read_csv('re_train/df_valid.step2_index.csv').index
 else:
     raise Exception('argument wrong')
+
+# some common params
+file_pred = '{}/imputation.{}.hd5'.format(p.stage, p.stage)
+tag = '({})'.format(p.stage)
+train_idx = scimpute.read_csv('{}/df1_train.{}_index.csv'.format(p.stage, p.stage)).index
+valid_idx = scimpute.read_csv('{}/df1_valid.{}_index.csv'.format(p.stage, p.stage)).index
 
 
 # read data #
@@ -73,50 +69,52 @@ h_train, h_valid = h.ix[train_idx], h.ix[valid_idx]
 df_train, df_valid = df1.ix[train_idx], df1.ix[valid_idx]
 df2_train, df2_valid = df2.ix[train_idx], df2.ix[valid_idx]
 
-# M vs H
+# M vs H, M vs X
 def m_vs_h():
-    print("> Ground truth vs prediction")
-    for j in [1, 2, 3, 4, 205, 206, 4058, 7496, 8495, 12871]:  # Cd34, Gypa, Klf1, Sfpi1
+    print("> M vs H, M vs X")
+    for j in p.gene_list:  # Cd34, Gypa, Klf1, Sfpi1
             scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='same',
                                   title=str('M_vs_H, Gene' + str(j) + ' (valid)'+tag),
                                   xlabel='Ground Truth (M)',
-                                  ylabel='Prediction (H)'
+                                  ylabel='Prediction (H)',
+                                  dir=p.stage
                                   )
-            scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='flexible',
-                                  title=str('M_vs_H(zoom), Gene' + str(j) + ' (valid)'+tag),
-                                  xlabel='Ground Truth (M)',
-                                  ylabel='Prediction (H)'
-                                 )
+            # scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='flexible',
+            #                       title=str('M_vs_H(zoom), Gene' + str(j) + ' (valid)'+tag),
+            #                       xlabel='Ground Truth (M)',
+            #                       ylabel='Prediction (H)',
+            #                       dir=p.stage
+            #                      )
             scimpute.scatterplot2(df2_valid.values[:, j], df_valid.values[:, j], range='same',
                                   title=str('M_vs_X, Gene' + str(j) + ' (valid)'+tag),
                                   xlabel='Ground Truth (M)',
-                                  ylabel='Input (X)'
+                                  ylabel='Input (X)',
+                                  dir=p.stage
                                  )
 m_vs_h()
 
 # Gene-Gene in M, X, H
 def gene_gene_relationship():
-    print('> gene-gene relationship, before/after inference')
-    List = [[4058, 7496],
-            [8495, 12871],
-            [2, 3],
-            [205, 206]
-            ]
+    print('> Gene-gene relationship, before/after inference')
+    List = p.pair_list
     # Valid, H
     for i, j in List:
         scimpute.scatterplot2(h_valid.ix[:, i], h_valid.ix[:, j],
                               title='Gene' + str(i) + ' vs Gene' + str(j) + ' (H,valid)' + tag,
-                              xlabel='Gene' + str(i), ylabel='Gene' + str(j + 1))
+                              xlabel='Gene' + str(i), ylabel='Gene' + str(j + 1),
+                              dir=p.stage)
     # Valid, M
     for i, j in List:
         scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
                               title="Gene" + str(i) + ' vs Gene' + str(j) + ' (M,valid)' + tag,
-                              xlabel='Gene' + str(i), ylabel='Gene' + str(j))
+                              xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                              dir=p.stage)
     # Valid, X
     for i, j in List:
         scimpute.scatterplot2(df_valid.ix[:, i], df_valid.ix[:, j],
                               title="Gene" + str(i) + ' vs Gene' + str(j) + ' (X,valid)' + tag,
-                              xlabel='Gene' + str(i), ylabel='Gene' + str(j))
+                              xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                              dir=p.stage)
 gene_gene_relationship()
 
 # todo: Hist of df1 (need to fix x)
@@ -126,18 +124,24 @@ gene_gene_relationship()
 
 # Hist Cell/Gene corr
 hist = scimpute.gene_corr_hist(h_valid.values, df2_valid.values,
-                               title="Hist Gene-Corr (H vs M)"+tag
+                               title="Hist Gene-Corr (H vs M)"+tag,
+                               dir=p.stage
                                )
 hist = scimpute.cell_corr_hist(h_valid.values, df2_valid.values,
-                               title="Hist Cell-Corr (H vs M)"+tag
+                               title="Hist Cell-Corr (H vs M)"+tag,
+                               dir=p.stage
                                )
 
 def visualization_of_dfs():
-    print('visualization of dfs')
+    print('> Visualization of dfs')
     max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
     # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min,
+                         dir=p.stage)
+    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname,
+                         xlab='genes', ylab='cells', vmax=max, vmin=min,
+                         dir=p.stage)
     # scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
     # scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
 

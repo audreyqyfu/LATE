@@ -4,5 +4,7 @@ rm -rf *csv.gz
 rm -rf plots/
 rm -rf pre_train/
 rm -rf re_train/
-rm -rf slurm*
+rm -rf step1/
+rm -rf step2/
+rm -r slurm*
 
