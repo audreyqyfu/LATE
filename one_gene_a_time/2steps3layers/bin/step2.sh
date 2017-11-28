@@ -1,1 +1,1 @@
-sbatch -p gpu-long --nodelist=n106 --gres=gpu:1 step2.slurm
+sbatch -p gpu-long --nodelist=n105 --gres=gpu:1 step2.slurm

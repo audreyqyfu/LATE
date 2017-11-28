@@ -47,7 +47,7 @@ gene_list = [
 
 # For Test Run #
 seed_tf = 3
-test_flag = 1  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
@@ -67,7 +67,7 @@ print('Parameters:')
 print('stage:', stage)
 print('test_mode:', test_flag)
 print('{}L'.format(L))
-print('{} Genes'.format(n))
+# print('{} Genes'.format(n))
 for l_tmp in range(1, l+1):
   print("n_hidden{}: {}".format(l_tmp, eval('n_hidden_'+str(l_tmp))))
 
