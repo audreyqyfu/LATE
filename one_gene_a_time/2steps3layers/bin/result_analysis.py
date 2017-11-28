@@ -1,6 +1,6 @@
 #!/usr/bin/python
-print('10/17/2017, reads h.hd5 and data.hd5, then analysis the result')
-print('python -u result_analysis.py [step1/step2]')
+print('reads h.hd5 and data.hd5, then analysis the result')
+print('usage: python -u result_analysis.py [step1/step2]')
 
 import sys
 import numpy as np
@@ -66,7 +66,7 @@ print('h.shape', h.shape)
 
 # split data
 h_train, h_valid = h.ix[train_idx], h.ix[valid_idx]
-df_train, df_valid = df1.ix[train_idx], df1.ix[valid_idx]
+df1_train, df1_valid = df1.ix[train_idx], df1.ix[valid_idx]
 df2_train, df2_valid = df2.ix[train_idx], df2.ix[valid_idx]
 
 # M vs H, M vs X
@@ -85,13 +85,14 @@ def m_vs_h():
             #                       ylabel='Prediction (H)',
             #                       dir=p.stage
             #                      )
-            scimpute.scatterplot2(df2_valid.values[:, j], df_valid.values[:, j], range='same',
+            scimpute.scatterplot2(df2_valid.values[:, j], df1_valid.values[:, j], range='same',
                                   title=str('M_vs_X, Gene' + str(j) + ' (valid)'+tag),
                                   xlabel='Ground Truth (M)',
                                   ylabel='Input (X)',
                                   dir=p.stage
                                  )
 m_vs_h()
+
 
 # Gene-Gene in M, X, H
 def gene_gene_relationship():
@@ -111,16 +112,18 @@ def gene_gene_relationship():
                               dir=p.stage)
     # Valid, X
     for i, j in List:
-        scimpute.scatterplot2(df_valid.ix[:, i], df_valid.ix[:, j],
+        scimpute.scatterplot2(df1_valid.ix[:, i], df1_valid.ix[:, j],
                               title="Gene" + str(i) + ' vs Gene' + str(j) + ' (X,valid)' + tag,
                               xlabel='Gene' + str(i), ylabel='Gene' + str(j),
                               dir=p.stage)
 gene_gene_relationship()
 
-# todo: Hist of df1 (need to fix x)
-# scimpute.hist_df(df_valid, 'X(valid)')
-# scimpute.hist_df(df2_valid, 'M(valid)')
-# scimpute.hist_df(h_valid, 'H(valid)')
+
+# Hist of df1
+scimpute.hist_df(df1_valid, title='X(valid)({})'.format(p.name1), dir=p.stage)
+scimpute.hist_df(df2_valid, title='M(valid)({})'.format(p.name2), dir=p.stage)
+scimpute.hist_df(h_valid, title='H(valid)({})'.format(p.name1), dir=p.stage)
+
 
 # Hist Cell/Gene corr
 hist = scimpute.gene_corr_hist(h_valid.values, df2_valid.values,
@@ -132,19 +135,31 @@ hist = scimpute.cell_corr_hist(h_valid.values, df2_valid.values,
                                dir=p.stage
                                )
 
+
+# Visualization of dfs
 def visualization_of_dfs():
     print('> Visualization of dfs')
-    max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid])
-    # max, min = scimpute.max_min_element_in_arrs([df_valid.values, h_valid, h, df.values])
-    scimpute.heatmap_vis(df_valid.values, title='df.valid'+Aname,
+    max, min = scimpute.max_min_element_in_arrs([df1_valid.values,
+                                                 h_valid.values,
+                                                 df2_valid.values])
+    mse1 = ((h_valid.values - df1_valid.values) ** 2).mean()
+    mse2 = ((h_valid.values - df2_valid.values) ** 2).mean()
+    scimpute.heatmap_vis(df1_valid.values, title='X.valid.{}'.format(p.name1),
                          xlab='genes', ylab='cells', vmax=max, vmin=min,
                          dir=p.stage)
-    scimpute.heatmap_vis(h_valid, title='h.valid'+Aname,
+    scimpute.heatmap_vis(h_valid,
+                         title='H.valid.{}'.format(p.name1),
+                         xlab='genes\nmse1={}\nmse2={}'.format{mse1, mse2},
+                         ylab='cells', vmax=max, vmin=min,
+                         dir=p.stage)
+    scimpute.heatmap_vis(df2_valid.values, title='M.valid.{}'.format(p.name2),
                          xlab='genes', ylab='cells', vmax=max, vmin=min,
                          dir=p.stage)
-    # scimpute.heatmap_vis(df.values, title='df'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
-    # scimpute.heatmap_vis(h, title='h'+Aname, xlab='genes', ylab='cells', vmax=max, vmin=min)
+visualization_of_dfs()
 
+
+# Clustmap of weights, bottle-neck-activations
+os.system('for file in ./{}/*npy; do python weight_visualization.py $file {}; done'.format(p.stage, p.stage))
 
 # # gene MSE
 # j = 0
@@ -155,6 +170,4 @@ def visualization_of_dfs():
 # mse_j_input = ((pred_j - input_j) ** 2).mean()
 # mse_j_groundTruth = ((pred_j - groundTruth_j) ** 2).mean()
 #
-# # matrix MSE
-# matrix_mse_input = ((h.values - df1.values) ** 2).mean()
-# matrix_mse_groundTruth = ((h.values - df2.values) ** 2).mean()
+# matrix MSE

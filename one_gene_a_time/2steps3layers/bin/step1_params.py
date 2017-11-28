@@ -28,6 +28,8 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 # GTEx
 file1 = "../../../../data/gtex/tpm/gtex_v7.log.hd5"  # input
 name1 = '(gtex_tpm_log_all)'  # uses 20GB of RAM
+file2 = file1
+name2 = name1
 file_orientation = 'gene_row'  # cell_row/gene_row
 
 # Gene list

@@ -530,7 +530,7 @@ def hist_df(df, title="hist of df", xlab='xlab', bins=100, dir='plots'):
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel('Frequency')
-    plt.savefig('./' + dir + title + '.png', bbox_inches='tight')
+    plt.savefig('./{}/{}.png'.format(dir, title), bbox_inches='tight')
     plt.close()
     print('hist of ', title, 'is done')
 

@@ -12,9 +12,6 @@ echo "*--training NN--*"
 python -u ./step2.new.mtask.py
 
 echo "*--result analysis--*"
-python -u ./result_analysis.py step1
-
-echo "*--cluster map--*"
-for file in pre_train/*w*npy; do python weight_visualization.py $file sns_tag; done
+python -u ./result_analysis.py step2
 
 echo "*--done--*"
