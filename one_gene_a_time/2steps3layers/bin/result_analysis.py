@@ -144,12 +144,13 @@ def visualization_of_dfs():
                                                  df2_valid.values])
     mse1 = ((h_valid.values - df1_valid.values) ** 2).mean()
     mse2 = ((h_valid.values - df2_valid.values) ** 2).mean()
-    scimpute.heatmap_vis(df1_valid.values, title='X.valid.{}'.format(p.name1),
+    scimpute.heatmap_vis(df1_valid.values,
+                         title='X.valid.{}'.format(p.name1),
                          xlab='genes', ylab='cells', vmax=max, vmin=min,
                          dir=p.stage)
-    scimpute.heatmap_vis(h_valid,
+    scimpute.heatmap_vis(h_valid.values,
                          title='H.valid.{}'.format(p.name1),
-                         xlab='genes\nmse1={}\nmse2={}'.format{mse1, mse2},
+                         xlab='genes\nmse1={}\nmse2={}'.format(mse1, mse2),
                          ylab='cells', vmax=max, vmin=min,
                          dir=p.stage)
     scimpute.heatmap_vis(df2_valid.values, title='M.valid.{}'.format(p.name2),

@@ -14,11 +14,13 @@ import matplotlib.pyplot as plt
 
 
 # read cmd
-print('usage: <weights_visualization.py> <w_name.npy> <out_tag>')
 if len(sys.argv) != 3:
+    print('usage: <weights_visualization.py> <w_name.npy> <out_tag>')
+    print(sys.argv)
     raise Exception('cmd error')
 in_name = sys.argv[1]
 tag = sys.argv[2]
+print('usage:', sys.argv)
 
 
 # read data

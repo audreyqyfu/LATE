@@ -431,4 +431,4 @@ for epoch in range(1, p.max_training_epochs+1):
 batch_writer.close()
 valid_writer.close()
 sess.close()
-print("Finished!")
+print("Finished!\n\n\n")
