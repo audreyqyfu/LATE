@@ -421,13 +421,13 @@ for epoch in range(1, p.max_training_epochs+1):
         h_train, h_valid, h_input = snapshot()  # save
         learning_curve_step2()
         scimpute.gene_corr_hist(
-            h_valid, df1_valid.values,
-            title="Gene-corr(H vs X)(valid).{}".format(p.stage),
+            h_valid, df2_valid.values,
+            title="Gene-corr(H vs M)(valid).{}".format(p.stage),
             dir=p.stage
         )
         scimpute.cell_corr_hist(
-            h_valid, df1_valid.values,
-            title="Cell-corr(H vs X)(valid).{}".format(p.stage),
+            h_valid, df2_valid.values,
+            title="Cell-corr(H vs M)(valid).{}".format(p.stage),
             dir=p.stage
         )
         save_bottle_neck_representation()
@@ -447,4 +447,3 @@ batch_writer.close()
 valid_writer.close()
 sess.close()
 print("Finished!")
-
