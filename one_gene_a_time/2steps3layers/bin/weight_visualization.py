@@ -13,6 +13,18 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 
+def random_subset_arr(arr, m_max, n_max):
+    [m, n] = arr.shape
+    m_reduce = min(m, m_max)
+    n_reduce = min(n, n_max)
+    row_rand_idx = np.random.choice(m, m_reduce, replace=False)
+    col_rand_idx = np.random.choice(n, n_reduce, replace=False)
+    arr_sub = arr[row_rand_idx][:, col_rand_idx]
+    print('matrix from [{},{}] to a random subset of [{},{}]'.
+          format(m, n, arr_sub.shape[0], arr_sub.shape[1]))
+    return arr_sub
+
+
 # read cmd
 if len(sys.argv) != 3:
     print('usage: <weights_visualization.py> <w_name.npy> <out_tag>')
@@ -25,11 +37,24 @@ print('usage:', sys.argv)
 
 # read data
 arr = np.load(in_name)
-print('matrix sample', arr[0:3, 0:3])
+
+[m, n] = arr.shape
+
+# exclude saved bias files
+if (m == 1 or n == 1):
+    raise Exception('Not matrix, but vector, so skipped')
+
+print('matrix sample', arr[0:2, 0:2])
 print('matrix shape:', arr.shape)
+
+# exclude large matrix
+m_max = 10000
+n_max = 10000
+if (m > m_max or n > n_max):
+    print('matrix too large')
+    arr = random_subset_arr(arr, m_max, n_max)
 
 # seaborn clustering
 heatmap = sns.clustermap(arr, method='average', cmap="summer", robust=True)
 heatmap.savefig(in_name+'.'+tag+'.png', bbox_inches='tight')
 print('\n\n')
-
