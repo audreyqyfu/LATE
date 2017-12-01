@@ -12,11 +12,11 @@ n_hidden_3 = 200
 pIn = 0.8
 pHidden = 0.5
 learning_rate = 3e-5  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
-sd = 1e-4  # 3-7L:1e-3, 9L:1e-4, update for different depth
-batch_size = 479
-max_training_epochs = int(3e3)
-display_step = 50  # interval on learning curve
-snapshot_step = int(1e3)  # interval of saving session, imputation
+sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
+batch_size = 394
+max_training_epochs = int(3e1)
+display_step = 5  # interval on learning curve
+snapshot_step = int(2e1)  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
@@ -29,12 +29,12 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 # name2 = '(EMT_MAGIC_B)'
 
 # GTEx Muscle
-# file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X
-file1 = "../../../../data/gtex/tpm_msk_muscle/gtex_v7.tpm.log.msk90.muscle_yes.hd5"  # input X
-file2 = "../../../../data/gtex/tpm_muscle/gtex_v7.tpm.log.muscle_yes.hd5"  # ground truth M
-# file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X
-# file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M
-file1_orientation = 'cell_row'  # cell_row/gene_row
+# file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X (cell_row)
+file1 = "../../../../data/gtex/tpm_msk_muscle/gtex_v7.tpm.log.msk90.muscle_yes.hd5"  # input X (cell_row)
+file2 = "../../../../data/gtex/tpm_muscle/gtex_v7.tpm.log.muscle_yes.hd5"  # ground truth M (cell_row)
+# file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X (cell_row)
+# file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M (gene_row)
+file1_orientation = 'gene_row'  # cell_row/gene_row
 file2_orientation = 'gene_row'
 name1 = '(muscle_ds70k)'  # uses 20GB of RAM
 name2 = '(GTEx_muscle)'

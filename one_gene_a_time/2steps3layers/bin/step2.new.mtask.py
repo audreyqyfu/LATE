@@ -202,16 +202,16 @@ scimpute.refresh_logfolder(log_dir)
 
 # read data into df1/2 [cells, genes]
 if p.file1_orientation == 'gene_row':
-    df1 = pd.read_hdf(p.file1).transpose()
+    df1 = scimpute.read_hd5(p.file1).transpose()
 elif p.file1_orientation == 'cell_row':
-    df1 = pd.read_hdf(p.file1)
+    df1 = scimpute.read_hd5(p.file1)
 else:
     raise Exception('parameter err: file1_orientation not correctly spelled')
 
 if p.file2_orientation == 'gene_row':
-    df2 = pd.read_hdf(p.file2).transpose()
+    df2 = scimpute.read_hd5(p.file2).transpose()
 elif p.file2_orientation == 'cell_row':
-    df2 = pd.read_hdf(p.file2)
+    df2 = scimpute.read_hd5(p.file2)
 else:
     raise Exception('parameter err: file2_orientation not correctly spelled')
 
@@ -227,7 +227,7 @@ print("input_df:\n", df1.ix[0:3, 0:2], "\n")
 print("grouth_truth_name:", p.name2)
 print("ground_truth_df:\n", df2.ix[0:3, 0:2], "\n")
 m, n = df1.shape  # m: n_cells; n: n_genes
-print('DF1: {} genes, {} cells\n'.format(n, m))
+print('DF1: {} genes, {} cells\n'.format(df1.shape[0], df1.shape[1]))
 print('DF2: {} genes, {} cells\n'.format(df2.shape[0], df2.shape[1]))
 
 
@@ -393,14 +393,15 @@ for epoch in range(1, p.max_training_epochs+1):
             df2_valid.values, h_valid, num=100
         )
         cell_corr2_batch_vec.append(cell_corr2_batch)
+        cell_corr2_batch_df2vec.append(cell_corr2_batch)
         cell_corr2_valid_vec.append(cell_corr2_valid)
 
 
         # gene-corr
         gene_corr2_batch = scimpute.median_corr(
-            df2_batch.values.transpose(), h_batch.transpose(), num=1000)
+            df2_batch.values.transpose(), h_batch.transpose(), num=100)
         gene_corr2_valid = scimpute.median_corr(
-            df2_valid.values.transpose(), h_valid.transpose(), num=1000)
+            df2_valid.values.transpose(), h_valid.transpose(), num=100)
         gene_corr2_batch_vec.append(gene_corr2_batch)
         gene_corr2_valid_vec.append(gene_corr2_valid)
 

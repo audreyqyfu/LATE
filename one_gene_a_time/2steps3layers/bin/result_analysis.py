@@ -167,7 +167,7 @@ visualization_of_dfs()
 
 
 # Clustmap of weights, bottle-neck-activations (slow on GPU, moved to CPU)
-os.system('for file in ./{}/*npy; do python -u weight_visualization.py $file {}; done'.format(p.stage, p.stage))
+# os.system('for file in ./{}/*npy; do python -u weight_visualization.py $file {}; done'.format(p.stage, p.stage))
 
 # # gene MSE
 # j = 0
