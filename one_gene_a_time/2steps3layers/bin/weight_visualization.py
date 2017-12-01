@@ -17,8 +17,10 @@ def random_subset_arr(arr, m_max, n_max):
     [m, n] = arr.shape
     m_reduce = min(m, m_max)
     n_reduce = min(n, n_max)
+    np.random.seed(1201)
     row_rand_idx = np.random.choice(m, m_reduce, replace=False)
     col_rand_idx = np.random.choice(n, n_reduce, replace=False)
+    np.random.seed()
     arr_sub = arr[row_rand_idx][:, col_rand_idx]
     print('matrix from [{},{}] to a random subset of [{},{}]'.
           format(m, n, arr_sub.shape[0], arr_sub.shape[1]))
