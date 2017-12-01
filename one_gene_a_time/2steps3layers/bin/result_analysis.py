@@ -36,17 +36,22 @@ train_idx = scimpute.read_csv('{}/df1_train.{}_index.csv'.format(p.stage, p.stag
 valid_idx = scimpute.read_csv('{}/df1_valid.{}_index.csv'.format(p.stage, p.stage)).index
 
 
-# read data #
-if p.file_orientation == 'gene_row':
-    df1 = scimpute.read_hd5(file1).transpose()
-    df2 = scimpute.read_hd5(file2).transpose()
-    h = scimpute.read_hd5(file_pred)
-elif p.file_orientation == 'cell_row':
-    df1 = scimpute.read_hd5(file1)
-    df2 = scimpute.read_hd5(file2)
-    h = scimpute.read_hd5(file_pred)
+# read data into h, df1/2 [cells, genes]
+h = scimpute.read_hd5(file_pred)
+
+if p.file1_orientation == 'gene_row':
+    df1 = pd.read_hdf(p.file1).transpose()
+elif p.file1_orientation == 'cell_row':
+    df1 = pd.read_hdf(p.file1)
 else:
-    raise Exception('p.file_orientation spelled wrong')
+    raise Exception('parameter err: file1_orientation not correctly spelled')
+
+if p.file2_orientation == 'gene_row':
+    df2 = pd.read_hdf(p.file2).transpose()
+elif p.file2_orientation == 'cell_row':
+    df2 = pd.read_hdf(p.file2)
+else:
+    raise Exception('parameter err: file2_orientation not correctly spelled')
 
 
 # If test
