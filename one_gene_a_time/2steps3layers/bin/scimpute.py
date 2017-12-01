@@ -293,6 +293,18 @@ def split_df(df, a=0.8, b=0.1, c=0.1, seed_var=1):
     return df_train, df_valid, df_test
 
 
+def random_subset_arr(arr, m_max, n_max):
+    [m, n] = arr.shape
+    m_reduce = min(m, m_max)
+    n_reduce = min(n, n_max)
+    row_rand_idx = np.random.choice(m, m_reduce, replace=False)
+    col_rand_idx = np.random.choice(n, n_reduce, replace=False)
+    arr_sub = arr[row_rand_idx][:, col_rand_idx]
+    print('matrix from [{},{}] to a random subset of [{},{}]'.
+          format(m, n, arr_sub.shape[0], arr_sub.shape[1]))
+    return arr_sub
+
+
 def median_corr(arr1, arr2, num=100, accuracy=3, seed_var=100):
     """arr1 & arr2 must have same shape
     will calculate correlation between corresponding rows"""
