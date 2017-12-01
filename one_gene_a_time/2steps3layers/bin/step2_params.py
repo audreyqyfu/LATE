@@ -34,7 +34,8 @@ file1 = "../../../../data/gtex/tpm_msk_muscle/gtex_v7.tpm.log.msk90.muscle_yes.h
 file2 = "../../../../data/gtex/tpm_muscle/gtex_v7.tpm.log.muscle_yes.hd5"  # ground truth M
 # file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X
 # file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M
-file_orientation = 'cell_row'  # cell_row/gene_row
+file1_orientation = 'cell_row'  # cell_row/gene_row
+file2_orientation = 'gene_row'
 name1 = '(muscle_ds70k)'  # uses 20GB of RAM
 name2 = '(GTEx_muscle)'
 
@@ -65,7 +66,9 @@ print('file1:', file1)
 print('name1:', name1)
 print('file2:', file2)
 print('name2:', name2)
-print('data_frame_orientation:', file_orientation)
+print('data_frame1_orientation:', file1_orientation)
+print('data_frame2_orientation:', file1_orientation)
+
 print()
 
 print('Parameters:')

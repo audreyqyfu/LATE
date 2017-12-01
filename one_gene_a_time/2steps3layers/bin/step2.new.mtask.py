@@ -201,14 +201,19 @@ log_dir = './{}'.format(p.stage)
 scimpute.refresh_logfolder(log_dir)
 
 # read data into df1/2 [cells, genes]
-if p.file_orientation == 'gene_row':
+if p.file1_orientation == 'gene_row':
     df1 = pd.read_hdf(p.file1).transpose()
-    df2 = pd.read_hdf(p.file2).transpose()
-elif p.file_orientation == 'cell_row':
+elif p.file1_orientation == 'cell_row':
     df1 = pd.read_hdf(p.file1)
+else:
+    raise Exception('parameter err: file1_orientation not correctly spelled')
+
+if p.file2_orientation == 'gene_row':
+    df2 = pd.read_hdf(p.file2).transpose()
+elif p.file2_orientation == 'cell_row':
     df2 = pd.read_hdf(p.file2)
 else:
-    raise Exception('parameter err: file_orientation not correctly spelled')
+    raise Exception('parameter err: file2_orientation not correctly spelled')
 
 # Test or not
 if p.test_flag > 0:
@@ -222,7 +227,8 @@ print("input_df:\n", df1.ix[0:3, 0:2], "\n")
 print("grouth_truth_name:", p.name2)
 print("ground_truth_df:\n", df2.ix[0:3, 0:2], "\n")
 m, n = df1.shape  # m: n_cells; n: n_genes
-print('{} genes, {} cells\n'.format(n, m))
+print('DF1: {} genes, {} cells\n'.format(n, m))
+print('DF2: {} genes, {} cells\n'.format(df2.shape[0], df2.shape[1]))
 
 
 # split data and save indexes
