@@ -371,9 +371,9 @@ for epoch in range(1, p.max_training_epochs+1):
 
         # gene-corr
         gene_corr_batch = scimpute.median_corr(
-            x_batch.transpose(), h_batch.transpose(), num=1000)
+            x_batch.transpose(), h_batch.transpose(), num=100)
         gene_corr_valid = scimpute.median_corr(
-            x_batch.transpose(), h_batch.transpose(), num=1000)
+            x_batch.transpose(), h_batch.transpose(), num=100)
         print("Gene-corr(fast): batch: {}, valid: {}".
               format(gene_corr_batch, gene_corr_valid))
         gene_corr_log_batch.append(gene_corr_batch)

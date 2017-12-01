@@ -59,9 +59,9 @@ def evaluate_epoch_step2():
 
     # Gene-corr
     gene_corr2_train = scimpute.median_corr(
-        df2_train.values.transpose(), h_train.transpose(), num=1000)
+        df2_train.values.transpose(), h_train.transpose(), num=100)
     gene_corr2_valid = scimpute.median_corr(
-        df2_valid.values.transpose(), h_valid.transpose(), num=1000)
+        df2_valid.values.transpose(), h_valid.transpose(), num=100)
     print("Gene-corr2(rand 1000 genes): train: {}, valid: {}".
           format(gene_corr2_train, gene_corr2_valid))
     gene_corr2_batch_vec.append(gene_corr2_train)
@@ -227,8 +227,8 @@ print("input_df:\n", df1.ix[0:3, 0:2], "\n")
 print("grouth_truth_name:", p.name2)
 print("ground_truth_df:\n", df2.ix[0:3, 0:2], "\n")
 m, n = df1.shape  # m: n_cells; n: n_genes
-print('DF1: {} genes, {} cells\n'.format(df1.shape[0], df1.shape[1]))
-print('DF2: {} genes, {} cells\n'.format(df2.shape[0], df2.shape[1]))
+print('DF1: {} cells, {} genes\n'.format(df1.shape[0], df1.shape[1]))
+print('DF2: {} cells, {} genes\n'.format(df2.shape[0], df2.shape[1]))
 
 
 # split data and save indexes
@@ -393,7 +393,6 @@ for epoch in range(1, p.max_training_epochs+1):
             df2_valid.values, h_valid, num=100
         )
         cell_corr2_batch_vec.append(cell_corr2_batch)
-        cell_corr2_batch_df2vec.append(cell_corr2_batch)
         cell_corr2_valid_vec.append(cell_corr2_valid)
 
 
