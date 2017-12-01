@@ -47,7 +47,10 @@ Can down-sample from bulk RNA-seq dataset or other high quality dataset and simu
 ### step2(To Be Adapted to 7L):
 - script: **step2.new.mtask.py** (7L, 11/03)
 - library: scimpute.py
-- run command: `python -u step2.new.mtask.py`
+- parameter file: **step2_params.py** (change num_nodes, learning_rate...)
+1. put the 3 files in the same folder
+2. edit step2_params.py
+3. run command: `python -u step2.new.mtask.py`
 
 ### step2_result analysis:
 `python -u ./result_analysis.py step2`
@@ -69,7 +72,7 @@ echo "*--done--*"
 ```
 2. create a step1.sh file
 ```bash
-sbatch -p gpu-long --gres=gpu:1 --nodelist=n105 step1.slurm
+sbatch --mem=100G -p gpu-long --gres=gpu:1 --nodelist=n105 step1.slurm
 ```
 3. login into 'fortyfour.ibest.uidaho.edu', start training with `sh step1.sh`
 
