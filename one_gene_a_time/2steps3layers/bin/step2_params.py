@@ -11,13 +11,13 @@ n_hidden_3 = 200
 # Training parameters #
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 3e-5  # 0.0003 for 3-7L, 0.00003 for 9L, update for different depth
+learning_rate = 3e-4  # 3e-4 for 3-7L, 3e-5 for 9L
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 394
-max_training_epochs = int(3e3)
-display_step = 50  # interval on learning curve
-snapshot_step = int(1e3)  # interval of saving session, imputation
-[a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
+max_training_epochs = int(8e3)
+display_step = 100  # interval on learning curve
+snapshot_step = int(2e3)  # interval of saving session, imputation
+[a, b, c] = [0.85, 0.15, 0]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 
@@ -30,14 +30,14 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 
 # GTEx Muscle
 # file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X (cell_row)
-file1 = "../../../../data/gtex/tpm_msk_muscle/gtex_v7.tpm.log.msk90.muscle_yes.hd5"  # input X (cell_row)
-file2 = "../../../../data/gtex/tpm_muscle/gtex_v7.tpm.log.muscle_yes.hd5"  # ground truth M (cell_row)
+file1 = "../../../../data/gtex/tpm_msk_tissues/gtex_v7.tpm.log.msk90.muscle_heart_skin_adipose_yes.hd5"  # input X (cell_row)
+file2 = "../../../../data/gtex/tpm_tissues/gtex_v7.tpm.log.muscle_heart_skin_adipose_yes.hd5"  # ground truth M (cell_row)
 # file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X (cell_row)
 # file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M (gene_row)
 file1_orientation = 'cell_row'  # cell_row/gene_row
 file2_orientation = 'cell_row'
-name1 = '(muscle_ds70k)'  # uses 20GB of RAM
-name2 = '(GTEx_muscle)'
+name1 = '(all_to_4tissues(msk))'  # uses 20GB of RAM
+name2 = '(all_to_4tissues(M))'
 
 
 # For development usage #
@@ -53,11 +53,11 @@ if test_flag == 1:
 # Gene list
 pair_list = [[4058, 7496],
             [8495, 12871],
-            # [2, 3],
-            # [205, 206]
+            [2, 3],
+            [205, 206]
             ]
 
-gene_list = [4058, 7496, 8495, 12871]
+gene_list = [4058, 7496, 8495, 12871, 2, 3, 205, 206]
 
 
 # print parameters
