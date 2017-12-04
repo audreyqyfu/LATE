@@ -67,6 +67,18 @@ def evaluate_epoch_step2():
     gene_corr2_batch_vec.append(gene_corr2_train)
     gene_corr2_valid_vec.append(gene_corr2_valid)
 
+    # Corr Hist
+    scimpute.gene_corr_hist(
+        h_valid, df2_valid.values,
+        title="Gene-corr(H vs M)(valid).{}.Epoch0".format(p.stage),
+        dir=p.stage
+    )
+    scimpute.cell_corr_hist(
+        h_valid, df2_valid.values,
+        title="Cell-corr(H vs M)(valid).{}.Epoch0".format(p.stage),
+        dir=p.stage
+    )
+
 
     # # tb todo
     # merged_summary = tf.summary.merge_all()
