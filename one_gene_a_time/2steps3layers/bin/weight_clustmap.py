@@ -50,8 +50,8 @@ print('matrix sample', arr[0:2, 0:2])
 print('matrix shape:', arr.shape)
 
 # exclude large matrix
-m_max = 10000
-n_max = 10000
+m_max = 1000
+n_max = 1000
 if (m > m_max or n > n_max):
     print('matrix too large')
     arr = random_subset_arr(arr, m_max, n_max)
