@@ -29,17 +29,17 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 # name2 = '(EMT_MAGIC_B)'
 
 # GTEx Muscle
-file1 = "../../../../data/gtex/rpm_ds/gtex_v7.rpm.ds_70k_10p_log.hd5"  # cell_row
-file2= '../../../../data/gtex/rpm/gtex_v7.rpm.log.hd5'  # gene_row
+file1 = "../../../../data/gtex/rpm_ds_4tissues/gtex_v7.rpm_ds.muscle_heart_skin_adipose_yes.hd5"  # cell_row
+file2= '../../../../data/gtex/rpm_4tissues/gtex_v7.rpm.log.muscle_heart_skin_adipose_yes.hd5'  # cell_row
 # file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X (cell_row)
 # file1 = "../../../../data/gtex/tpm_msk_tissues/gtex_v7.tpm.log.msk90.muscle_heart_skin_adipose_yes.hd5"  # input X (cell_row)
 # file2 = "../../../../data/gtex/tpm_tissues/gtex_v7.tpm.log.muscle_heart_skin_adipose_yes.hd5"  # ground truth M (cell_row)
 # file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X (cell_row)
 # file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M (gene_row)
 file1_orientation = 'cell_row'  # cell_row/gene_row
-file2_orientation = 'gene_row'
-name1 = '(RPM_DS_LOG)'  # uses 20GB of RAM
-name2 = '(RPM_LOG)'
+file2_orientation = 'cell_row'
+name1 = '(RPM_DS_4TissueYes)'  # uses 20GB of RAM
+name2 = '(RPM_4TissueYes)'
 
 
 # For development usage #
