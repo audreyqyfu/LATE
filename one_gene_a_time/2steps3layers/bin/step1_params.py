@@ -13,9 +13,9 @@ pHidden = 0.5
 learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 sd = 1e-3  # step1: 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-max_training_epochs = int(1e3)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
+max_training_epochs = int(6e2)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
 display_step = 50  # interval on learning curve
-snapshot_step = int(300)  # interval of saving session, imputation
+snapshot_step = int(3e2)  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
@@ -26,11 +26,11 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 # file_orientation = 'gene_row'  # cell_row/gene_row
 
 # GTEx
-file1 = "../../../../data/gtex/rpm/gtex_v7.rpm.log.hd5"  # input
-name1 = '(gtex_rpm_log_all)'  # uses 20GB of RAM
+file1 = "../../../../data/gtex/rpm_4tissues/gtex_v7.rpm.log.muscle_heart_skin_adipose_no.hd5"  # input
+name1 = '(RPM_4TissuesNo)'  # uses 20GB of RAM for 5GB DF
 file2 = file1
 name2 = name1
-file_orientation = 'gene_row'  # cell_row/gene_row
+file_orientation = 'cell_row'  # cell_row/gene_row
 file1_orientation = file_orientation  # cell_row/gene_row
 file2_orientation = file_orientation
 
