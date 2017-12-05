@@ -2,7 +2,7 @@
 echo $(hostname)
 module load python/3.5.2
 
-sleep 3h
+sleep 2h
 
 echo "*--training NN--*"
 python -u ./step2.new.mtask.py
