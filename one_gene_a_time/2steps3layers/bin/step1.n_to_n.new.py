@@ -55,9 +55,9 @@ def evaluate_epoch0():
 
     # gene-corr
     gene_corr_batch = scimpute.median_corr(
-        df1_train.values.transpose(), h_train.transpose(), num=100)
+        df1_train.values.transpose(), h_train.transpose(), num=2000)
     gene_corr_valid = scimpute.median_corr(
-        df1_valid.values.transpose(), h_valid.transpose(), num=100)
+        df1_valid.values.transpose(), h_valid.transpose(), num=2000)
     print("Gene-corr(full): batch: {}, valid: {}".
           format(gene_corr_batch, gene_corr_valid))
     gene_corr_log_batch.append(gene_corr_batch)
@@ -371,9 +371,9 @@ for epoch in range(1, p.max_training_epochs+1):
 
         # gene-corr
         gene_corr_batch = scimpute.median_corr(
-            x_batch.transpose(), h_batch.transpose(), num=100)
+            x_batch.transpose(), h_batch.transpose(), num=2000)
         gene_corr_valid = scimpute.median_corr(
-            x_batch.transpose(), h_batch.transpose(), num=100)
+            x_batch.transpose(), h_batch.transpose(), num=2000)
         print("Gene-corr(fast): batch: {}, valid: {}".
               format(gene_corr_batch, gene_corr_valid))
         gene_corr_log_batch.append(gene_corr_batch)

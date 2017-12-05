@@ -26,8 +26,8 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 # file_orientation = 'gene_row'  # cell_row/gene_row
 
 # GTEx
-file1 = "../../../../data/gtex/tpm/gtex_v7.log.hd5"  # input
-name1 = '(gtex_tpm_log_all)'  # uses 20GB of RAM
+file1 = "../../../../data/gtex/rpm/gtex_v7.rpm.log.hd5"  # input
+name1 = '(gtex_rpm_log_all)'  # uses 20GB of RAM
 file2 = file1
 name2 = name1
 file_orientation = 'gene_row'  # cell_row/gene_row
@@ -38,13 +38,13 @@ file2_orientation = file_orientation
 pair_list = [
             [4058, 7496],
             [8495, 12871],
-            # [2, 3],
-            # [205, 206]
+            [2, 3],
+            [205, 206]
             ]
 
 gene_list = [
             4058, 7496, 8495, 12871,
-            # 2, 3
+            2, 3, 205, 206
              ]
 
 # For Test Run #
