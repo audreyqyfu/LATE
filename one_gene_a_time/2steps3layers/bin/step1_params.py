@@ -13,9 +13,9 @@ pHidden = 0.5
 learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 sd = 1e-3  # step1: 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-max_training_epochs = int(3e3)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
+max_training_epochs = int(1e3)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
 display_step = 50  # interval on learning curve
-snapshot_step = int(1e3)  # interval of saving session, imputation
+snapshot_step = int(300)  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 

@@ -11,9 +11,9 @@ n_hidden_3 = 200
 # Training parameters #
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 3e-4  # 3e-4 for 3-7L, 3e-5 for 9L
+learning_rate = 3e-5  # 3e-4 for 3-7L, 3e-5 for 9L
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
-batch_size = 394
+batch_size = 1500
 max_training_epochs = int(8e3)
 display_step = 100  # interval on learning curve
 snapshot_step = int(2e3)  # interval of saving session, imputation
@@ -29,15 +29,17 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 # name2 = '(EMT_MAGIC_B)'
 
 # GTEx Muscle
+file1 = "../../../../data/gtex/rpm_ds/gtex_v7.rpm.ds_70k_10p_log.hd5"  # cell_row
+file2= '../../../../data/gtex/rpm/gtex_v7.rpm.log.hd5'  # gene_row
 # file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X (cell_row)
-file1 = "../../../../data/gtex/tpm_msk_tissues/gtex_v7.tpm.log.msk90.muscle_heart_skin_adipose_yes.hd5"  # input X (cell_row)
-file2 = "../../../../data/gtex/tpm_tissues/gtex_v7.tpm.log.muscle_heart_skin_adipose_yes.hd5"  # ground truth M (cell_row)
+# file1 = "../../../../data/gtex/tpm_msk_tissues/gtex_v7.tpm.log.msk90.muscle_heart_skin_adipose_yes.hd5"  # input X (cell_row)
+# file2 = "../../../../data/gtex/tpm_tissues/gtex_v7.tpm.log.muscle_heart_skin_adipose_yes.hd5"  # ground truth M (cell_row)
 # file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X (cell_row)
 # file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M (gene_row)
 file1_orientation = 'cell_row'  # cell_row/gene_row
-file2_orientation = 'cell_row'
-name1 = '(all_to_4tissues(msk))'  # uses 20GB of RAM
-name2 = '(all_to_4tissues(M))'
+file2_orientation = 'gene_row'
+name1 = '(RPM_DS_LOG)'  # uses 20GB of RAM
+name2 = '(RPM_LOG)'
 
 
 # For development usage #
