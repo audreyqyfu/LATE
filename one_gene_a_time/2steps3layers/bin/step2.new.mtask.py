@@ -314,7 +314,7 @@ with tf.name_scope("Metrics"):
     tf.summary.scalar('mse2', mse2)
 
 # trainer
-optimizer = tf.train.AdamOptimizer(p.learning_rate)
+optimizer = tf.train.GradientDescentOptimizer(p.learning_rate)
 trainer = optimizer.minimize(mse1_j)  # for gene_j
 
 # start session
