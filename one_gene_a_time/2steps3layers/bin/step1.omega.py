@@ -28,23 +28,29 @@ def evaluate_epoch0():
     print("> Epoch 0:")
     epoch_log.append(epoch)
 
-    # MSE1, h
-    mse_train, h_train = sess.run([mse1, h],
+    # mse_omega, h
+    mse_omega_train, mse1_train, h_train = sess.run([mse_omega, mse1, h],
                          feed_dict={
                              X: df1_train.values,
                              pIn_holder: 1,
                              pHidden_holder: 1}
                          )
-    mse_valid, h_valid = sess.run([mse1,h],
+    mse_omega_valid, mse1_valid, h_valid = sess.run([mse_omega, mse1, h],
                          feed_dict={
                              X: df1_valid.values,
                              pIn_holder: 1,
                              pHidden_holder: 1}
                          )
-    print('MSE1: train: {}, valid: {}'.format(mse_train, mse_valid))
-    mse_log_batch.append(mse_train)  # approximation
-    mse_log_train.append(mse_train)
-    mse_log_valid.append(mse_valid)
+    print('mse_omega:   train: {}, valid: {}'.
+          format(mse_omega_train, mse_omega_valid))
+    print('mse1:    train: {}, valid: {}'.
+          format(mse1_train, mse1_valid))
+    mse_omega_log_batch.append(mse_omega_train)  # approximation
+    mse_omega_log_train.append(mse_omega_train)
+    mse_omega_log_valid.append(mse_omega_valid)
+    mse1_log_batch.append(mse1_train)  # approximation
+    mse1_log_train.append(mse1_train)
+    mse1_log_valid.append(mse1_valid)
 
     # cell-corr
     cell_corr_train = scimpute.median_corr(df1_train.values, h_train)
@@ -96,9 +102,15 @@ def tb_summary():
 def learning_curves():
     print('plotting learning curves')
     scimpute.learning_curve(
-        epoch_log, mse_log_batch, mse_log_valid,
-        title='Learning curve (MSE).{}'.format(p.stage),
-        ylabel='MSE',
+        epoch_log, mse_omega_log_batch, mse_omega_log_valid,
+        title='Learning curve (mse_omega).{}'.format(p.stage),
+        ylabel='mse_omega',
+        dir=p.stage
+    )
+    scimpute.learning_curve(
+        epoch_log, mse1_log_batch, mse1_log_valid,
+        title='Learning curve (mse1).{}'.format(p.stage),
+        ylabel='mse1',
         dir=p.stage
     )
     scimpute.learning_curve(
@@ -306,11 +318,11 @@ with tf.name_scope("Metrics"):
                         )
                 )
 
-    tf.summary.scalar('mse1 (H vs X)', mse1)
+    tf.summary.scalar('mse_omega (H vs X)', mse_omega)
 
 # trainer
 optimizer = tf.train.AdamOptimizer(p.learning_rate)
-trainer = optimizer.minimize(mse1)
+trainer = optimizer.minimize(mse_omega)
 
 # Launch Session #
 sess = tf.Session()
@@ -324,11 +336,12 @@ valid_writer = tf.summary.FileWriter(p.stage + '/valid', sess.graph)
 epoch = 0
 num_batch = int(math.floor(len(df1_train) // p.batch_size))  # floor
 epoch_log = []
-mse_log_batch, mse_log_valid, mse_log_train = [], [], []
+mse_omega_log_batch, mse_omega_log_valid, mse_omega_log_train = [], [], []
+mse1_log_batch, mse1_log_valid, mse1_log_train = [], [], []
 cell_corr_log_batch, cell_corr_log_valid, cell_corr_log_train = [], [], []
 gene_corr_log_batch, gene_corr_log_valid, gene_corr_log_train = [], [], []
 increasing_epochs = 0
-previous_mse = -1  # neg is impossible for true mse
+previous_mse_omega = -1  # neg is impossible for true mse_omega
 
 evaluate_epoch0()
 
@@ -355,25 +368,28 @@ for epoch in range(1, p.max_training_epochs+1):
             epoch, cpu_time, wall_time
         ))
 
-        # mse
-        mse_batch, mse_omega_batch, h_batch = sess.run([mse1, mse_omega, h],
+        # mse_omega
+        mse_omega_batch, mse1_batch, h_batch = sess.run([mse_omega, mse1, h],
                                       feed_dict={
                                           X: x_batch,
                                           pIn_holder: 1.0,
                                           pHidden_holder: 1.0}
                                       )
-        # todo: mse omega
-        print("MSE1: {}, MSE_OMEGA: {}".format(mse_batch, mse_omega_batch))
-        mse_log_batch.append(mse_batch)
-        mse_valid, h_valid = sess.run([mse1, h],
+        mse_omega_log_batch.append(mse_omega_batch)
+        mse1_log_batch.append(mse1_batch)
+        mse_omega_valid, mse1_valid, h_valid = sess.run([mse_omega, mse1, h],
                                       feed_dict={
                                           X: df1_valid,
                                           pIn_holder: 1.0,
                                           pHidden_holder: 1.0}
                                       )
-        mse_log_valid.append(mse_valid)
-        print('MSE1: batch: {}, valid: {}'.
-              format(mse_batch, mse_valid))
+        mse_omega_log_valid.append(mse_omega_valid)
+        mse1_log_valid.append(mse1_valid)
+        print('mse_omega:   batch: {}, valid: {}'.
+              format(mse_omega_batch, mse_omega_valid))
+        print('mse1:    batch: {}, valid: {}'.
+              format(mse1_batch, mse1_valid))
+
 
         # cell-corr
         cell_corr_batch = scimpute.median_corr(x_batch, h_batch)
@@ -425,20 +441,20 @@ for epoch in range(1, p.max_training_epochs+1):
         visualize_weights()
         toc_log2 = time.time()
         log2_time = round(toc_log2 - tic_log2, 1)
-        min_mse1_valid = min(mse_log_valid)
-        print('min_MSE1_valid till now: {}'.format(min_mse1_valid))
+        min_mse_omega_valid = min(mse_omega_log_valid)
+        print('min_mse_omega_valid till now: {}'.format(min_mse_omega_valid))
         print('snapshot_step: {}s'.format(log2_time))
 
     # early stop (not used yet)
-    if previous_mse > 0:  # skip if MSE == -1, no previous mse yet
-        if mse_valid > previous_mse:
+    if previous_mse_omega > 0:  # skip if mse_omega == -1, no previous mse_omega yet
+        if mse_omega_valid > previous_mse_omega:
             increasing_epochs += 1
         else:
             increasing_epochs = 0
-    previous_mse = mse_valid
+    previous_mse_omega = mse_omega_valid
 
     if increasing_epochs >= p.patience:
-        print('* Warning: {} epochs with increasing MSE_valid'.
+        print('* Warning: {} epochs with increasing mse_omega_valid'.
               format(increasing_epochs))
 
 
