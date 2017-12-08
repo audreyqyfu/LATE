@@ -21,8 +21,8 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 
 # file input #
 # EMT.MAGIC
-file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # input
-name1 = '(EMT_MAGIC_B.msk90)'
+file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.ds_60000_10.log.hd5"  # input
+name1 = '(EMT_MAGIC_B.DS_60k10p)'
 file_orientation = 'gene_row'  # cell_row/gene_row
 
 # GTEx
