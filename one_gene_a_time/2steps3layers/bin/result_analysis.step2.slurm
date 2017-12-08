@@ -7,6 +7,6 @@ nvidia-smi -L
 source /usr/modules/init/bash
 module load python/3.5.2
 python -u ./result_analysis.py step2
-for file in re_train/*npy; do python weight_visualization.py $file step2; done
+for file in step2/*npy; do python weight_visualization.py $file step2; done
 echo "*--done--*"
 
