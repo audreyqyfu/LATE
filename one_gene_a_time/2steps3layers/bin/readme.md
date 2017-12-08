@@ -23,5 +23,3 @@
 
 
 # Run note:
-- step1: all
-- step2: 4 tissues: muscle, heart, skin, adipose (muscle not confined to skeleton muscle)
