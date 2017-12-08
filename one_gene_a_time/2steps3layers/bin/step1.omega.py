@@ -267,31 +267,31 @@ with tf.name_scope('Encoder_L2'):
     e_a2 = scimpute.dense_layer(
         'encoder2', e_a1, e_w2, e_b2, pHidden_holder)
 
-with tf.name_scope('Encoder_L3'):
-    e_w3, e_b3 = scimpute.weight_bias_variable(
-        'encoder3', p.n_hidden_2, p.n_hidden_3, p.sd)
-    e_a3 = scimpute.dense_layer(
-        'encoder3', e_a2, e_w3, e_b3, pHidden_holder)
-
-# with tf.name_scope('Encoder_L4'):
-#     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', p.n_hidden_3, p.n_hidden_4, p.sd)
-#     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
+# with tf.name_scope('Encoder_L3'):
+#     e_w3, e_b3 = scimpute.weight_bias_variable(
+#         'encoder3', p.n_hidden_2, p.n_hidden_3, p.sd)
+#     e_a3 = scimpute.dense_layer(
+#         'encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 #
-# with tf.name_scope('Decoder_L4'):
-#     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', p.n_hidden_4, p.n_hidden_3, p.sd)
-#     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
-
-with tf.name_scope('Decoder_L3'):
-    d_w3, d_b3 = scimpute.weight_bias_variable(
-        'decoder3', p.n_hidden_3, p.n_hidden_2, p.sd)
-    d_a3 = scimpute.dense_layer(
-        'decoder3', e_a3, d_w3, d_b3, pHidden_holder)
+# # with tf.name_scope('Encoder_L4'):
+# #     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', p.n_hidden_3, p.n_hidden_4, p.sd)
+# #     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
+# #
+# # with tf.name_scope('Decoder_L4'):
+# #     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', p.n_hidden_4, p.n_hidden_3, p.sd)
+# #     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
+#
+# with tf.name_scope('Decoder_L3'):
+#     d_w3, d_b3 = scimpute.weight_bias_variable(
+#         'decoder3', p.n_hidden_3, p.n_hidden_2, p.sd)
+#     d_a3 = scimpute.dense_layer(
+#         'decoder3', e_a3, d_w3, d_b3, pHidden_holder)
 
 with tf.name_scope('Decoder_L2'):
     d_w2, d_b2 = scimpute.weight_bias_variable(
         'decoder2', p.n_hidden_2, p.n_hidden_1, p.sd)
     d_a2 = scimpute.dense_layer(
-        'decoder2', d_a3, d_w2, d_b2, pHidden_holder)
+        'decoder2', e_a2, d_w2, d_b2, pHidden_holder)
 
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable(

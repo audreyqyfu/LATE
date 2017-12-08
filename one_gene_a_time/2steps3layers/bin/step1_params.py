@@ -1,10 +1,10 @@
 # Hyper structure #
 stage = 'step1'  # step1/step2
-L = 7  # only a reporter, changing it can't alter the model structure
+L = 5  # only a reporter, changing it can't alter the model structure
 l = L//2
-n_hidden_1 = 800
-n_hidden_2 = 400  # update for different depth
-n_hidden_3 = 200
+n_hidden_1 = 400
+n_hidden_2 = 200  # update for different depth
+# n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
 # Training parameters #
@@ -13,10 +13,10 @@ pHidden = 0.5
 learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 sd = 1e-3  # step1: 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-max_training_epochs = int(1e3)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
+max_training_epochs = int(5e3)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
 display_step = 50  # interval on learning curve
 snapshot_step = int(5e2)  # interval of saving session, imputation
-[a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
+[a, b, c] = [0.8, 0.2, 0]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 # file input #
