@@ -13,16 +13,16 @@ pHidden = 0.5
 learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 sd = 1e-3  # step1: 3-7L:1e-3, 9L:1e-4
 batch_size = 256
-max_training_epochs = int(6e2)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
+max_training_epochs = int(1e3)  # step1, EMT data: 3L:100, 5L/7L:1000, 9L:3000
 display_step = 50  # interval on learning curve
-snapshot_step = int(3e2)  # interval of saving session, imputation
+snapshot_step = int(5e2)  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 # file input #
 # EMT.MAGIC
-file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
-name1 = '(EMT_MAGIC_A)'
+file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk50.log.hd5"  # input
+name1 = '(EMT_MAGIC_B.msk50)'
 file_orientation = 'gene_row'  # cell_row/gene_row
 
 # GTEx
@@ -49,7 +49,7 @@ gene_list = [
 
 # For Test Run #
 seed_tf = 3
-test_flag = 1  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
