@@ -301,7 +301,7 @@ with tf.name_scope('Decoder_L1'):
 
 
 # define input/output
-a_bottle_neck = e_a3
+a_bottle_neck = e_a2
 h = d_a1
 
 # define loss
