@@ -11,7 +11,7 @@ n_hidden_2 = 200  # update for different depth
 # Training parameters #
 pIn = 0.8
 pHidden = 0.5
-learning_rate = 3e-5  # 3e-4 for 3-7L, 3e-5 for 9L
+learning_rate = 3e-4  # 3e-4 for 3-7L, 3e-5 for 9L
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
 max_training_epochs = int(1e3)
