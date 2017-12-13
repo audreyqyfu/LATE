@@ -336,7 +336,15 @@ sess = tf.Session()
 
 # restore variables
 saver = tf.train.Saver()
-saver.restore(sess, "./step1/step1.ckpt")
+if p.run_flag == 'load_saved':
+    print('*** In TL Mode')
+    saver.restore(sess, "./step1/step1.ckpt")
+elif p.run_flag == 'rand_init':
+    print('*** In Rand Init Mode')
+    init = tf.global_variables_initializer()
+    sess.run(init)
+else:
+    raise Exception('run_flag err')
 
 # define tensor_board writer
 batch_writer = tf.summary.FileWriter(log_dir + '/batch', sess.graph)

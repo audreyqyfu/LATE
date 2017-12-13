@@ -7,6 +7,7 @@ n_hidden_2 = 200  # update for different depth
 # n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
+run_flag = 'rand_init'  # rand_init/load_saved
 
 # Training parameters #
 pIn = 0.8
@@ -46,7 +47,7 @@ file2_orientation = 'gene_row'
 
 # For development usage #
 seed_tf = 3
-test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
