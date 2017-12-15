@@ -238,8 +238,8 @@ def gene_nzvar_list(arr1):
     return list
 
 
-gene_corr = gene_corr_list(df1.values, h.values)
-gene_mse = gene_mse_list(df1.values, h.values)
+gene_corr = gene_corr_list(df2.values, h.values)
+gene_mse = gene_mse_list(df2.values, h.values)
 gene_mean_expression = df1.sum(axis=0).values / df1.shape[1]  # sum for each column
 gene_nz_rate = gene_nz_rate_list(df1.values)
 gene_var = gene_var_list(df1.values)
