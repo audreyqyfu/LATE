@@ -166,8 +166,133 @@ def visualization_of_dfs():
 visualization_of_dfs()
 
 
-# Clustmap of weights, bottle-neck-activations (slow on GPU, moved to CPU)
-# os.system('for file in ./{}/*npy; do python -u weight_visualization.py $file {}; done'.format(p.stage, p.stage))
+# Factors Affecting Gene Prediction
+def gene_corr_list(arr1, arr2):
+    '''calculate correlation between genes [columns]
+    arr [cells, genes], note, some genes don't have corr'''
+    # if arr1.shape is arr2.shape:
+    n = arr2.shape[1]
+    list = []
+    for j in range(n):
+        corr = pearsonr(arr1[:, j], arr2[:, j])[0]
+        if math.isnan(corr):
+            list.append(-1.1)  # NA becomes -1.1
+        else:
+            list.append(corr)
+    list = np.array(list)
+    return list
+
+
+def gene_mse_list(arr1, arr2):
+    '''mse for each gene(column)
+    arr [cells, genes]
+    arr1: X
+    arr2: H'''
+    n = arr2.shape[1]
+    list = []
+    for j in range(n):
+        mse = ((arr1[:, j] - arr2[:, j]) ** 2).mean()
+        list.append(mse)
+    list = np.array(list)
+    return list
+
+
+def gene_nz_rate_list(arr1):
+    '''nz_rate for each gene(column)
+    arr [cells, genes]
+    arr1: X'''
+    n = arr1.shape[1]
+    list = []
+    for j in range(n):
+        nz_rate = np.count_nonzero(arr1[:, j]) / n
+        list.append(nz_rate)
+    list = np.array(list)
+    return list
+
+
+def gene_var_list(arr1):
+    '''variation for each gene(column)
+    arr [cells, genes]
+    arr: X'''
+    n = arr1.shape[1]
+    list = []
+    for j in range(n):
+        var = np.var(arr1[:, j])
+        list.append(var)
+    list = np.array(list)
+    return list
+
+
+def gene_nzvar_list(arr1):
+    '''variation for non-zero values in each gene(column)
+    arr [cells, genes]
+    arr: X'''
+    n = arr1.shape[1]
+    list = []
+    for j in range(n):
+        data = arr1[:, j]
+        nz_data = data[data.nonzero()]
+        var = np.var(nz_data)
+        list.append(var)
+    list = np.array(list)
+    return list
+
+
+gene_corr = gene_corr_list(df1.values, h.values)
+gene_mse = gene_mse_list(df1.values, h.values)
+gene_mean_expression = df1.sum(axis=0).values / df1.shape[1]  # sum for each column
+gene_nz_rate = gene_nz_rate_list(df1.values)
+gene_var = gene_var_list(df1.values)
+gene_nzvar = gene_nzvar_list(df1.values)
+
+scimpute.density_plot(gene_mean_expression, gene_mse,
+                      title='Factors, expression vs mse, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene mean expression',
+                      ylab='gene mse')
+
+scimpute.density_plot(gene_mean_expression, gene_corr,
+                      title='Factors, expression vs corr, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene mean expression',
+                      ylab='gene corr (NA: -1.1)')
+
+scimpute.density_plot(gene_nz_rate, gene_mse,
+                      title='Factors, nz_rate vs mse, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene nz_rate',
+                      ylab='gene mse')
+
+scimpute.density_plot(gene_nz_rate, gene_corr,
+                      title='Factors, nz_rate vs corr, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene nz_rate',
+                      ylab='gene corr (NA: -1.1)')
+
+scimpute.density_plot(gene_var, gene_mse,
+                      title='Factors, var vs mse, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene variation',
+                      ylab='gene mse')
+
+scimpute.density_plot(gene_var, gene_corr,
+                      title='Factors, var vs corr, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene variation',
+                      ylab='gene corr (NA: -1.1)')
+
+scimpute.density_plot(gene_nzvar, gene_mse,
+                      title='Factors, nz_var vs mse, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene nz_variation',
+                      ylab='gene mse')
+
+scimpute.density_plot(gene_nzvar, gene_corr,
+                      title='Factors, nz_var vs corr, {}'.format(p.stage),
+                      dir=p.stage,
+                      xlab='gene nz_variation',
+                      ylab='gene corr (NA: -1.1)')
+
 
 # # gene MSE
 # j = 0
@@ -179,3 +304,6 @@ visualization_of_dfs()
 # mse_j_groundTruth = ((pred_j - groundTruth_j) ** 2).mean()
 #
 # matrix MSE
+
+# Clustmap of weights, bottle-neck-activations (slow on GPU, moved to CPU)
+# os.system('for file in ./{}/*npy; do python -u weight_visualization.py $file {}; done'.format(p.stage, p.stage))

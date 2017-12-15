@@ -99,11 +99,17 @@ def mask_df(df, zero_percentage):
 
 
 # Plots #
-def density_plot(x, y, title, fname, dir='plots'):
+def density_plot(x, y,
+                 title='density plot',
+                 dir='plots',
+                 xlab='x',
+                 ylab='y'):
+    '''x and y must be arr [m, 1]'''
+    from scipy.stats import gaussian_kde
     # create plots directory
     if not os.path.exists(dir):
         os.makedirs(dir)
-    fname = "./{}/{}".format(dir, fname)
+    fname = "./{}/{}".format(dir, title)
     # Calculate the point density
     xy = np.vstack([x, y])
     z = gaussian_kde(xy)(xy)
@@ -111,13 +117,34 @@ def density_plot(x, y, title, fname, dir='plots'):
     idx = z.argsort()
     x, y, z = x[idx], y[idx], z[idx]
     # plt
-    # fig = plt.figure(figsize=(9,9))
+    fig = plt.figure(figsize=(5, 5))
     fig, ax = plt.subplots()
     cax = ax.scatter(x, y, c=z, s=50, edgecolor='')
     plt.title(title)
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
     plt.colorbar(cax)
     plt.savefig(fname + ".png", bbox_inches='tight')
     plt.close(fig)
+
+
+def scatterplot(x, y,
+                title='scatterplot',
+                dir='plots',
+                xlab='xlab',
+                ylab='ylab',
+                alpha=1):
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    fname = "./{}/{}".format(dir, title)
+    fig = plt.figure(figsize=(5, 5))
+    plt.plot(x, y, 'o', alpha=alpha)
+    plt.title(title)
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+    plt.savefig(fname, bbox_inches='tight')
+    plt.close(fig)
+    print('heatmap vis ', title, ' done')
 
 
 def genescatterplot(gene1, gene2, scdata):
