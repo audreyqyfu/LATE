@@ -73,11 +73,11 @@ df_filtered_norm_log = scimpute.df_log_transformation(df_filtered_norm)
 read_per_cell_filtered_norm_log = df_filtered_norm_log.sum(axis=1)
 read_per_gene_filtered_norm_log = df_filtered_norm_log.sum(axis=0)
 # histogram of filtered_norm_log data
-scimpute.hist_list(read_per_cell_filtered_norm_log.values, xlab='log10(normed-counts+1)/cell',
-                   title='Histogram of log10(normed_counts+1) per cell' + tag)
-scimpute.hist_list(read_per_gene_filtered_norm_log.values, xlab='log10(normed-counts+1)/gene',
-                   title='Histogram of log10(normed_counts+1) per gene' + tag)
-scimpute.hist_df(df_filtered_norm_log, xlab='log10(normed-counts+1)',
-                 title='Histogram of expression matrix' + tag)
+scimpute.hist_list(read_per_cell_filtered_norm_log.values, xlab='log10(RPM+1)/cell',
+                   title='Histogram of log10(RPM+1) per cell' + tag)
+scimpute.hist_list(read_per_gene_filtered_norm_log.values, xlab='log10(RPM+1)/gene',
+                   title='Histogram of log10(RPM+1) per gene' + tag)
+scimpute.hist_df(df_filtered_norm_log, xlab='log10(RPM+1)',
+                 title='Histogram of log10(RPM+1) in expression matrix' + tag)
 
 
