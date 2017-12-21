@@ -2,9 +2,9 @@
 # read gene expression matrix
 # into format [gene, cell]
 # 1. Filter
-# 2. Histogram of reads/cell, reads/gene
+# 2. Stat: Histogram of reads/cell, reads/gene
 # example usage:
-# python gene_expression_matrix_statistics.py GSE72857.umitab.csv.gz row_gene 0 0 EMT.Raw
+# python data_filter_stat.py GSE72857.umitab.csv.gz row_gene 0 0 EMT.Raw
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 
 # get argv #
-print('usage: <gene_expression_matrix_statistics.py> <file> <row_cell/row_gene> <reads/gene min> <reads/cell min> <out-tag>')
+print('usage: <data_filter_stat.py> <file.csv/hd5> <row_cell/row_gene> <reads/gene min> <reads/cell min> <out-tag>')
 print('min included')
 print('cmd typed:', sys.argv)
 if len(sys.argv) != 6:
@@ -25,12 +25,24 @@ if len(sys.argv) != 6:
 # read data
 file = str(sys.argv[1])
 matrix_mode = str(sys.argv[2])
+
 if matrix_mode == 'row_cell':
-    df = scimpute.read_csv(file).transpose()
+    if file.endswith('.csv'):
+        df = scimpute.read_csv(file).transpose()
+    elif file.endswith('.hd5'):
+        df = scimpute.read_hd5(file).transpose()
+    else:
+        raise Exception('file extension error: not hd5/csv')
 elif matrix_mode == 'row_gene':
-    df = scimpute.read_csv(file)
+    if file.endswith('.csv'):
+        df = scimpute.read_csv(file)
+    elif file.endswith('.hd5'):
+        df = scimpute.read_hd5(file)
+    else:
+        raise Exception('file extension error: not hd5/csv')
 else:
     raise Exception('cmd err in the argv[2]')
+
 print('matrix.shape:', df.shape)
 print(df.ix[0:3, 0:3])
 
