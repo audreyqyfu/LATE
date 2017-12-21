@@ -11,7 +11,7 @@ np.random.seed(1120)
 
 
 # instructions
-print('usage: down_sampling_hd5.py <file> <libsize-resampled> <zero-inflation-goal> <outname>',
+print('usage: data_down_sampling.py <file> <libsize-resampled> <zero-inflation-goal> <outname>',
       '<file>: count or tpm data matrix in hd5 format ([row = gene, column = cell]) (e.g. MAGIC.B.hd5)',
       '<lib-size-resampled>: the lib-size for each sample in the output (e.g. 60000)',
       '<zero-inflation goal>: a percentage (e.g. 10 represents 10%),',
