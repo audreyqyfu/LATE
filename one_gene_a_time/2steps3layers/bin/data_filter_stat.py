@@ -27,8 +27,8 @@ matrix_mode = str(sys.argv[2])
 
 gene_min = int(sys.argv[3])
 cell_min = int(sys.argv[4])
+tag0 = str(sys.argv[5])
 tag = '(' + str(sys.argv[5]) +')'
-
 
 # read data
 if matrix_mode == 'row_cell':
@@ -63,7 +63,7 @@ nz_rate_filtered = scimpute.nnzero_rate_df(df_filtered)
 print('filtered matrix : ', df_filtered.shape)
 print('nz_rate:', nz_rate_filtered)
 print(df_filtered.ix[0:3, 0:3])
-scimpute.save_hd5(df_filtered, tag+'.hd5')
+scimpute.save_hd5(df_filtered, tag0+'.hd5')
 
 
 # histogram of filtered data
