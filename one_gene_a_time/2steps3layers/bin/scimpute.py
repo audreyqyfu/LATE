@@ -180,10 +180,11 @@ def hist_list(list, xlab='xlab', title='histogram', bins=100, dir='plots'):
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel('Frequency')
-    plt.hist(list, bins=bins)
+    hist = plt.hist(list, bins=bins)
     plt.savefig(fname, bbox_inches='tight')
     plt.close(fig)
-
+    print('hist of {} is done'.format(title))
+    return hist
 
 def bone_marrow_biaxial_plots(scdata):
     # Gene-Gene scatter plot (before & after magic)
@@ -567,13 +568,14 @@ def corr_one_gene(col1, col2, accuracy=3):
 def hist_df(df, title="hist of df", xlab='xlab', bins=100, dir='plots'):
     df_flat = df.values.reshape(df.size, 1)
     # fig = plt.figure(figsize=(9, 9))
-    plt.hist(df_flat, bins=bins)
+    hist = plt.hist(df_flat, bins=bins)
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel('Frequency')
     plt.savefig('./{}/{}.png'.format(dir, title), bbox_inches='tight')
     plt.close()
     print('hist of ', title, 'is done')
+    return hist
 
 
 def nnzero_rate_df(df):

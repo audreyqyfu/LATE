@@ -4,7 +4,7 @@
 # 1. Filter
 # 2. Stat: Histogram of reads/cell, reads/gene
 # example usage:
-# python data_filter_stat.py GSE72857.umitab.csv.gz row_gene 0 0 EMT.Raw
+# python data_filter_stat.py GSE72857.umitab.csv.gz row_gene 0 0 EMT.Raw.Gene0.Cell0
 
 import numpy as np
 import pandas as pd
@@ -22,10 +22,15 @@ print('cmd typed:', sys.argv)
 if len(sys.argv) != 6:
     raise Exception('num args err')
 
-# read data
 file = str(sys.argv[1])
 matrix_mode = str(sys.argv[2])
 
+gene_min = int(sys.argv[3])
+cell_min = int(sys.argv[4])
+tag = '(' + str(sys.argv[5]) +')'
+
+
+# read data
 if matrix_mode == 'row_cell':
     if file.endswith('.csv'):
         df = scimpute.read_csv(file).transpose()
@@ -43,23 +48,27 @@ elif matrix_mode == 'row_gene':
 else:
     raise Exception('cmd err in the argv[2]')
 
-print('matrix.shape:', df.shape)
+# summary
+nz_rate_df = scimpute.nnzero_rate_df(df)
+print('input matrix.shape:', df.shape)
+print('nz_rate: {}'.format(round(nz_rate_df, 3)))
 print(df.ix[0:3, 0:3])
 
-# get argv
-gene_min = int(sys.argv[3])
-cell_min = int(sys.argv[4])
-tag = '(' + str(sys.argv[5]) +')'
 
 # filter #
 read_per_gene = df.sum(axis=1)
 read_per_cell = df.sum(axis=0)
 df_filtered = df.loc[(read_per_gene >= gene_min), (read_per_cell >= cell_min)]
-print('filtered matrix: ', df_filtered.shape)
-read_per_cell_filtered = df_filtered.sum(axis=1)
-read_per_gene_filtered = df_filtered.sum(axis=0)
+nz_rate_filtered = scimpute.nnzero_rate_df(df_filtered)
+print('filtered matrix : ', df_filtered.shape)
+print('nz_rate:', nz_rate_filtered)
+print(df_filtered.ix[0:3, 0:3])
+scimpute.save_hd5(df_filtered, tag+'.hd5')
+
 
 # histogram of filtered data
+read_per_gene_filtered = df_filtered.sum(axis=1)
+read_per_cell_filtered = df_filtered.sum(axis=0)
 scimpute.hist_list(read_per_cell_filtered.values, xlab='counts/cell',
                    title='Histogram of counts per cell' + tag)
 scimpute.hist_list(read_per_gene_filtered.values, xlab='counts/gene',
@@ -67,17 +76,11 @@ scimpute.hist_list(read_per_gene_filtered.values, xlab='counts/gene',
 scimpute.hist_df(df_filtered, xlab='counts',
                  title='Histogram of counts in expression matrix' + tag)
 
-# normalization and log(x+1) transformation
-df_filtered_norm = scimpute.df_normalization(df_filtered)
-df_filtered_norm_log = scimpute.df_log_transformation(df_filtered_norm)
-read_per_cell_filtered_norm_log = df_filtered_norm_log.sum(axis=1)
-read_per_gene_filtered_norm_log = df_filtered_norm_log.sum(axis=0)
-# histogram of filtered_norm_log data
-scimpute.hist_list(read_per_cell_filtered_norm_log.values, xlab='log10(RPM+1)/cell',
-                   title='Histogram of log10(RPM+1) per cell' + tag)
-scimpute.hist_list(read_per_gene_filtered_norm_log.values, xlab='log10(RPM+1)/gene',
-                   title='Histogram of log10(RPM+1) per gene' + tag)
-scimpute.hist_df(df_filtered_norm_log, xlab='log10(RPM+1)',
-                 title='Histogram of log10(RPM+1) in expression matrix' + tag)
 
-
+# histogram of log transformed filtered data
+scimpute.hist_list(scimpute.df_log_transformation(read_per_cell_filtered).values, xlab='log10(count+1)/cell',
+                   title='Histogram of log10(count+1) per cell' + tag)
+scimpute.hist_list(scimpute.df_log_transformation(read_per_gene_filtered).values, xlab='log10(count+1)/gene',
+                   title='Histogram of log10(count+1) per gene' + tag)
+scimpute.hist_df(scimpute.df_log_transformation(df_filtered), xlab='log10(count+1)',
+                 title='Histogram of log10(count+1) in expression matrix' + tag)
