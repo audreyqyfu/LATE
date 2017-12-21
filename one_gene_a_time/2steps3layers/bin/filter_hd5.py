@@ -10,7 +10,7 @@ import scimpute
 
 
 # instructions
-print('usage: filter_data.py <file_name> <cell_row/gene_row> <cell_list_name> <out_prefix>',
+print('usage: filter_hd5.py <file_name> <cell_row/gene_row> <cell_list_name> <out_prefix>',
       'file_name: name of the gene expression hd5 file',
       'cell_row/gene_row: indicates the matrix direction in input file',
       'cell_list_name: name of the list of cells to be filtered or excluded',
