@@ -1,28 +1,41 @@
 # Description
-Autoencoder -> transfer learning -> multi-task network 
-- step1: pre-trained Autoencoder on dataset A (bulk RNA-seq)
-  - autoencoder structure
-- step2: re-train the network on dataset B (scRNA-seq)
-  - m-task structure
-  - traing process only included non-zero (nz) cells for gene-j
-  - weights/biases initialized to weights/biases trained in step1
+## Option1: transfer learning (step1 -> TL -> step2) 
+- step1: `step1.omega.py`
+  - pre-trained Autoencoder on dataset A (bulk RNA-seq reference / huge scRNA-seq reference)
+  - autoencoder OMEGA structure 
+- step2: 'step2.omega.py'
+  - load parameters(weights/biases) pre-trained in step1
+  - re-train them on dataset B (scRNA-seq/msk/ds)
+  - autoencoder OMEGA structure, excluding zeros from cost function 
+
+## Option2: 1step training
+- 1step: `step1.omega.py`
+  - randomly initialized parameters
+  - directly trained on scRNA-seq/msk/ds dataset
+
 
 # Workflow
 * working dir: **scImpute/one_gene_a_time/2steps3layers/bin/**
 
 ## General
 ### preprocessing (normalization/log-transformation):
-- download gene expression matrix (row: genes, column: cells)
-  - e.g.: 'All_Tissue_Site_Details.combined.reads.gct'
+- Download gene expression matrix:
+  - e.g.: 'All_Tissue_Site_Details.combined.reads.gct' (GTEx)
+
+- Filtering data:
+  - `data_filter_stat.py` (min-reads/cell, min-reads/gene)
+  - `data_gene_selection.py` (select genes from reference datasets, so that )
+  - `data_sample_selection.py` (select cells ...)
   
-- script: **normalization.logXplus1.py**
+- Normalization: 
+  - `normalization.logXplus1.py`
+    - `python -u normalization.logXplus1.py`
+    - change 'in_name' and 'out_prefix' in the code
+    - code performs: tpm_like_normalization(rescaled back to median cell read counts)
+    - code performs: log(x+1) transformation
 
-- run command: `python -u normalization.logXplus1.py`
-  - change 'in_name' and 'out_prefix' in the code
-  - code performs: tpm_like_normalization(rescaled back to median cell read counts)
-  - code performs: log(x+1) transformation
+- Select output:
 
-- select output:
   - **xxx.norm.log.hd5** (normed, log-transformed)(recommended)
   - xxx.norm.hd5 (normed)
   - xxx.csv.gz (csv.gz format, slow, large, better compatability)
