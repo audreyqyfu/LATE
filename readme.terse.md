@@ -16,6 +16,8 @@
 ## Data Pre-processing
 - data_mat2csv.sh  (call cellranger, read MEX from 10x_genomics)
 - data_csv2hd5.py
+- data_split_cells.py
+- data_split_and_mask.py
 - data_svd_variation_plot.py  (use SVD to see the inner PCA dimensionality of data matrix)
 - data_filter_stat.py  (select samples/cells)
 - data_sample_selection.py
@@ -36,7 +38,7 @@
 
 ## Result analysis
 - result_analysis.py  (comprehensive)
-- weight_clustmap.py  (cluster map of weights)
+- weight_clustmap.py  (cluster map of weights) 
 - representation_visualization.py  (code_neck histgram and scatterplot)
 
 ## misc
