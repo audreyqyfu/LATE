@@ -1,4 +1,5 @@
 # Description
+You can read readme.terse.md first
 ## Option1: transfer learning (step1 -> TL -> step2) 
 - step1: `step1.omega.py`
   - pre-trained Autoencoder on dataset A (bulk RNA-seq reference / huge scRNA-seq reference)
@@ -13,12 +14,10 @@
   - randomly initialized parameters
   - directly trained on scRNA-seq/msk/ds dataset
 
-
 # Workflow
-* working dir: **scImpute/one_gene_a_time/2steps3layers/bin/**
+* working dir: **scImpute/bin/**
 
-## General
-### preprocessing (normalization/log-transformation):
+## Pre-processing (normalization/log-transformation):
 - Download gene expression matrix:
   - e.g.: 'All_Tissue_Site_Details.combined.reads.gct' (GTEx)
 
@@ -28,44 +27,40 @@
   - `data_sample_selection.py` (select cells ...)
   
 - Normalization: 
-  - `normalization.logXplus1.py`
-    - `python -u normalization.logXplus1.py`
-    - change 'in_name' and 'out_prefix' in the code
-    - code performs: tpm_like_normalization(rescaled back to median cell read counts)
-    - code performs: log(x+1) transformation
 
-- Select output:
-
+- Output:
   - **xxx.norm.log.hd5** (normed, log-transformed)(recommended)
   - xxx.norm.hd5 (normed)
   - xxx.csv.gz (csv.gz format, slow, large, better compatability)
 
-### creating simulation single cell RNA-seq dataset
-Can down-sample from bulk RNA-seq dataset or other high quality dataset and simulate zero_inflated scRNA-seq dataset
-- Example Command: `python -u down_sampling.py gtex_v7.norm.hd5 60000 10 gtex_v7.ds_60000_10.hd5`
-- first, each sample in data matrix was downsampled to typical scRNA-seq lib-size
-- then, additional random zeros introduced to meet the user-defined zero percentage
+## Creating simulated scRNA-seq data
+- msk
+- ds
+    - Can down-sample from bulk RNA-seq dataset or other high quality dataset 
+    and simulate zero_inflated scRNA-seq dataset
+    - `python -u data_down_sampling.py gtex_v7.norm.hd5 60000 10 gtex_v7.ds_60000_10.hd5`
+    - first, each sample in data matrix was downsampled to typical scRNA-seq lib-size
+    - then, additional random zeros introduced to meet the user-defined zero percentage
 
-### step1_training: 
-- script: **step1.n_to_n.new.py** (7L, 11/03)
+## step1_training: 
+- script: **step1.omega.py**
 - library: **scimpute.py**
 - parameter file: **step1_params.py** (where user change num_nodes, learning_rate...)
 1. put the 3 files in the same folder, 
 2. edit step1_params.py
 3. edit variables run command: `python -u step1.n_to_n.new.7L.py`
 
-### step1_result analysis:
+## step1_result analysis:
 `python -u ./result_analysis.py step1`
   
-### step2(To Be Adapted to 7L):
-- script: **step2.new.mtask.py** (7L, 11/03)
-- library: scimpute.py
+## step2_training:
+- script: **step2.omega.py** (7L, 11/03)
+- library: **scimpute.py**
 - parameter file: **step2_params.py** (change num_nodes, learning_rate...)
-1. put the 3 files in the same folder
-2. edit step2_params.py
-3. run command: `python -u step2.new.mtask.py`
+- step1 output: **./step1/**
+- put these 4 files in the same folder
 
-### step2_result analysis:
+## step2_result analysis:
 `python -u ./result_analysis.py step2`
 
 ## On ibest cluster
@@ -79,7 +74,7 @@ echo $(hostname)
 nvidia-smi -L
 source /usr/modules/init/bash
 module load python/3.5.2
-python -u ./step1.n_to_n.new.py
+python -u ./step1.xxx.py
 python -u ./result_analysis.py step1
 echo "*--done--*"
 ```
@@ -88,7 +83,6 @@ echo "*--done--*"
 sbatch --mem=100G -p gpu-long --gres=gpu:1 --nodelist=n105 step1.slurm
 ```
 3. login into 'fortyfour.ibest.uidaho.edu', start training with `sh step1.sh`
-
 
 # input data format
 - read hd5 or csv into pandas data-frames
@@ -130,11 +124,11 @@ sbatch --mem=100G -p gpu-long --gres=gpu:1 --nodelist=n105 step1.slurm
 
 # parameter setting
 Here is a good start point for parameter setting
-  - (num_nodes in bottle-neck) x (hidden_node retain rate) == data dimension after PCA reduce dim
+  - (num_nodes in bottle-neck) x (hidden_node retain rate) == 
+  data dimension after PCA reduce dim
   - learning rate = 3e-4 for 7L, 3e-5 for 9L 
   - rand_init_sd = 1e-4 for 7L, 1e-5 for 9L 
-  
-** test_flag ** = 1 makes the program runs very fast with a subset of data loaded and few epoch trained
+  - test_flag = 1 (fast run: a subset of data and few epochs)
 
 
 
