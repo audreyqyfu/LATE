@@ -1,7 +1,0 @@
-input.shape:  (1000, 20000)
-A.shape:  (1000, 9884)
-B.shape:  (1000, 10116)
-B_sub.shape (1000, 10116)
-savingv1-1-5-2.A.hd5 took 0.5 seconds
-savingv1-1-5-2.B.hd5 took 0.5 seconds
-savingv1-1-5-2.B.msk.hd5 took 0.4 seconds
