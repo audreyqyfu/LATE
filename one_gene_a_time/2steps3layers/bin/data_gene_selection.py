@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # read gene expression matrix (data)
-# read cell id list (info)
-# filter/keep cells in the id list
+# read gene id list (info)
+# filter/keep genes in the id list
 
 import numpy as np
 import pandas as pd
@@ -10,13 +10,13 @@ import scimpute
 
 
 # instructions
-print('usage: data_sample_selection.py <file_name> <cell_row/gene_row> <cell_list_name> <out_prefix>',
+print('usage: data_sample_selection.py <file_name> <cell_row/gene_row> <gene_list_name> <out_prefix>',
       'file_name: name of the gene expression hd5 file',
       'cell_row/gene_row: indicates the matrix direction in input file',
-      'cell_list_name: name of the list of cells to be filtered or excluded',
-      'cell_list requirement: no headers, tab de-limited, first column cell_id',
+      'cell_list_name: name of the list of genes to be filtered or excluded',
+      '*cell_list requirement: no headers, tab de-limited, first column cell_id\n or df.hd5 with gene_id as index',
       'out_prefix: the output name prefix',
-      'output: [cell_row, gene_column].hd5',
+      'output: [gene_row, cell_column].hd5',
       'two outputs, one with cells in list(yes), one excluding cells in list(no)',
       '', sep='\n')
 
@@ -34,18 +34,22 @@ print("> command: ", sys.argv)
 
 # read data (so that output matrix is [sample, gene])
 if matrix_type == 'cell_row':
-    df = pd.read_hdf(file_name)
-elif matrix_type == 'gene_row':
     df = pd.read_hdf(file_name).transpose()
+elif matrix_type == 'gene_row':
+    df = pd.read_hdf(file_name)
 
 # summary
-print('input shape [samples, genes]:', df.shape,  df.ix[0:3, 0:2])
+print('input shape [genes, samples]:', df.shape,  df.ix[0:3, 0:2])
 
 nz_rate_in = scimpute.nnzero_rate_df(df)
 print('nz_rate_in: {}'.format(nz_rate_in))
 
 # read list
-list_df = pd.read_csv(list_name, index_col=0, sep='\t', header=None)
+if list_name.endswith('.csv'):
+    list_df = pd.read_csv(list_name, index_col=0, sep='\t', header=None)
+elif list_name.endswith('.hd5'):
+    list_df = scimpute.read_hd5(list_name)
+
 print('list:', list_df.shape, list_df.index)
 
 # filter

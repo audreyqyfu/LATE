@@ -21,16 +21,22 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 
 # file input #
 # EMT.MAGIC
-file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # input
-name1 = '(EMT_MAGIC_A)'
+file1 = '../../../../data/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5'  # input
+name1 = 'EMT.MAGIC.A'
 file_orientation = 'gene_row'  # cell_row/gene_row
+
+# PBMC
+# file1 = "10x_human_pbmc_68k.hd5.Gene10k.Cell1.5k.msk95.hd5"  # input
+# name1 = 'PBMC.g949.msk95'
+# file_orientation = 'gene_row'  # cell_row/gene_row
 
 # GTEx
 # file1 = "../../../../data/gtex/rpm_4tissues/gtex_v7.rpm.log.muscle_heart_skin_adipose_no.hd5"  # input
 # name1 = '(RPM_4TissuesNo)'  # uses 20GB of RAM for 5GB DF
+
+# Automatic
 file2 = file1
 name2 = name1
-# file_orientation = 'cell_row'  # cell_row/gene_row
 file1_orientation = file_orientation  # cell_row/gene_row
 file2_orientation = file_orientation
 
@@ -49,7 +55,7 @@ gene_list = [
 
 # For Test Run #
 seed_tf = 3
-test_flag = 0  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
+test_flag = 1  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve

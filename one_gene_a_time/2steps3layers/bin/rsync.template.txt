@@ -1,0 +1,4 @@
+# template (push)
+local='~/imputation/scImpute/one_gene_a_time/2steps3layers/bin/'
+remote='rui@fortyfour.ibest.uidaho.edu:~/scImpute/one_gene_a_time/2steps3layers/bin/'
+rsync -avh local remote
