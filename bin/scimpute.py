@@ -566,6 +566,8 @@ def corr_one_gene(col1, col2, accuracy=3):
 
 
 def hist_df(df, title="hist of df", xlab='xlab', bins=100, dir='plots'):
+    if not os.path.exists(dir):
+        os.makedirs(dir)
     df_flat = df.values.reshape(df.size, 1)
     # fig = plt.figure(figsize=(9, 9))
     hist = plt.hist(df_flat, bins=bins)
@@ -932,3 +934,78 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
 
     plt.savefig(fprefix + '.png', bbox_inches='tight')
     plt.close()
+
+# RESULT ANALYSIS (Factors Affecting Gene Prediction)
+# example usage:
+# gene_corr = scimpute.gene_corr_list(M.values, H.values)
+def gene_corr_list(arr1, arr2):
+    '''calculate correlation between genes [columns]
+    arr [cells, genes], note, some genes don't have corr'''
+    # if arr1.shape is arr2.shape:
+    n = arr2.shape[1]
+    list = []
+    for j in range(n):
+        corr = pearsonr(arr1[:, j], arr2[:, j])[0]
+        if math.isnan(corr):
+            list.append(-1.1)  # NA becomes -1.1
+        else:
+            list.append(corr)
+    list = np.array(list)
+    return list
+
+
+def gene_mse_list(arr1, arr2):
+    '''mse for each gene(column)
+    arr [cells, genes]
+    arr1: X
+    arr2: H'''
+    n = arr2.shape[1]
+    list = []
+    for j in range(n):
+        mse = ((arr1[:, j] - arr2[:, j]) ** 2).mean()
+        list.append(mse)
+    list = np.array(list)
+    return list
+
+
+def gene_nz_rate_list(arr1):
+    '''nz_rate for each gene(column)
+    arr [cells, genes]
+    arr1: X'''
+    n = arr1.shape[1]
+    list = []
+    for j in range(n):
+        nz_rate = np.count_nonzero(arr1[:, j]) / n
+        list.append(nz_rate)
+    list = np.array(list)
+    return list
+
+
+def gene_var_list(arr1):
+    '''variation for each gene(column)
+    arr [cells, genes]
+    arr: X'''
+    n = arr1.shape[1]
+    list = []
+    for j in range(n):
+        var = np.var(arr1[:, j])
+        list.append(var)
+    list = np.array(list)
+    return list
+
+
+def gene_nzvar_list(arr1):
+    '''variation for non-zero values in each gene(column)
+    arr [cells, genes]
+    arr: X'''
+    n = arr1.shape[1]
+    list = []
+    for j in range(n):
+        data = arr1[:, j]
+        nz_data = data[data.nonzero()]
+        var = np.var(nz_data)
+        list.append(var)
+    list = np.array(list)
+    return list
+
+
