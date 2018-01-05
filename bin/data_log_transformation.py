@@ -11,9 +11,9 @@ def save_hd5 (df, out_name):
     print("saving" + out_name + " took {:.1f} seconds".format(toc-tic))
 
 if len(sys.argv) is not 3:
-	raise Exception ('usage: log_transformation <in.hd5> <out.hd5>')
+    raise Exception ('usage: log_transformation <in.hd5> <out.hd5>')
 else:
-	print(sys.argv)
+    print(sys.argv)
     print('this is log10(x+1) transformation')
 
 file_in = sys.argv[1] #training set

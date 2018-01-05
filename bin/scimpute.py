@@ -446,8 +446,9 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr', dir='plots'):
     plt.hist(hist, bins=100)
     plt.xlabel('Gene-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
     plt.ylabel('Freq')
+    plt.xlim(0, 1)
     plt.title(title)
-    plt.savefig(fprefix + ".png", bbox_inches='tight')
+    plt.savefig(fprefix + ".png", bbox_inches='tight') #todo remove \n from out-name
     plt.close(fig)
     return hist
 
@@ -477,6 +478,7 @@ def cell_corr_hist(arr1, arr2, title='hist_cell_corr', dir='plots'):
     plt.hist(hist, bins=100)
     plt.xlabel('Cell-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
     plt.ylabel('Freq')
+    plt.xlim(0, 1)
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
     plt.close(fig)
