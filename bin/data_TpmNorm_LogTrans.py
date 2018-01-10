@@ -4,8 +4,7 @@
 # 1. TPM transformation: divide by length, then by lib-size, scale back to 1M
 # 2. log(tpm+1) transformation
 # 3. Histogram of resulting matrix
-# example usage:
-# python data_TpmNorm_LogTrans.py pbmc.filtered.hd5 row_gene gene_length.txt out_name.hd5
+
 
 import numpy as np
 import pandas as pd
@@ -17,7 +16,7 @@ import matplotlib.pyplot as plt
 
 
 # get argv #
-print('usage: <data_TpmNorm_LogTrans.py> <file.csv/hd5> <row_cell/row_gene> <gene_length.txt> <out_name>')
+print('usage: <data_TpmNorm_LogTrans.py> <file.csv/hd5> <cell_row/gene_row> <gene_length.txt> <out_name>')
 print('gene_length.txt:\n\t')
 print('warning: length not used yet, just rpm')
 print('cmd typed:', sys.argv)
@@ -30,14 +29,14 @@ length_file = str(sys.argv[3])
 outname = str(sys.argv[4])
 
 # Read data
-if matrix_mode == 'row_cell':
+if matrix_mode == 'cell_row':
     if file.endswith('.csv'):
         df = scimpute.read_csv(file).transpose()
     elif file.endswith('.hd5'):
         df = scimpute.read_hd5(file).transpose()
     else:
         raise Exception('file extension error: not hd5/csv')
-elif matrix_mode == 'row_gene':
+elif matrix_mode == 'gene_row':
     if file.endswith('.csv'):
         df = scimpute.read_csv(file)
     elif file.endswith('.hd5'):

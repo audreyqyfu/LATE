@@ -1,99 +1,66 @@
 #!/usr/bin/python
-# read count.txt/csv; do MAGIC style normalization (scale back to median);
-# do log (x+1) transformation
-# output in blosc-compressed hd5 and csv.gz format
+# read gene expression matrix
+# into format [gene, cell]
+# 1. RPM transformation: divide by lib-size, scale back to 1M
+# 2. log(rpm+1) transformation
 
-print("data_RpmNorm_LogTrans.py: read csv [row=genes, col=cells], normalize similar to magic")
-
-import pandas as pd
 import numpy as np
-import time
-import os
+import pandas as pd
+import scimpute
+import sys
+import matplotlib
+matplotlib.use('Agg')  # for plotting without GUI
+import matplotlib.pyplot as plt
 
+# get argv #
+print('usage: <data_RpmNorm_LogTrans.py> <file.csv/hd5> <cell_row/gene_row> <out_name(x.rpm.log.hd5)>')
+print('cmd typed:', sys.argv)
+if len(sys.argv) != 4:
+    raise Exception('num args err')
 
-def df_filter(df):
-    df_filtered = df.loc[(df.sum(axis=1) != 0), (df.sum(axis=0) != 0)]
-    print("filtered out any rows and columns with sum of zero")
-    return (df_filtered)
+file = str(sys.argv[1])
+matrix_mode = str(sys.argv[2])
+outname = str(sys.argv[3])
 
+# Read data into [gene, cell]
+if matrix_mode == 'cell_row':
+    if file.endswith('.csv'):
+        df = scimpute.read_csv(file).transpose()
+    elif file.endswith('.hd5'):
+        df = scimpute.read_hd5(file).transpose()
+    else:
+        raise Exception('file extension error: not hd5/csv')
+elif matrix_mode == 'gene_row':
+    if file.endswith('.csv'):
+        df = scimpute.read_csv(file)
+    elif file.endswith('.hd5'):
+        df = scimpute.read_hd5(file)
+    else:
+        raise Exception('file extension error: not hd5/csv')
+else:
+    raise Exception('cmd err in the argv[2]')
 
-def df_normalization(df):
-    read_counts = df.sum(axis=0)  # colsum
-    df_normalized = df.div(read_counts, axis=1).mul(np.median(read_counts)).mul(1)
-    return (df_normalized)
+# summary
+nz_rate_df = scimpute.nnzero_rate_df(df)
+print('df.shape, [gene, cell]:', df.shape)
+print('nz_rate: {}'.format(round(nz_rate_df, 3)))
+print(df.ix[0:3, 0:3])
 
+# lib-size per million normalization
+df = scimpute.df_normalization(df)
+print('after normalization')
+print(df.ix[0:3, 0:3])
+read_per_gene = df.sum(axis=1)
+read_per_cell = df.sum(axis=0)
+print('sum_reads_per_gene:', read_per_gene[0:3])
+print('sum_reads_per_cell:', read_per_cell[0:3])
 
-def df_log_transformation(df, pseudocount=1):
-    df_log = np.log10(np.add(df, pseudocount))
-    return (df_log)
+# log(tpm+1) transformation
+df = scimpute.df_log_transformation(df)
+print('after log transformation')
+print(df.ix[0:3, 0:3])
 
-
-# input
-in_name = 'All_Tissue_Site_Details.combined.reads.gct'
-out_prefix = "gtex_v7"
-
-# reading data
-print("started reading file: ", in_name)
-tic = time.time()
-data = pd.io.parsers.read_csv(in_name,
-                              index_col=0,  # col=0 as rownames (gene ID)
-                              sep="\t",
-                              skiprows=2)  # skip first two commentary rows
-del data['Description']  # delete column gene_description
-toc = time.time()
-print("reading input took {:.1f} seconds".format(toc - tic))
-print("input matrix:")
-print(data.ix[0:2, 0:2])
-print(data.shape)
-
-# filter out genes and cells with no reads
-tic = time.time()
-data_filtered = df_filter(data)
-toc = time.time()
-print("filtered matrix:")
-print(data_filtered.ix[0:2, 0:2])
-print(data.shape)
-print("filtering took {:.1f} seconds".format(toc - tic))
-
-# normalization
-tic = time.time()
-data_normalized = df_normalization(data_filtered)
-toc = time.time()
-print("normalized matrix:")
-print(data_normalized.ix[0:2, 0:2])
-print(data_normalized.shape)
-print("normalization took {:.1f} seconds".format(toc - tic))
-
-# log transformation
-tic = time.time()
-data_normalized_log = df_log_transformation(data_normalized)
-toc = time.time()
-print("log transformed matrix:")
-print(data_normalized_log.ix[0:2, 0:2])
-print(data_normalized_log.shape)
-print("log-tansformation took {:.1f} seconds".format(toc - tic))
-
-# output
-print("saving output norm.hd5: " + os.getcwd())
-tic = time.time()
-data_normalized.to_hdf(out_prefix + '.norm.hd5', key='null', mode='w', complevel=9, complib='blosc')
-toc = time.time()
-print("saving " + out_prefix + ".norm.hd5 took {:.1f} seconds".format(toc - tic))
-
-print("saving output norm.log.hd5: " + os.getcwd())
-tic = time.time()
-data_normalized_log.to_hdf(out_prefix + '.norm.log.hd5', key='null', mode='w', complevel=9, complib='blosc')
-toc = time.time()
-print("saving " + out_prefix + ".norm.log.hd5 took {:.1f} seconds".format(toc - tic))
-
-print("saving output norm.csv.gz")
-tic = time.time()
-data_normalized.to_csv(out_prefix + ".norm.csv.gz", compression='gzip')
-toc = time.time()
-print("saving " + out_prefix + ".norm.csv.gz took {:.1f} seconds".format(toc - tic))
-
-print("saving output norm.log.csv.gz")
-tic = time.time()
-data_normalized_log.to_csv(out_prefix + ".norm.log.csv.gz", compression='gzip')
-toc = time.time()
-print("saving " + out_prefix + ".norm.log.csv.gz took {:.1f} seconds".format(toc - tic))
+# save
+print('saving output to:', outname)
+scimpute.save_hd5(df, outname)
+print('finished')
