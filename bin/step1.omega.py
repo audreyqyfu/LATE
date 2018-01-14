@@ -334,6 +334,7 @@ batch_writer = tf.summary.FileWriter(p.stage + '/batch', sess.graph)
 valid_writer = tf.summary.FileWriter(p.stage + '/valid', sess.graph)
 
 epoch = 0
+n_iter = 0
 num_batch = int(math.floor(len(df1_train) // p.batch_size))  # floor
 epoch_log = []
 mse_omega_log_batch, mse_omega_log_valid, mse_omega_log_train = [], [], []
@@ -351,6 +352,7 @@ for epoch in range(1, p.max_training_epochs+1):
     tic_cpu, tic_wall = time.clock(), time.time()
     ridx_full = np.random.choice(len(df1_train), len(df1_train), replace=False)
     for i in range(num_batch):
+        n_iter += 1
         indices = np.arange(p.batch_size * i, p.batch_size*(i+1))
         ridx_batch = ridx_full[indices]
         x_batch = df1_train.values[ridx_batch, :]
@@ -461,4 +463,4 @@ for epoch in range(1, p.max_training_epochs+1):
 batch_writer.close()
 valid_writer.close()
 sess.close()
-print("Finished!\n\n\n")
+print("Finished!\n{} iterations\n\n\n".format(n_iter))
