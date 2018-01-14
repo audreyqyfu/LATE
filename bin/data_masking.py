@@ -1,34 +1,49 @@
-# split simulated dataset into two parts (A and B)
-# mask 90% of the B part to mimic single cell data
-print('needs polishing')
-
 import pandas as pd
 import os
 import numpy as np
 import time
+import sys
+import scimpute
 
-def save_hd5 (df, out_name):
-    tic = time.time()
-    df.to_hdf(out_name, key='null', mode='w', complevel=9, complib='blosc')
-    toc = time.time()
-    print("saving" + out_name + " took {:.1f} seconds".format(toc-tic))
 
-file_B = "EMT.MAGIC.9k.B.hd5"  # ground truth for scRNA-seq data
-file_B_sub = 'EMT.MAGIC.9k.B.msk50.hd5'  # mimic scRNA_seq data with drop-outs
+print('usage: python data_masking.py df.hd5  zero_percentage_goal(90, 95) outname')
+print('example: python data_masking.py test.hd5 90 test.msk90.hd5')
+print('matrix direction does not matter, only values masked, shape kept same')
+
+if len(sys.argv) is not 4:
+    raise Exception("error: the num of arguments not correct")
+else:
+    print('running:')
+    fname = str(sys.argv[1])  # df.hd5
+    zero_goal = float(sys.argv[2])/100  # small.hd5
+    nz_goal = 1 - zero_goal
+    out_name = str(sys.argv[3])  # big.small.hd5
+    print('cmd: ', sys.argv)
 
 # read data #
-df_B = pd.read_hdf(file_B)
+df = pd.read_hdf(fname)
+print('input shape:', df.shape)
+nz_rate = scimpute.nnzero_rate_df(df)
+print('nz_rate: {}\n'.format(nz_rate))
+print(df.iloc[0:6, 0:2])
 
-# mask df_B
+# Masking
 np.random.seed(2)
-df_B_msked = df_B.where(np.random.uniform(size=df_B.shape)>0.5, 0)
+# further masking (zero_inflation)
+if nz_rate > nz_goal:
+    df = scimpute.mask_df(df, nz_goal)
+else:
+    df = df
 
 # print
-print("B.", df_B.ix[1:6, 1:6])
-print("B.msk.shape", df_B_msked.ix[1:6, 1:6])
+print('msked shape:', df.shape)
+nz_rate = scimpute.nnzero_rate_df(df)
+print('nz_rate_msked: {}\n'.format(nz_rate))
+print(df.iloc[0:6, 0:2])
+
 
 # save files
-save_hd5(df_B_msked, file_B_sub)
+scimpute.save_hd5(df, out_name)
 
 
 
