@@ -1,3 +1,6 @@
+import os
+home = os.environ['HOME']
+
 # Hyper structure #
 stage = 'step1'  # step1/step2
 L = 5  # only a reporter, changing it can't alter the model structure
@@ -21,14 +24,14 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 
 # file input #
 # EMT.MAGIC
-file1 = '../../../../data/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5'  # input
-name1 = 'EMT.MAGIC.A'
-file_orientation = 'gene_row'  # cell_row/gene_row
+# file1 = '../../../../data/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5'  # input
+# name1 = 'EMT.MAGIC.A'
+# file_orientation = 'gene_row'  # cell_row/gene_row
 
 # PBMC
-# file1 = "10x_human_pbmc_68k.hd5.Gene10k.Cell1.5k.msk95.hd5"  # input
-# name1 = 'PBMC.g949.msk95'
-# file_orientation = 'gene_row'  # cell_row/gene_row
+file1 = home+'/imputation/data/gtex/nz40/rpm/gtex_v7.rpm.log.nz40.hd5'
+name1 = 'GTEx.rpm.log.nz40'
+file_orientation = 'gene_row'  # cell_row/gene_row
 
 # GTEx
 # file1 = "../../../../data/gtex/rpm_4tissues/gtex_v7.rpm.log.muscle_heart_skin_adipose_no.hd5"  # input
@@ -42,20 +45,20 @@ file2_orientation = file_orientation
 
 # Gene list
 pair_list = [
-            [4058, 7496],
-            [8495, 12871],
+            # [4058, 7496],
+            # [8495, 12871],
             [2, 3],
             [205, 206]
             ]
 
 gene_list = [
-            4058, 7496, 8495, 12871,
+            # 4058, 7496, 8495, 12871,
             2, 3, 205, 206
              ]
 
 # For Test Run #
 seed_tf = 3
-test_flag = 1  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # {0, 1}, in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
