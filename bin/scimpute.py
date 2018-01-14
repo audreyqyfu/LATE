@@ -90,11 +90,12 @@ def multinormial_downsampling(in_df, libsize_out):
     return out_df
 
 
-def mask_df(df, zero_percentage):
+def mask_df(df, nz_goal):
     df_msked = df.copy()
     nz_now = nnzero_rate_df(df)
-    zero_percentage = zero_percentage/nz_now
-    df_msked = df_msked.where(np.random.uniform(size=df.shape) > (1-zero_percentage), 0)
+    nz_goal = nz_goal/nz_now
+    zero_goal = 1-nz_goal
+    df_msked = df_msked.where(np.random.uniform(size=df.shape) > zero_goal, 0)
     return df_msked
 
 
@@ -446,7 +447,7 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr', dir='plots'):
     plt.hist(hist, bins=100)
     plt.xlabel('Gene-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
     plt.ylabel('Freq')
-    plt.xlim(0, 1)
+    plt.xlim(-1, 1)
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight') #todo remove \n from out-name
     plt.close(fig)
@@ -478,7 +479,7 @@ def cell_corr_hist(arr1, arr2, title='hist_cell_corr', dir='plots'):
     plt.hist(hist, bins=100)
     plt.xlabel('Cell-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
     plt.ylabel('Freq')
-    plt.xlim(0, 1)
+    plt.xlim(-1, 1)
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight')
     plt.close(fig)
