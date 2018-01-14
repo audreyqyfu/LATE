@@ -322,7 +322,7 @@ with tf.name_scope("Metrics"):
                         omega
                         )
                 )
-    reg_term = tf.pow(h, 2) * p.reg_coef
+    reg_term = tf.reduce_mean(tf.pow(h, 2)) * p.reg_coef
     tf.summary.scalar('mse_omega (H vs X)', mse_omega)
 
     mse1 = tf.reduce_mean(tf.pow(X - h, 2))  # for report
