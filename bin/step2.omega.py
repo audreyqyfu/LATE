@@ -210,6 +210,8 @@ def save_weights():
 
 
 print("Usage: python -u <step2.py>")
+print('Change step2_params.py for parameters')
+print('there are load_saved (TL) mode and rand_init(1step) mode')
 
 # print versions / sys.path
 print('python version:', sys.version)
@@ -320,6 +322,7 @@ with tf.name_scope("Metrics"):
                         omega
                         )
                 )
+    reg_term = tf.pow(h, 2) * p.reg_coef
     tf.summary.scalar('mse_omega (H vs X)', mse_omega)
 
     mse1 = tf.reduce_mean(tf.pow(X - h, 2))  # for report
@@ -329,7 +332,7 @@ with tf.name_scope("Metrics"):
 
 # trainer
 optimizer = tf.train.AdamOptimizer(p.learning_rate)
-trainer = optimizer.minimize(mse_omega)  # for gene_j
+trainer = optimizer.minimize(mse_omega + reg_term)  # for gene_j
 
 # start session
 sess = tf.Session()
