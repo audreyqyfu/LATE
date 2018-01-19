@@ -23,7 +23,7 @@ def read_csv(fname):
         print(df.ix[0:3, 0:2])
     toc = time.time()
     print("reading took {:.1f} seconds".format(toc - tic))
-    return (df)
+    return df
 
 
 def save_csv(arr, fname):
@@ -53,7 +53,7 @@ def read_hd5(in_name):
     # print(df.axes)
     if df.shape[0] > 2 and df.shape[1] > 2:
         print(df.ix[0:3, 0:2])
-    return (df)
+    return df
 
 
 # Pre-processing of data frames #
@@ -593,6 +593,16 @@ def mean_df(df):
     Sum = sum(sum(df.values))
     Mean = Sum / df.size
     return (Mean)
+
+
+def mse_omega(arr_h, arr_m):
+    '''arr and df both works'''
+    omega = np.sign(arr_m)
+    diff = np.subtract(H, M)
+    squared = np.power(diff, 2)
+    non_zero_squared = np.multiply(squared, omega)
+    mse_omega = np.mean(np.mean(non_zero_squared))
+    return mse_omega
 
 
 def subset_df(df_big, df_subset):
