@@ -72,7 +72,7 @@ if test_flag == 1:
     m = 1000
     n = 15000
 
-# Gene list
+# Gene list (data frame index)
 pair_list = [
             #[4058, 7496],
             #[8495, 12871],
