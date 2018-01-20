@@ -10,6 +10,16 @@ import os
 import time
 import scimpute
 
+def mse_omega(arr_h, arr_m):
+    '''arr and df both works'''
+    omega = np.sign(arr_m)
+    diff = np.subtract(H, M)
+    squared = np.power(diff, 2)
+    non_zero_squared = np.multiply(squared, omega)
+    mse_omega = np.mean(np.mean(non_zero_squared))
+    return mse_omega
+
+
 # read cmd
 print('reads H.hd5 and M.hd5, then analysis the result')
 print('usage: python -u result_analysis.py H.hd5 gene_row/cell_row M.hd5 gene_row/cell_row out_tag')
@@ -76,11 +86,12 @@ hist = scimpute.cell_corr_hist(H.values, M.values,
 # Visualization of dfs
 print('> Visualization of dfs')
 max, min = scimpute.max_min_element_in_arrs([H.values, M.values])
-mse2 = ((H.values - M.values) ** 2).mean()
-mse2 = round(mse2, 5)
+mse_omega = mse_omega(H, M)
+mse_omega = round(mse_omega, 5)
+print('mse_omega', mse_omega)
 scimpute.heatmap_vis(H.values,
                      title='H ({})'.format(file_h),
-                     xlab='genes\nMSE2(H vs M)={}'.format(mse2),
+                     xlab='genes\nMSE_OMEGA(H vs M)={}'.format(mse_omega),
                      ylab='cells', vmax=max, vmin=min,
                      dir=tag)
 scimpute.heatmap_vis(M.values,
