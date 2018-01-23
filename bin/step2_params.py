@@ -19,7 +19,7 @@ if run_flag == 'rand_init':
     learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 elif run_flag == 'load_saved':
     learning_rate = 3e-5  # step2: 3e-5 for 3-7L, 3e-6 for 9L
-reg_coef = 0.001
+reg_coef = 0.000  # set to zero if don't want regularization, set to 1e-2 as default reg
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
 max_training_epochs = int(1e3)
