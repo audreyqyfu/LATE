@@ -9,6 +9,7 @@ import math
 import os
 import time
 import scimpute
+import result_analysis_matrix_based_params as p
 
 def mse_omega(arr_h, arr_m):
     '''arr and df both works'''
@@ -22,10 +23,10 @@ def mse_omega(arr_h, arr_m):
 
 # read cmd
 print('reads H.hd5 and M.hd5, then analysis the result')
-print('usage: python -u result_analysis.py H.hd5 gene_row/cell_row M.hd5 gene_row/cell_row out_tag')
+print('usage: python -u result_analysis.py H.hd5 gene_row/cell_row M.hd5 gene_row/cell_row X.hd5 gene_row/cell_row out_tag')
 print('H means prediction, M means ground truth')
 
-if len(sys.argv) != 6:
+if len(sys.argv) != 8:
     raise Exception('cmd err')
 else:
     print('cmd: ', sys.argv)
@@ -34,7 +35,9 @@ file_h = str(sys.argv[1]).strip()
 file_h_ori = str(sys.argv[2]).strip()
 file_m = str(sys.argv[3]).strip()
 file_m_ori = str(sys.argv[4]).strip()
-tag = str(sys.argv[5]).strip()
+file_x = str(sys.argv[5]).strip()
+file_x_ori = str(sys.argv[6]).strip()
+tag = str(sys.argv[7]).strip()
 
 # read data
 if file_h_ori == 'gene_row':
@@ -51,6 +54,13 @@ elif file_m_ori == 'cell_row':
 else:
     raise Exception('parameter err: m_orientation not correctly spelled')
 
+if file_x_ori == 'gene_row':
+    X = pd.read_hdf(file_x).transpose()
+elif file_x_ori == 'cell_row':
+    X = pd.read_hdf(file_x)
+else:
+    raise Exception('parameter err: x_orientation not correctly spelled')
+
 # Test mode or not
 test_flag = 0
 m = 100
@@ -59,17 +69,21 @@ if test_flag > 0:
     print('in test mode')
     H = H.ix[0:m, 0:n]
     M = M.ix[0:m, 0:n]
+    X = X.ix[0:m, 0:n]
 
 # input summary
 print('inside this code, matrices are supposed to be cell_row')
 print('H:', H.ix[0:3, 0:2])
 print('M:', M.ix[0:3, 0:2])
+print('X:', X.ix[0:3, 0:2])
 print('H.shape', H.shape)
 print('M.shape', M.shape)
+print('X.shape', X.shape)
 
 # Hist of H todo combine
 scimpute.hist_df(H, title='H({})'.format(file_h), dir=tag)
 scimpute.hist_df(M, title='M({})'.format(file_m), dir=tag)
+scimpute.hist_df(M, title='X({})'.format(file_x), dir=tag)
 
 
 # Hist Cell/Gene corr todo combine
@@ -158,6 +172,54 @@ scimpute.density_plot(gene_nzvar, gene_corr,
                       dir=tag,
                       xlab='gene nz_variation',
                       ylab='gene corr (NA: -1.1)')
+
+# Gene-Gene in M, X, H
+def gene_gene_relationship():
+    print('> Gene-gene relationship, before/after inference')
+    List = p.pair_list
+    # Valid, H
+    for i, j in List:
+        scimpute.scatterplot2(h_valid.ix[:, i], h_valid.ix[:, j],
+                              title='Gene' + str(i) + ' vs Gene' + str(j) + ' (H,valid)' + tag,
+                              xlabel='Gene' + str(i), ylabel='Gene' + str(j + 1),
+                              dir=p.stage)
+    # Valid, M
+    for i, j in List:
+        scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
+                              title="Gene" + str(i) + ' vs Gene' + str(j) + ' (M,valid)' + tag,
+                              xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                              dir=p.stage)
+    # Valid, X
+    for i, j in List:
+        scimpute.scatterplot2(df1_valid.ix[:, i], df1_valid.ix[:, j],
+                              title="Gene" + str(i) + ' vs Gene' + str(j) + ' (X,valid)' + tag,
+                              xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                              dir=p.stage)
+gene_gene_relationship()
+
+# M vs H, M vs X
+def m_vs_h():
+    print("> M vs H, M vs X")
+    for j in p.gene_list:  # Cd34, Gypa, Klf1, Sfpi1
+            scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='same',
+                                  title=str('M_vs_H, Gene' + str(j) + ' (valid)'+tag),
+                                  xlabel='Ground Truth (M)',
+                                  ylabel='Prediction (H)',
+                                  dir=p.stage
+                                  )
+            # scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='flexible',
+            #                       title=str('M_vs_H(zoom), Gene' + str(j) + ' (valid)'+tag),
+            #                       xlabel='Ground Truth (M)',
+            #                       ylabel='Prediction (H)',
+            #                       dir=p.stage
+            #                      )
+            scimpute.scatterplot2(df2_valid.values[:, j], df1_valid.values[:, j], range='same',
+                                  title=str('M_vs_X, Gene' + str(j) + ' (valid)'+tag),
+                                  xlabel='Ground Truth (M)',
+                                  ylabel='Input (X)',
+                                  dir=p.stage
+                                 )
+m_vs_h()
 
 
 # # gene MSE
