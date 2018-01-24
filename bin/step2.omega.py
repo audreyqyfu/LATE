@@ -109,33 +109,34 @@ def tb_summary():
     print('tb_summary time:', round(toc-tic,2))
 
 
-def learning_curve_step2():
+def learning_curve_step2(skip=1):
     print('> plotting learning curves')
     scimpute.learning_curve(epoch_log, mse_omega_batch_vec, mse_omega_valid_vec,
                                 title="Learning Curve MSE_OMEGA.{}".format(p.stage),
                                 ylabel='MSE_OMEGA (X vs H, nz)',
-                                dir=p.stage
+                                dir=p.stage,
+                                skip=skip
                             )
-    scimpute.learning_curve(epoch_log, mse2_batch_vec, mse2_valid_vec,
-                                title="Learning Curve MSE2.{}".format(p.stage),
-                                ylabel='MSE2',
-                                dir=p.stage
-                            )
-    scimpute.learning_curve(epoch_log, mse1_batch_vec, mse1_valid_vec,
-                                title="Learning Curve MSE1.{}".format(p.stage),
-                                ylabel="MSE1",
-                                dir=p.stage
-                            )
-    scimpute.learning_curve(epoch_log, cell_corr2_batch_vec, cell_corr2_valid_vec,
-                                 title='Learning curve cell-corr2.{}'.format(p.stage),
-                                 ylabel='Cell-corr2',
-                                 dir=p.stage
-                            )
-    scimpute.learning_curve(epoch_log, gene_corr2_batch_vec, gene_corr2_valid_vec,
-                                 title='Learning curve gene-corr2.{}'.format(p.stage),
-                                 ylabel='Gene-corr2',
-                                 dir=p.stage
-                            )
+    # scimpute.learning_curve(epoch_log, mse2_batch_vec, mse2_valid_vec,
+    #                             title="Learning Curve MSE2.{}".format(p.stage),
+    #                             ylabel='MSE2',
+    #                             dir=p.stage
+    #                         )
+    # scimpute.learning_curve(epoch_log, mse1_batch_vec, mse1_valid_vec,
+    #                             title="Learning Curve MSE1.{}".format(p.stage),
+    #                             ylabel="MSE1",
+    #                             dir=p.stage
+    #                         )
+    # scimpute.learning_curve(epoch_log, cell_corr2_batch_vec, cell_corr2_valid_vec,
+    #                              title='Learning curve cell-corr2.{}'.format(p.stage),
+    #                              ylabel='Cell-corr2',
+    #                              dir=p.stage
+    #                         )
+    # scimpute.learning_curve(epoch_log, gene_corr2_batch_vec, gene_corr2_valid_vec,
+    #                              title='Learning curve gene-corr2.{}'.format(p.stage),
+    #                              ylabel='Gene-corr2',
+    #                              dir=p.stage
+    #                         )
 
 
 def snapshot():
@@ -144,13 +145,13 @@ def snapshot():
     h_train = sess.run(h, feed_dict={X: df1_train.values, pIn_holder: 1, pHidden_holder: 1})
     h_valid = sess.run(h, feed_dict={X: df1_valid.values, pIn_holder: 1, pHidden_holder: 1})
     h_input = sess.run(h, feed_dict={X: df1.values, pIn_holder: 1, pHidden_holder: 1})
-    # print whole dataset pearsonr
-    print("median cell-pearsonr(all train): ",
-          scimpute.median_corr(df2_train.values, h_train, num=len(df1_train)))
-    print("median cell-pearsonr(all valid): ",
-          scimpute.median_corr(df2_valid.values, h_valid, num=len(df1_valid)))
-    print("median cell-pearsonr in all imputation cells: ",
-          scimpute.median_corr(df2.values, h_input, num=m))
+    # # print whole dataset pearsonr
+    # print("median cell-pearsonr(all train): ",
+    #       scimpute.median_corr(df2_train.values, h_train, num=len(df1_train)))
+    # print("median cell-pearsonr(all valid): ",
+    #       scimpute.median_corr(df2_valid.values, h_valid, num=len(df1_valid)))
+    # print("median cell-pearsonr in all imputation cells: ",
+    #       scimpute.median_corr(df2.values, h_input, num=m))
     # save pred
     df_h_input = pd.DataFrame(data=h_input, columns=df1.columns, index=df1.index)
     scimpute.save_hd5(df_h_input, "{}/imputation.{}.hd5".format(p.stage, p.stage))
@@ -417,24 +418,24 @@ for epoch in range(1, p.max_training_epochs+1):
         mse_omega_batch_vec.append(mse_omega_batch)
         mse_omega_valid_vec.append(mse_omega_valid)
 
-        # cell-corr
-        cell_corr2_batch = scimpute.median_corr(
-            df2_batch.values, h_batch, num=100
-        )
-        cell_corr2_valid = scimpute.median_corr(
-            df2_valid.values, h_valid, num=100
-        )
-        cell_corr2_batch_vec.append(cell_corr2_batch)
-        cell_corr2_valid_vec.append(cell_corr2_valid)
+        # # cell-corr
+        # cell_corr2_batch = scimpute.median_corr(
+        #     df2_batch.values, h_batch, num=100
+        # )
+        # cell_corr2_valid = scimpute.median_corr(
+        #     df2_valid.values, h_valid, num=100
+        # )
+        # cell_corr2_batch_vec.append(cell_corr2_batch)
+        # cell_corr2_valid_vec.append(cell_corr2_valid)
 
 
-        # gene-corr
-        gene_corr2_batch = scimpute.median_corr(
-            df2_batch.values.transpose(), h_batch.transpose(), num=100)
-        gene_corr2_valid = scimpute.median_corr(
-            df2_valid.values.transpose(), h_valid.transpose(), num=100)
-        gene_corr2_batch_vec.append(gene_corr2_batch)
-        gene_corr2_valid_vec.append(gene_corr2_valid)
+        # # gene-corr
+        # gene_corr2_batch = scimpute.median_corr(
+        #     df2_batch.values.transpose(), h_batch.transpose(), num=100)
+        # gene_corr2_valid = scimpute.median_corr(
+        #     df2_valid.values.transpose(), h_valid.transpose(), num=100)
+        # gene_corr2_batch_vec.append(gene_corr2_batch)
+        # gene_corr2_valid_vec.append(gene_corr2_valid)
 
         toc_log = time.time()
         epoch_log.append(epoch)
@@ -442,10 +443,10 @@ for epoch in range(1, p.max_training_epochs+1):
               format(mse_omega_batch, mse_omega_valid))
         print('mse1_batch:', mse1_batch, '; mse1_valid:', mse1_valid)
         print('mse2_batch:', mse2_batch, '; mse2_valid:', mse2_valid)
-        print("cell-corr2(rand 100 cells): batch: {}, valid: {}".
-              format(cell_corr2_batch, cell_corr2_valid))
-        print("gene-corr2(rand 1000 genes): batch: {}, valid: {}".
-              format(gene_corr2_batch, gene_corr2_valid))
+        # print("cell-corr2(rand 100 cells): batch: {}, valid: {}".
+        #       format(cell_corr2_batch, cell_corr2_valid))
+        # print("gene-corr2(rand 1000 genes): batch: {}, valid: {}".
+        #       format(gene_corr2_batch, gene_corr2_valid))
         print('log time for each epoch:', round(toc_log - tic_log, 1))
         print()
 
@@ -453,24 +454,24 @@ for epoch in range(1, p.max_training_epochs+1):
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
         h_train, h_valid, h_input = snapshot()  # save
-        learning_curve_step2()
-        scimpute.gene_corr_hist(
-            h_valid, df2_valid.values,
-            title="Gene-corr(H vs M)(valid).{}".format(p.stage),
-            dir=p.stage
-        )
-        scimpute.cell_corr_hist(
-            h_valid, df2_valid.values,
-            title="Cell-corr(H vs M)(valid).{}".format(p.stage),
-            dir=p.stage
-        )
+        learning_curve_step2(skip=math.floor(epoch/2/p.display_step))
+        # scimpute.gene_corr_hist(
+        #     h_valid, df2_valid.values,
+        #     title="Gene-corr(H vs M)(valid).{}".format(p.stage),
+        #     dir=p.stage
+        # )
+        # scimpute.cell_corr_hist(
+        #     h_valid, df2_valid.values,
+        #     title="Cell-corr(H vs M)(valid).{}".format(p.stage),
+        #     dir=p.stage
+        # )
         save_bottle_neck_representation()
         save_weights()
         visualize_weights()
         toc_log2 = time.time()
         log2_time = round(toc_log2 - tic_log2, 1)
-        min_mse2_valid = min(mse2_valid_vec)
-        print('min_MSE2_valid till now: {}'.format(min_mse2_valid))
+        min_mse_valid = min(mse_omega_valid_vec)
+        print('min_MSE_OMEGA_valid till now: {}'.format(min_mse_valid))
         print('snapshot_step: {}s'.format(log2_time))
 
 batch_writer.close()

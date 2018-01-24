@@ -930,7 +930,7 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
     plt.savefig(fprefix + '.png', bbox_inches='tight')
     plt.close()
 
-    # plot (no epoch0)
+    # plot (zoom)
     fprefix = "./{}/{}".format(dir, title) + '.cropped'
     zoom = np.arange(skip, len(metrics_batch))
     plt.plot(epoch[zoom], metrics_batch[zoom], 'b--', label='batch')

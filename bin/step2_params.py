@@ -19,69 +19,42 @@ if run_flag == 'rand_init':
     learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 elif run_flag == 'load_saved':
     learning_rate = 3e-5  # step2: 3e-5 for 3-7L, 3e-6 for 9L
-reg_coef = 0.000  # set to zero if don't want regularization, set to 1e-2 as default reg
+reg_coef = 1e-2  # reg3, can set to 0.0
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
 max_training_epochs = int(1e3)
-display_step = 100  # interval on learning curve
+display_step = 50  # interval on learning curve
 snapshot_step = int(5e2)  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
-
-# file input #
-# EMT.MAGIC
-# file1 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.ds_60000_10.log.hd5"  # data need imputation
-# file2 = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth
-# name1 = '(EMT_MAGIC_B.DS_60K10P)'
-# name2 = '(EMT_MAGIC_B)'
-# file1_orientation = 'cell_row'  # cell_row/gene_row
-# file2_orientation = 'gene_row'
-
 # PBMC
-file1 = home+'/imputation/data/10x_human_pbmc_68k/filtering/msk/log/\
-10x_human_pbmc_68k.hd5.Gene10k.Cell1.5k.msk90.log.hd5'
-name1 = 'PBMC.nz40.msk90.log'
+file1 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/msk/\
+10xHumanPbmc.g5561.rpmLog.msk98.hd5'
+name1 = 'PBMC.G5561.RPM.LOG.MSK98'
 file1_orientation = 'gene_row'  # cell_row/gene_row
-file2 = home+'/imputation/data/10x_human_pbmc_68k/filtering/log/\
-10x_human_pbmc_68k.hd5.Gene10k.Cell1.5k.log.hd5'
-name2 = 'PBMC.nz40.log'
+file2 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
+10xHumanPbmc.g5561.rpmLog.hd5'
+name2 = 'PBMC.G5561.RPM.LOG'
 file2_orientation = 'gene_row'  # cell_row/gene_row
-
-# GTEx Muscle
-# file1 = "../../../../data/gtex/rpm_ds_4tissues/gtex_v7.rpm_ds.muscle_heart_skin_adipose_yes.hd5"  # cell_row
-# file2= '../../../../data/gtex/rpm_4tissues/gtex_v7.rpm.log.muscle_heart_skin_adipose_yes.hd5'  # cell_row
-# file1 = "../../../../data/gtex/tpm_ds_muscle/gtex_v7.tpm.ds_70k_10p_log.muscle_yes.hd5"  # input X (cell_row)
-# file1 = "../../../../data/gtex/tpm_msk_tissues/gtex_v7.tpm.log.msk90.muscle_heart_skin_adipose_yes.hd5"  # input X (cell_row)
-# file2 = "../../../../data/gtex/tpm_tissues/gtex_v7.tpm.log.muscle_heart_skin_adipose_yes.hd5"  # ground truth M (cell_row)
-# file1 = "../../../../data/gtex/tpm_ds/gtex_v7.tpm.ds_70k_10p_log.hd5"  # input X (cell_row)
-# file2 = "../../../../data/gtex/tpm/gtex_v7.tpm.log.hd5"  # ground truth M (gene_row)
-# file1_orientation = 'cell_row'  # cell_row/gene_row
-# file2_orientation = 'cell_row'
-# name1 = '(RPM_DS_4TissueYes)'  # uses 20GB of RAM
-# name2 = '(RPM_4TissueYes)'
-
 
 # For development usage #
 seed_tf = 3
-test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
-    max_training_epochs = 10  # 3L:100, 5L:1000, 7L:1000, 9L:3000
-    display_step = 1  # interval on learning curve
-    snapshot_step = 5  # interval of saving session, imputation
+    max_training_epochs = 20 # 3L:100, 5L:1000, 7L:1000, 9L:3000
+    display_step = 2  # interval on learning curve
+    snapshot_step = 10  # interval of saving session, imputation
     m = 1000
-    n = 15000
+    n = 300
 
 # Gene list (data frame index)
 pair_list = [
-            #[4058, 7496],
-            #[8495, 12871],
             [2, 3],
             [205, 206]
             ]
 
 gene_list = [
-    #4058, 7496, 8495, 12871,
     2, 3, 205, 206]
 
 
