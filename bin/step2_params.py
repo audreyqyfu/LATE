@@ -10,7 +10,7 @@ n_hidden_2 = 200  # update for different depth
 # n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
-run_flag = 'rand_init'  # rand_init/load_saved
+run_flag = 'load_saved'  # rand_init/load_saved
 
 # Training parameters #
 pIn = 0.8
@@ -29,10 +29,14 @@ snapshot_step = int(5e2)  # interval of saving session, imputation
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 # PBMC
+# file1 as X matrix (imputation and result_analysis)
 file1 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/msk/\
+10xHumanPbmc.g5561.rpmLog.msk98.hd5'
+file1 = '/Volumes/radio/audrey2/' + '/imputation/data/10x_human_pbmc_68k/filtering/rpm/msk/\
 10xHumanPbmc.g5561.rpmLog.msk98.hd5'
 name1 = 'PBMC.G5561.RPM.LOG.MSK98'
 file1_orientation = 'gene_row'  # cell_row/gene_row
+# file2 for result_analysis
 file2 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
 10xHumanPbmc.g5561.rpmLog.hd5'
 name2 = 'PBMC.G5561.RPM.LOG'
