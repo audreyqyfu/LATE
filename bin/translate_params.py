@@ -2,7 +2,7 @@ import os
 home = os.environ['HOME']
 
 # Hyper structure #
-stage = 'step2'  # step1/step2
+stage = 'step2'  # step1/step2 (not others)
 L = 5  # only a reporter, changing it can't alter the model structure
 l = L//2
 n_hidden_1 = 400
@@ -10,7 +10,7 @@ n_hidden_2 = 200  # update for different depth
 # n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
-run_flag = 'load_saved'  # rand_init/load_saved
+run_flag = 'rand_init'  # rand_init/load_saved
 
 # Training parameters #
 pIn = 0.8
@@ -28,15 +28,23 @@ snapshot_step = int(5e2)  # interval of saving session, imputation
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
+
+# # GTEx
+# # home = '/Volumes/radio/audrey2/'
+# file1 = home+'/imputation/data/gtex/g5561/gtex_v7.norm.g5561.rpm.log.hd5'
+# name1 = 'GTEx.G5561.RPM.LOG'
+# file1_orientation = 'gene_row'  # cell_row/gene_row
+# # file2 for result_analysis.py
+# file2 = file1
+# name2 = name1
+# file2_orientation = file1_orientation  # cell_row/gene_row
+
 # PBMC
-# file1 as X matrix (imputation and result_analysis)
 file1 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/msk/\
-10xHumanPbmc.g5561.rpmLog.msk98.hd5'
-file1 = '/Volumes/radio/audrey2/' + '/imputation/data/10x_human_pbmc_68k/filtering/rpm/msk/\
 10xHumanPbmc.g5561.rpmLog.msk98.hd5'
 name1 = 'PBMC.G5561.RPM.LOG.MSK98'
 file1_orientation = 'gene_row'  # cell_row/gene_row
-# file2 for result_analysis
+# file2 for result_analysis.py
 file2 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
 10xHumanPbmc.g5561.rpmLog.hd5'
 name2 = 'PBMC.G5561.RPM.LOG'
@@ -44,7 +52,7 @@ file2_orientation = 'gene_row'  # cell_row/gene_row
 
 # For development usage #
 seed_tf = 3
-test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 20 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 2  # interval on learning curve
@@ -59,16 +67,17 @@ pair_list = [
             ]
 
 gene_list = [
-    2, 3, 205, 206]
+             2, 3,
+             205, 206
+             ]
 
 
 # print parameters
-print('Files:')
-print('file1:', file1)
+print('\nfile1:', file1)
 print('name1:', name1)
-print('file2:', file2)
-print('name2:', name2)
 print('data_frame1_orientation:', file1_orientation)
+print('\nfile2:', file1)
+print('name2:', name1)
 print('data_frame2_orientation:', file1_orientation)
 
 print()
@@ -82,7 +91,9 @@ for l_tmp in range(1, l+1):
   print("n_hidden{}: {}".format(l_tmp, eval('n_hidden_'+str(l_tmp))))
 
 print('learning_rate:', learning_rate)
+print('reg_coef:', reg_coef)
 print('batch_size:', batch_size)
+print('data split: [{}/{}/{}]'.format(a,b,c) )
 print('pIn:', pIn)
 print('pHidden:', pHidden)
 print('max_training_epochs:', max_training_epochs)

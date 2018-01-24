@@ -3,7 +3,7 @@ import numpy as np
 import time
 import os
 import matplotlib
-matplotlib.use('Agg')  # for plotting without GUI
+# matplotlib.use('Agg')  # for plotting without GUI
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math

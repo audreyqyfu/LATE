@@ -25,7 +25,7 @@ import time
 import seaborn as sns
 # sys.path.append('./bin')
 import scimpute
-import step2_params as p
+import translate_params as p
 
 
 def evaluate_epoch_step2():
@@ -344,4 +344,8 @@ for epoch in range(1, p.max_training_epochs+1):
 batch_writer.close()
 valid_writer.close()
 sess.close()
-print("Finished!")
+print("Imputation Finished!")
+
+# # Result analysis
+os.system('for file in {0}/*_w*npy;do python -u weight_clustmap.py $file {0};done'.format(p.stage))
+os.system('for file in {0}/code*npy;do python -u weight_clustmap.py $file {0};done'.format(p.stage))

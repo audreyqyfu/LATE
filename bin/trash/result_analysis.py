@@ -1,33 +1,23 @@
 #!/usr/bin/python
-print('reads h.hd5 and data.hd5, then analysis the result')
-print('usage: python -u result_analysis.py [step1/step2]')
+print('reads translate_params.py, then analysis the result')
+print('usage: python -u result_analysis.py')
 
 import sys
 import numpy as np
 import pandas as pd
-import matplotlib
+# import matplotlib
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
 import os
 import time
 import scimpute
+import translate_params as p
 
-flag = sys.argv[1].strip()
-print(flag + ",\n")
-# stage specific params
-if flag == 'step1':
-    print('in step1')
-    import step1_params as p
-    file1 = p.file1
-    file2 = p.file1
-elif flag == 'step2':
-    print('in step2')
-    import step2_params as p
-    file1 = p.file1
-    file2 = p.file2
-else:
-    raise Exception('argument wrong')
+file1 = p.file1
+file2 = p.file1
+print('cmd:', sys.argv)
+
 
 # some common params
 file_pred = '{}/imputation.{}.hd5'.format(p.stage, p.stage)

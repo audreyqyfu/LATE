@@ -8,7 +8,7 @@ import sys
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib
+# import matplotlib
 # matplotlib.use('Agg')  # for plotting without GUI
 import matplotlib.pyplot as plt
 
@@ -53,10 +53,10 @@ print('matrix shape:', arr.shape)
 m_max = 1000
 n_max = 1000
 if (m > m_max or n > n_max):
-    print('matrix too large')
+    print('matrix too large, down-sample to 1000 max each dim')
     arr = random_subset_arr(arr, m_max, n_max)
 
-# seaborn clustering
+# seaborn clustering (the rows are rows, columns are columns in clustmap)
 heatmap = sns.clustermap(arr, method='average', cmap="summer", robust=True)
 heatmap.savefig(in_name+'.'+tag+'.png', bbox_inches='tight')
 print('\n\n')
