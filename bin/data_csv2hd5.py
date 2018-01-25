@@ -5,12 +5,13 @@ import pandas as pd
 import sys
 import time
 
-print("usage: python data_csv2hd5.py xxx.csv")
-if len(sys.argv) == 2:
+print("usage: python data_csv2hd5.py inname.csv outname.hd5")
+if len(sys.argv) == 3:
     in_name = sys.argv[1]
+    out_name = sys.argv[2]
     print('usage: {}'.format(sys.argv))
 else:
-    raise Exception ("cmd error")
+    raise Exception("cmd error")
 
 def read_csv(fname):
     '''read_csv into pd.df, assuming index_col=0, and header=True'''
@@ -34,4 +35,4 @@ def save_hd5(df, out_name):
     toc = time.time()
     print("saving" + out_name + " took {:.1f} seconds".format(toc - tic))
 
-save_hd5(df, in_name + '.hd5')
+save_hd5(df, out_name)
