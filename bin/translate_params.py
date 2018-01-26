@@ -1,8 +1,28 @@
 import os
 home = os.environ['HOME']
 
-# Hyper structure #
-stage = 'step2'  # step1/step2 (not others)
+# MODE
+# step1/rand_init for pre-training on ref (step1)
+# step2/rand_init for one step training (late)
+# step2/load_saved for transfer learning (translate)
+mode = 'translate'  # pre-training, translate, late
+
+if mode == 'pre-training':
+    # Reference Pretraining
+    stage = 'step1'
+    run_flag = 'rand_init'
+elif mode == 'translate':
+    # Translate
+    stage = 'step2'  # step1/step2 (not others)
+    run_flag = 'load_saved'  # rand_init/load_saved
+elif mode == 'late':
+    # Late
+    stage = 'step2'
+    run_flag = 'rand_init'
+else:
+    raise Exception('mode err')
+
+# HYPER PARAMETERS
 L = 5  # only a reporter, changing it can't alter the model structure
 l = L//2
 n_hidden_1 = 400
@@ -10,45 +30,47 @@ n_hidden_2 = 200  # update for different depth
 # n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
-run_flag = 'rand_init'  # rand_init/load_saved
 
-# Training parameters #
+# TRAINING PARAMETERS
 pIn = 0.8
 pHidden = 0.5
+reg_coef = 0.0  # reg3=1e-2, can set to 0.0
+
 if run_flag == 'rand_init':
     learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 elif run_flag == 'load_saved':
     learning_rate = 3e-5  # step2: 3e-5 for 3-7L, 3e-6 for 9L
-reg_coef = 1e-2  # reg3, can set to 0.0
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
+
 max_training_epochs = int(1e3)
 display_step = 50  # interval on learning curve
 snapshot_step = int(5e2)  # interval of saving session, imputation
+
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
+
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 
 # # GTEx
-# # home = '/Volumes/radio/audrey2/'
-# file1 = home+'/imputation/data/gtex/g5561/gtex_v7.norm.g5561.rpm.log.hd5'
+# file1 = home+'/imputation/data/gtex/g5561/\
+# gtex_v7.count.g5561.rpm.log.hd5'
 # name1 = 'GTEx.G5561.RPM.LOG'
 # file1_orientation = 'gene_row'  # cell_row/gene_row
 # # file2 for result_analysis.py
 # file2 = file1
 # name2 = name1
-# file2_orientation = file1_orientation  # cell_row/gene_row
+# file2_orientation = file1_orientation
 
 # PBMC
-file1 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/msk/\
-10xHumanPbmc.g5561.rpmLog.msk98.hd5'
-name1 = 'PBMC.G5561.RPM.LOG.MSK98'
+file1 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
+10xHumanPbmc.g5561.rpmLog.hd5'
+name1 = 'PBMC.G5561.RPM.LOG'
 file1_orientation = 'gene_row'  # cell_row/gene_row
 # file2 for result_analysis.py
-file2 = home+'/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
-10xHumanPbmc.g5561.rpmLog.hd5'
-name2 = 'PBMC.G5561.RPM.LOG'
-file2_orientation = 'gene_row'  # cell_row/gene_row
+file2 = file1
+name2 = name1
+file2_orientation = file1_orientation
 
 # For development usage #
 seed_tf = 3

@@ -24,8 +24,8 @@ import os
 import time
 import seaborn as sns
 # sys.path.append('./bin')
+import importlib
 import scimpute
-import translate_params as p
 
 
 def evaluate_epoch_step2():
@@ -135,10 +135,14 @@ def save_weights():
                 sess.run(eval(decoder_bias_name)))
 
 
-print("Usage: python -u <step2.omega.py>")
-print('Change step2_params.py for parameters')
-print('Can also set p.stage = "step1" for pre-training')
-print('there are load_saved (TL) mode and rand_init(1step) mode')
+print("Usage: python -u <translate.py> <params.py>")
+
+if len(sys.argv) == 2:
+    param_file = sys.argv[1]
+    param_file = param_file.rstrip('.py')
+    p = importlib.import_module(param_file)
+else:
+    raise Exception('cmd err')
 
 # print versions / sys.path
 print('python version:', sys.version)
@@ -160,7 +164,7 @@ else:
 # Test or not
 if p.test_flag > 0:
     print('in test mode')
-    df1 = df1.ix[0:p.m, 0:p.n]
+    df1 = df1.ix[:p.m, :p.n]
 
 # Summary of data
 print("input_name:", p.name1)
