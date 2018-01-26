@@ -31,3 +31,5 @@ else:
 
 df = read_hd5(in_name)
 df.to_csv(out_name)
+
+print('finished')
