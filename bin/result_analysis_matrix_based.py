@@ -3,22 +3,15 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
 import os
 import time
 import scimpute
-import result_analysis_matrix_based_params as p
 
-def mse_omega(arr_h, arr_m):
-    '''arr and df both works'''
-    omega = np.sign(arr_m)
-    diff = np.subtract(H, M)
-    squared = np.power(diff, 2)
-    non_zero_squared = np.multiply(squared, omega)
-    mse_omega = np.mean(np.mean(non_zero_squared))
-    return mse_omega
+import result_analysis_matrix_based_params as p
 
 
 # read cmd
@@ -83,7 +76,7 @@ print('X.shape', X.shape)
 # Hist of H todo combine
 scimpute.hist_df(H, title='H({})'.format(file_h), dir=tag)
 scimpute.hist_df(M, title='M({})'.format(file_m), dir=tag)
-scimpute.hist_df(M, title='X({})'.format(file_x), dir=tag)
+scimpute.hist_df(X, title='X({})'.format(file_x), dir=tag)
 
 
 # Hist Cell/Gene corr todo combine
@@ -99,127 +92,136 @@ hist = scimpute.cell_corr_hist(H.values, M.values,
 
 # Visualization of dfs
 print('> Visualization of dfs')
+max_h, min_h = scimpute.max_min_element_in_arrs([H.values])
+print('Max in H is {}, Min in H is{}'.format(max_h, min_h))
+max_m, min_m = scimpute.max_min_element_in_arrs([M.values])
+print('Max in M is {}, Min in M is{}'.format(max_m, min_m))
+
+
+mse2 = scimpute.mse(H, M)
+mse2 = round(mse2, 5)
+print('MSE2 between H and M: ', mse2)
+
+mse2_omega = scimpute.mse_omega(H, M)
+mse2_omega = round(mse_omega, 5)
+print('mse2_omega between H and M: ', mse_omega)
+
+mse1_omega = scimpute.mse_omega(H, X)
+mse1_omega = round(mse1_omega, 5)
+print('mse1_omega between H and X: ', mse_omega)
+
 max, min = scimpute.max_min_element_in_arrs([H.values, M.values])
-mse_omega = mse_omega(H, M)
-mse_omega = round(mse_omega, 5)
-print('mse_omega', mse_omega)
 scimpute.heatmap_vis(H.values,
                      title='H ({})'.format(file_h),
-                     xlab='genes\nMSE_OMEGA(H vs M)={}'.format(mse_omega),
+                     xlab='genes\nMSE1_OMEGA(H vs X)={}'.format(mse1_omega),
                      ylab='cells', vmax=max, vmin=min,
                      dir=tag)
 scimpute.heatmap_vis(M.values,
                      title='M ({})'.format(file_m),
-                     xlab='genes',
+                     xlab='genes\nMSE2(H vs M)={}'.format(mse2),
                      ylab='cells', vmax=max, vmin=min,
                      dir=tag)
 
 
-# Factors Affecting Gene Prediction
-print('Mean and Var are calculated from H')
-gene_corr = scimpute.gene_corr_list(M.values, H.values)
-gene_mse = scimpute.gene_mse_list(M.values, H.values)
-gene_mean_expression = H.sum(axis=0).values / H.shape[1]  # sum for each column
-gene_nz_rate = scimpute.gene_nz_rate_list(H.values)
-gene_var = scimpute.gene_var_list(H.values)
-gene_nzvar = scimpute.gene_nzvar_list(H.values)
-
-scimpute.density_plot(gene_mean_expression, gene_mse,
-                      title='Factors, expression vs mse, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene mean expression',
-                      ylab='gene mse')
-
-scimpute.density_plot(gene_mean_expression, gene_corr,
-                      title='Factors, expression vs corr, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene mean expression',
-                      ylab='gene corr (NA: -1.1)')
-
-scimpute.density_plot(gene_nz_rate, gene_mse,
-                      title='Factors, nz_rate vs mse, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene nz_rate',
-                      ylab='gene mse')
-
-scimpute.density_plot(gene_nz_rate, gene_corr,
-                      title='Factors, nz_rate vs corr, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene nz_rate',
-                      ylab='gene corr (NA: -1.1)')
-
-scimpute.density_plot(gene_var, gene_mse,
-                      title='Factors, var vs mse, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene variation',
-                      ylab='gene mse')
-
-scimpute.density_plot(gene_var, gene_corr,
-                      title='Factors, var vs corr, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene variation',
-                      ylab='gene corr (NA: -1.1)')
-
-# todo: sometimes NA error for the following two plots
-scimpute.density_plot(gene_nzvar, gene_mse,
-                      title='Factors, nz_var vs mse, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene nz_variation',
-                      ylab='gene mse')
-
-scimpute.density_plot(gene_nzvar, gene_corr,
-                      title='Factors, nz_var vs corr, {}'.format('test'),
-                      dir=tag,
-                      xlab='gene nz_variation',
-                      ylab='gene corr (NA: -1.1)')
+# # Factors Affecting Gene Prediction todo: validate
+# print('Mean and Var are calculated from H')
+# gene_corr = scimpute.gene_corr_list(M.values, H.values)
+# gene_mse = scimpute.gene_mse_list(M.values, H.values)
+# gene_mean_expression = M.sum(axis=0).values / M.shape[1]  # sum for each column
+# gene_nz_rate = scimpute.gene_nz_rate_list(M.values)
+# gene_var = scimpute.gene_var_list(M.values)
+# gene_nzvar = scimpute.gene_nzvar_list(M.values)
+#
+# scimpute.density_plot(gene_mean_expression, gene_mse,
+#                       title='Factors, expression vs mse, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene mean expression',
+#                       ylab='gene mse')
+#
+# scimpute.density_plot(gene_mean_expression, gene_corr,
+#                       title='Factors, expression vs corr, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene mean expression',
+#                       ylab='gene corr (NA: -1.1)')
+#
+# scimpute.density_plot(gene_nz_rate, gene_mse,
+#                       title='Factors, nz_rate vs mse, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene nz_rate',
+#                       ylab='gene mse')
+#
+# scimpute.density_plot(gene_nz_rate, gene_corr,
+#                       title='Factors, nz_rate vs corr, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene nz_rate',
+#                       ylab='gene corr (NA: -1.1)')
+#
+# scimpute.density_plot(gene_var, gene_mse,
+#                       title='Factors, var vs mse, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene variation',
+#                       ylab='gene mse')
+#
+# scimpute.density_plot(gene_var, gene_corr,
+#                       title='Factors, var vs corr, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene variation',
+#                       ylab='gene corr (NA: -1.1)')
+#
+# # todo: sometimes NA error for the following two plots
+# scimpute.density_plot(gene_nzvar, gene_mse,
+#                       title='Factors, nz_var vs mse, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene nz_variation',
+#                       ylab='gene mse')
+#
+# scimpute.density_plot(gene_nzvar, gene_corr,
+#                       title='Factors, nz_var vs corr, {}'.format('test'),
+#                       dir=tag,
+#                       xlab='gene nz_variation',
+#                       ylab='gene corr (NA: -1.1)')
 
 # Gene-Gene in M, X, H
-def gene_gene_relationship():
-    print('> Gene-gene relationship, before/after inference')
-    List = p.pair_list
-    # Valid, H
-    for i, j in List:
-        scimpute.scatterplot2(h_valid.ix[:, i], h_valid.ix[:, j],
-                              title='Gene' + str(i) + ' vs Gene' + str(j) + ' (H,valid)' + tag,
-                              xlabel='Gene' + str(i), ylabel='Gene' + str(j + 1),
-                              dir=p.stage)
-    # Valid, M
-    for i, j in List:
-        scimpute.scatterplot2(df2_valid.ix[:, i], df2_valid.ix[:, j],
-                              title="Gene" + str(i) + ' vs Gene' + str(j) + ' (M,valid)' + tag,
-                              xlabel='Gene' + str(i), ylabel='Gene' + str(j),
-                              dir=p.stage)
-    # Valid, X
-    for i, j in List:
-        scimpute.scatterplot2(df1_valid.ix[:, i], df1_valid.ix[:, j],
-                              title="Gene" + str(i) + ' vs Gene' + str(j) + ' (X,valid)' + tag,
-                              xlabel='Gene' + str(i), ylabel='Gene' + str(j),
-                              dir=p.stage)
-gene_gene_relationship()
+print('> Gene-gene relationship, before/after inference')
+gene_pair_dir = 'pairs'
+List = p.pair_list
+# Valid, H
+for i, j in List:
+    print(i, type(i), j, type(j))
+    scimpute.scatterplot2(H.ix[:, i], H.ix[:, j],
+                          title='Gene' + str(i) + ' vs Gene' + str(j) + ' (H)' + tag,
+                          xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                          dir=gene_pair_dir)
+# Valid, M
+for i, j in List:
+    scimpute.scatterplot2(M.ix[:, i], M.ix[:, j],
+                          title="Gene" + str(i) + ' vs Gene' + str(j) + ' (M)' + tag,
+                          xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                          dir=gene_pair_dir)
+# Valid, X
+for i, j in List:
+    scimpute.scatterplot2(X.ix[:, i], X.ix[:, j],
+                          title="Gene" + str(i) + ' vs Gene' + str(j) + ' (X)' + tag,
+                          xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                          dir=gene_pair_dir)
+
 
 # M vs H, M vs X
-def m_vs_h():
-    print("> M vs H, M vs X")
-    for j in p.gene_list:  # Cd34, Gypa, Klf1, Sfpi1
-            scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='same',
-                                  title=str('M_vs_H, Gene' + str(j) + ' (valid)'+tag),
-                                  xlabel='Ground Truth (M)',
-                                  ylabel='Prediction (H)',
-                                  dir=p.stage
-                                  )
-            # scimpute.scatterplot2(df2_valid.values[:, j], h_valid.values[:, j], range='flexible',
-            #                       title=str('M_vs_H(zoom), Gene' + str(j) + ' (valid)'+tag),
-            #                       xlabel='Ground Truth (M)',
-            #                       ylabel='Prediction (H)',
-            #                       dir=p.stage
-            #                      )
-            scimpute.scatterplot2(df2_valid.values[:, j], df1_valid.values[:, j], range='same',
-                                  title=str('M_vs_X, Gene' + str(j) + ' (valid)'+tag),
-                                  xlabel='Ground Truth (M)',
-                                  ylabel='Input (X)',
-                                  dir=p.stage
-                                 )
-m_vs_h()
+print("> M vs H, M vs X")
+gene_dir = 'genes'
+for j in p.gene_list:  # Cd34, Gypa, Klf1, Sfpi1
+        scimpute.scatterplot2(M.ix[:, j], H.ix[:, j], range='same',
+                              title=str('M_vs_H ' + str(j) +' '+tag),
+                              xlabel='Ground Truth (M)',
+                              ylabel='Prediction (H)',
+                              dir=gene_dir
+                              )
+        scimpute.scatterplot2(M.ix[:, j], X.ix[:, j], range='same',
+                              title=str('M_vs_X ' + str(j) +' '+tag),
+                              xlabel='Ground Truth (M)',
+                              ylabel='Input (X)',
+                              dir=gene_dir
+                             )
 
 
 # # gene MSE

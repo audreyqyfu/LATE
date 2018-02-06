@@ -605,6 +605,14 @@ def mse_omega(arr_h, arr_m):
     return mse_omega
 
 
+def mse(arr_h, arr_m):
+    '''MSE between H and M'''
+    diff = np.subtract(H, M)
+    squared = np.power(diff, 2)
+    mse = np.mean(np.mean(squared))
+    return mse
+
+
 def subset_df(df_big, df_subset):
     return (df_big.ix[df_subset.index, df_subset.columns])
 
@@ -1020,5 +1028,6 @@ def gene_nzvar_list(arr1):
         list.append(var)
     list = np.array(list)
     return list
+
 
 
