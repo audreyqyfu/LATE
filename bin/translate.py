@@ -136,6 +136,7 @@ def save_weights():
 
 
 print("Usage: python -u <translate.py> <params.py>")
+tic_start = time.time()
 
 if len(sys.argv) == 2:
     param_file = sys.argv[1]
@@ -348,7 +349,10 @@ for epoch in range(1, p.max_training_epochs+1):
 batch_writer.close()
 valid_writer.close()
 sess.close()
+toc_stop = time.time()
+time_finish = round((toc_stop - tic_start), 2)
 print("Imputation Finished!")
+print("Wall Time Used: {} seconds".format(time_finish))
 
 # # Result analysis
 os.system('for file in {0}/*_w*npy;do python -u weight_clustmap.py $file {0};done'.format(p.stage))
