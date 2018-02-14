@@ -74,7 +74,7 @@ file2_orientation = file1_orientation
 
 # For development usage #
 seed_tf = 3
-test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 20 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 2  # interval on learning curve
@@ -105,7 +105,9 @@ print('data_frame2_orientation:', file1_orientation)
 print()
 
 print('Parameters:')
+print('mode:', mode)
 print('stage:', stage)
+print('init:', run_flag)
 print('test_mode:', test_flag)
 print('{}L'.format(L))
 # print('{} Genes'.format(n))
