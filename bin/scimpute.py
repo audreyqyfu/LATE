@@ -180,8 +180,8 @@ def hist_list(list, xlab='xlab', title='histogram', bins=100, dir='plots'):
     fig, ax = plt.subplots()
     plt.title(title)
     plt.xlabel(xlab)
-    plt.ylabel('Frequency')
-    hist = plt.hist(list, bins=bins)
+    plt.ylabel('Density')
+    hist = plt.hist(list, bins=bins, density=True)
     plt.savefig(fname, bbox_inches='tight')
     plt.close(fig)
     print('hist of {} is done'.format(title))
@@ -472,14 +472,13 @@ def hist_2matrix_corr(arr1, arr2, mode='column-wise', nz_mode='ignore',
     median_corr = round(np.median(hist), 3)
     mean_corr = round(np.mean(hist), 3)
     print(title)
-    print('median corr: {}'.format(median_corr))
-    print('mean corr: {}'.format(mean_corr))
+    print('median corr: {}    mean corr: {}'.format(median_corr, mean_corr))
 
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100, density=True)
     plt.xlabel(title + '\nmedian=' + str(median_corr) + ', mean=' + str(mean_corr))
-    plt.ylabel('Freq') #todo freq to density
+    plt.ylabel('Density') #todo freq to density
     plt.xlim(-1, 1)
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight') #todo remove \n from out-name
@@ -574,10 +573,10 @@ def hist_df(df, title="hist of df", xlab='xlab', bins=100, dir='plots'):
         os.makedirs(dir)
     df_flat = df.values.reshape(df.size, 1)
     # fig = plt.figure(figsize=(9, 9))
-    hist = plt.hist(df_flat, bins=bins)
+    hist = plt.hist(df_flat, bins=bins, density=True)
     plt.title(title)
     plt.xlabel(xlab)
-    plt.ylabel('Frequency')
+    plt.ylabel('Density')
     plt.savefig('./{}/{}.png'.format(dir, title), bbox_inches='tight')
     plt.close()
     print('hist of ', title, 'is done')
