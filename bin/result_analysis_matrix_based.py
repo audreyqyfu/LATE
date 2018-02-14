@@ -66,9 +66,9 @@ if test_flag > 0:
 
 # input summary
 print('inside this code, matrices are supposed to be cell_row')
-print('H:', H.ix[0:3, 0:2])
-print('M:', M.ix[0:3, 0:2])
-print('X:', X.ix[0:3, 0:2])
+print('H:', file_h, file_h_ori, '\n', H.ix[0:3, 0:2])
+print('M:', file_m, file_m_ori, '\n', M.ix[0:3, 0:2])
+print('X:', file_x, file_x_ori, '\n', X.ix[0:3, 0:2])
 print('H.shape', H.shape)
 print('M.shape', M.shape)
 print('X.shape', X.shape)
@@ -80,15 +80,46 @@ scimpute.hist_df(X, title='X({})'.format(file_x), dir=tag)
 
 
 # Hist Cell/Gene corr todo combine
-hist = scimpute.gene_corr_hist(H.values, M.values,
+print('between H and M')
+hist = scimpute.hist_2matrix_corr(M.values, H.values,
                                title="Hist Gene-Corr (H vs M)\n"+file_h+'\n'+file_m,
-                               dir=tag
-                               )
-hist = scimpute.cell_corr_hist(H.values, M.values,
-                               title="Hist Cell-Corr (H vs M)\n"+file_h+'\n'+file_m,
-                               dir=tag
+                               dir=tag, mode='column-wise', nz_mode='ignore'
                                )
 
+hist = scimpute.hist_2matrix_corr(M.values, H.values,
+                               title="Hist Cell-Corr (H vs M)\n"+file_h+'\n'+file_m,
+                               dir=tag, mode='row-wise', nz_mode='ignore'
+                               )
+
+hist = scimpute.hist_2matrix_corr(M.values, H.values,
+                               title="Hist nz1-Gene-Corr (H vs M)\n"+file_h+'\n'+file_m,
+                               dir=tag, mode='column-wise', nz_mode='first'
+                               )
+
+hist = scimpute.hist_2matrix_corr(M.values, H.values,
+                               title="Hist nz1-Cell-Corr (H vs M)\n"+file_h+'\n'+file_m,
+                               dir=tag, mode='row-wise', nz_mode='first'
+                               )
+
+hist = scimpute.hist_2matrix_corr(M.values, H.values,
+                               title="Hist nz2-Gene-Corr (H vs M)\n"+file_h+'\n'+file_m,
+                               dir=tag, mode='column-wise', nz_mode='strict'
+                               )
+
+hist = scimpute.hist_2matrix_corr(M.values, H.values,
+                               title="Hist nz2-Cell-Corr (H vs M)\n"+file_h+'\n'+file_m,
+                               dir=tag, mode='row-wise', nz_mode='strict'
+                               )
+
+hist = scimpute.hist_2matrix_corr(X.values, H.values,
+                               title="Hist nz1-Gene-Corr (H vs X)\n"+file_h+'\n'+file_m,
+                               dir=tag, mode='column-wise', nz_mode='first'
+                               )
+
+hist = scimpute.hist_2matrix_corr(X.values, H.values,
+                               title="Hist nz1-Cell-Corr (H vs X)\n"+file_h+'\n'+file_m,
+                               dir=tag, mode='row-wise', nz_mode='first'
+                               )
 
 # Visualization of dfs
 print('> Visualization of dfs')
@@ -97,18 +128,18 @@ print('Max in H is {}, Min in H is{}'.format(max_h, min_h))
 max_m, min_m = scimpute.max_min_element_in_arrs([M.values])
 print('Max in M is {}, Min in M is{}'.format(max_m, min_m))
 
+mse1_omega = scimpute.mse_omega(H, X)
+mse1_omega = round(mse1_omega, 5)
+print('mse1_omega between H and X: ', mse1_omega)
 
 mse2 = scimpute.mse(H, M)
 mse2 = round(mse2, 5)
 print('MSE2 between H and M: ', mse2)
 
 mse2_omega = scimpute.mse_omega(H, M)
-mse2_omega = round(mse_omega, 5)
-print('mse2_omega between H and M: ', mse_omega)
+mse2_omega = round(mse2_omega, 5)
+print('mse2_omega between H and M: ', mse2_omega)
 
-mse1_omega = scimpute.mse_omega(H, X)
-mse1_omega = round(mse1_omega, 5)
-print('mse1_omega between H and X: ', mse_omega)
 
 max, min = scimpute.max_min_element_in_arrs([H.values, M.values])
 scimpute.heatmap_vis(H.values,
@@ -183,7 +214,7 @@ scimpute.heatmap_vis(M.values,
 
 # Gene-Gene in M, X, H
 print('> Gene-gene relationship, before/after inference')
-gene_pair_dir = 'pairs'
+gene_pair_dir = tag+'/pairs'
 List = p.pair_list
 # Valid, H
 for i, j in List:
@@ -208,7 +239,7 @@ for i, j in List:
 
 # M vs H, M vs X
 print("> M vs H, M vs X")
-gene_dir = 'genes'
+gene_dir = tag+'/genes'
 for j in p.gene_list:  # Cd34, Gypa, Klf1, Sfpi1
         scimpute.scatterplot2(M.ix[:, j], H.ix[:, j], range='same',
                               title=str('M_vs_H ' + str(j) +' '+tag),

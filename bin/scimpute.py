@@ -3,7 +3,7 @@ import numpy as np
 import time
 import os
 import matplotlib
-# matplotlib.use('Agg')  # for plotting without GUI
+matplotlib.use('Agg')  # for plotting without GUI
 import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
@@ -422,9 +422,21 @@ def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same', dir='
     plt.close()
 
 
-def gene_corr_hist(arr1, arr2, title='hist_gene_corr', dir='plots'):
-    '''calculate correlation between genes [columns]
-    arr [cells, genes]'''
+def hist_2matrix_corr(arr1, arr2, mode='column-wise', nz_mode='ignore',
+                   title='hist_corr', dir='plots'):
+    '''Calculate correlation between two matrices column-wise or row-wise
+    default: arr[cells, genes], gene-wise corr (column-wise)
+    assume: arr1 from benchmark matrix (e.g. input), arr2 from imputation
+    if corr = NaN, it will be excluded from result 
+    
+    mode: column-wise, row-wise
+    nz_mode: 
+        ignore (all values in vectors included)
+        strict (zero values excluded from both vector x,y)
+        first (zero values excluded from x in arr1 only, 
+    title: 'hist_corr' or custom
+    dir: 'plots' or custom
+    '''
     # create plots directory
     if not os.path.exists(dir):
         os.makedirs(dir)
@@ -434,54 +446,43 @@ def gene_corr_hist(arr1, arr2, title='hist_gene_corr', dir='plots'):
     range_size = arr2.shape[1]
     hist = []
     for i in range(range_size):
-        corr = pearsonr(arr1[:, i], arr2[:, i])[0]
+        if mode == 'column-wise':
+            x = arr1[:, i]
+            y = arr2[:, i]
+        elif mode == 'row-wise':
+            x = arr1[i, :]
+            y = arr2[i, :]
+        else:
+            raise Exception('mode not recognized')
+
+        if nz_mode == 'strict':
+            nas = np.logical_or(x==0, y==0)
+            corr = pearsonr(x[~nas], y[~nas])[0]
+        elif nz_mode == 'first':
+            nas = (x==0)
+            corr = pearsonr(x[~nas], y[~nas])[0]
+        elif nz_mode == 'ignore':
+            corr = pearsonr(x, y)[0]
+        else:
+            raise Exception('nz_mode not recognized')
+
         if not math.isnan(corr):
             hist.append(corr)
     hist.sort()
-    median = round(np.median(hist), 3)
-    mean = round(np.mean(hist), 3)
-    print('median gene_corr: {}'.format(median))
+    median_corr = round(np.median(hist), 3)
+    mean_corr = round(np.mean(hist), 3)
+    print(title)
+    print('median corr: {}'.format(median_corr))
+    print('mean corr: {}'.format(mean_corr))
 
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
-    plt.hist(hist, bins=100)
-    plt.xlabel('Gene-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
-    plt.ylabel('Freq')
+    plt.hist(hist, bins=100, density=True)
+    plt.xlabel(title + '\nmedian=' + str(median_corr) + ', mean=' + str(mean_corr))
+    plt.ylabel('Freq') #todo freq to density
     plt.xlim(-1, 1)
     plt.title(title)
     plt.savefig(fprefix + ".png", bbox_inches='tight') #todo remove \n from out-name
-    plt.close(fig)
-    return hist
-
-
-def cell_corr_hist(arr1, arr2, title='hist_cell_corr', dir='plots'):
-    '''calculate correlation between genes [columns]
-    arr [cells, genes]'''
-    # create plots directory
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    fprefix = "./{}/{}".format(dir, title)
-
-    # if arr1.shape is arr2.shape:
-    range_size = arr2.shape[0]
-    hist = []
-    for i in range(range_size):
-        corr = pearsonr(arr1[i, :], arr2[i, :])[0]
-        if not math.isnan(corr):
-            hist.append(corr)
-    hist.sort()
-    median = round(np.median(hist), 3)
-    mean = round(np.mean(hist), 3)
-    print('median cell_corr: {}'.format(median))
-
-    # histogram of correlation
-    fig = plt.figure(figsize=(5, 5))
-    plt.hist(hist, bins=100)
-    plt.xlabel('Cell-corr (Pearson)' + '\nmedian=' + str(median) + ', mean=' + str(mean))
-    plt.ylabel('Freq')
-    plt.xlim(-1, 1)
-    plt.title(title)
-    plt.savefig(fprefix + ".png", bbox_inches='tight')
     plt.close(fig)
     return hist
 
@@ -598,7 +599,7 @@ def mean_df(df):
 def mse_omega(arr_h, arr_m):
     '''arr and df both works'''
     omega = np.sign(arr_m)
-    diff = np.subtract(H, M)
+    diff = np.subtract(arr_h, arr_m)
     squared = np.power(diff, 2)
     non_zero_squared = np.multiply(squared, omega)
     mse_omega = np.mean(np.mean(non_zero_squared))
@@ -607,7 +608,7 @@ def mse_omega(arr_h, arr_m):
 
 def mse(arr_h, arr_m):
     '''MSE between H and M'''
-    diff = np.subtract(H, M)
+    diff = np.subtract(arr_h, arr_m)
     squared = np.power(diff, 2)
     mse = np.mean(np.mean(squared))
     return mse
@@ -618,28 +619,28 @@ def subset_df(df_big, df_subset):
 
 
 def read_data(data_name):
-    if data_name is 'splatter':  # only this mode creates gene-gene plot
+    if data_name == 'splatter':  # only this mode creates gene-gene plot
         file = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"  # data need imputation
         file_benchmark = "../data/v1-1-5-3/v1-1-5-3.E3.hd5"
         name1 = '(E3)'
         name2 = '(E3)'  # careful
         df = pd.read_hdf(file).transpose()  # [cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
-    elif data_name is 'EMT2730':  # 2.7k cells used in magic paper
+    elif data_name == 'EMT2730':  # 2.7k cells used in magic paper
         file = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"  # data need imputation
         file_benchmark = "../../../../data/mouse_bone_marrow/python_2730/bone_marrow_2730.norm.log.hd5"
         name1 = '(EMT2730)'
         name2 = '(EMT2730)'
         df = pd.read_hdf(file).transpose()  # [cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
-    elif data_name is 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
+    elif data_name == 'EMT9k':  # magic imputation using 8.7k cells > 300 reads/cell
         file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"  # data need imputation
         file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.hd5"
         name1 = '(EMT9k)'
         name2 = '(EMT9k)'
         df = pd.read_hdf(file).transpose()  # [cells,genes]
         df2 = pd.read_hdf(file_benchmark).transpose()  # [cells,genes]
-    elif data_name is 'EMT9k_log':  # magic imputation using 8.7k cells > 300 reads/cell
+    elif data_name == 'EMT9k_log':  # magic imputation using 8.7k cells > 300 reads/cell
         file = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"  # data need imputation
         file_benchmark = "../../../../magic/results/mouse_bone_marrow/EMT_MAGIC_9k/EMT.MAGIC.9k.A.log.hd5"
         name1 = '(EMT9kLog)'
@@ -929,7 +930,7 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
     plt.xlabel(xlabel + '\nfinal valid:' + str(metrics_valid[-1]))
     plt.ylabel(ylabel)
     plt.legend()
-    if range is None:
+    if range == None:
         max, min = max_min_element_in_arrs([metrics_batch, metrics_valid])
         plt.ylim(min, max)
     else:
@@ -947,7 +948,7 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
     plt.xlabel(xlabel + '\nfinal valid:' + str(metrics_valid[-1]))
     plt.ylabel(ylabel)
     plt.legend()
-    if range is None:
+    if range == None:
         max, min = max_min_element_in_arrs([metrics_batch[zoom], metrics_valid[zoom]])
         plt.ylim(min, max)
     else:
