@@ -30,6 +30,7 @@ file_m_ori = p.file_m_ori
 file_x = p.file_x
 file_x_ori = p.file_x_ori
 tag = p.tag
+data_transformation = p.data_transformation
 
 # READ DATA
 if file_h_ori == 'gene_row':
@@ -52,6 +53,11 @@ elif file_x_ori == 'cell_row':
     X = pd.read_hdf(file_x)
 else:
     raise Exception('parameter err: x_orientation not correctly spelled')
+
+
+# Data Transformation for H
+H = scimpute.data_formatting(df, format=data_format)
+
 
 # TEST MODE OR NOT
 test_flag = 0

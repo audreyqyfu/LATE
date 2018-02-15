@@ -63,23 +63,87 @@ def df_filter(df):
     return df_filtered
 
 
-def df_normalization(df):
+def df_normalization(df, scale=1e6):
     '''
-    :param df: assume df.shape = [gene, cell]
-    :return: Reads Per Million (RPM)
+    RPM when default
+    :param df: [gene, cell]
+    :param scale: 
+    :return: 
     '''
     read_counts = df.sum(axis=0)  # colsum
     # df_normalized = df.div(read_counts, axis=1).mul(np.median(read_counts)).mul(1)
-    df_normalized = df.div(read_counts, axis=1).mul(1e6)
+    df_normalized = df.div(read_counts, axis=1).mul(scale)
     return df_normalized
 
 
 def df_log_transformation(df, pseudocount=1):
+    '''
+    log10
+    :param df: 
+    :param pseudocount: 
+    :return: 
+    '''
     df_log = np.log10(np.add(df, pseudocount))
     return df_log
 
 
+def df_rpm_log(df, pseudocount=1):
+    '''
+    log10
+    :param df: [gene, cell]
+    :return: 
+    '''
+    df_tmp = df.copy()
+    df_tmp = df_normalization(df_tmp)
+    df_tmp = df_log_transformation(df_tmp, pseudocount=pseudocount)
+    return df_tmp
+
+
+def df_exp_rpm_log(df, pseudocount=1):
+    '''
+    log10
+    :param df: [gene, cell]
+    :pseudocount: for exp transformation and log transformation
+    :return: 
+    '''
+    df_tmp = df.copy()
+    df_tmp = np.power(10, df_tmp) - pseudocount
+    df_tmp = df_normalization(df_tmp)
+    df_tmp = df_log_transformation(df_tmp, pseudocount=pseudocount)
+    return df_tmp
+
+
+def data_formatting(df, format='as_is'):
+    '''
+    data_formatting
+    :param df: [genes, cells]
+    :param format: as_is, log, rpm_log, exp_rpm_log
+    :return: df_formatted
+    '''
+    df_tmp = df.copy(df)
+
+    if format == 'as_is':
+        pass
+    elif format == 'log':
+        df_tmp = df_log_transformation(df_tmp)
+    elif format == 'rpm_log':
+        df_tmp = df_rpm_log(df_tmp)
+    elif format == 'exp_rpm_log':
+        df_tmp == df_exp_rpm_log(df_tmp)
+    else:
+        raise Exception('format not recognized')
+
+    print('data formatting: ', format)
+    return df_tmp
+
+
 def mask_df(df, nz_goal):
+    '''
+    
+    :param df: any direction
+    :param nz_goal: 
+    :return: 
+    '''
     df_msked = df.copy()
     nz_now = nnzero_rate_df(df)
     nz_goal = nz_goal/nz_now
@@ -156,6 +220,9 @@ def random_subset_arr(arr, m_max, n_max):
 
 def subset_df(df_big, df_subset):
     return (df_big.ix[df_subset.index, df_subset.columns])
+
+
+
 
 
 # STAT CALCULATION #
