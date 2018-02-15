@@ -9,30 +9,29 @@ from scipy.stats.stats import pearsonr
 import math
 import os
 import time
+import importlib
 import scimpute
 
-import result_analysis_matrix_based_params as p
+# READ CMD
+print('reads H.hd5, X.hd5 and M.hd5, then analysis the result')
+print('usage: python -u result_analysis.py params.py')
 
-
-# read cmd
-print('reads H.hd5 and M.hd5, then analysis the result')
-print('usage: python -u result_analysis.py H.hd5 gene_row/cell_row M.hd5 gene_row/cell_row X.hd5 gene_row/cell_row out_tag')
-print('H means prediction, M means ground truth')
-
-if len(sys.argv) != 8:
-    raise Exception('cmd err')
+if len(sys.argv) == 2:
+    param_file = sys.argv[1]
+    param_file = param_file.rstrip('.py')
+    p = importlib.import_module(param_file)
 else:
-    print('cmd: ', sys.argv)
+    raise Exception('cmd err')
     
-file_h = str(sys.argv[1]).strip()
-file_h_ori = str(sys.argv[2]).strip()
-file_m = str(sys.argv[3]).strip()
-file_m_ori = str(sys.argv[4]).strip()
-file_x = str(sys.argv[5]).strip()
-file_x_ori = str(sys.argv[6]).strip()
-tag = str(sys.argv[7]).strip()
+file_h = p.file_h
+file_h_ori = p.file_h_ori
+file_m = p.file_m
+file_m_ori = p.file_m_ori
+file_x = p.file_x
+file_x_ori = p.file_x_ori
+tag = p.tag
 
-# read data
+# READ DATA
 if file_h_ori == 'gene_row':
     H = pd.read_hdf(file_h).transpose()
 elif file_h_ori == 'cell_row':
@@ -54,7 +53,7 @@ elif file_x_ori == 'cell_row':
 else:
     raise Exception('parameter err: x_orientation not correctly spelled')
 
-# Test mode or not
+# TEST MODE OR NOT
 test_flag = 0
 m = 100
 n = 200
@@ -64,7 +63,7 @@ if test_flag > 0:
     M = M.ix[0:m, 0:n]
     X = X.ix[0:m, 0:n]
 
-# input summary
+# INPUT SUMMARY
 print('\ninside this code, matrices are supposed to be cell_row')
 print('H:', file_h, file_h_ori, '\n', H.ix[0:3, 0:2])
 print('M:', file_m, file_m_ori, '\n', M.ix[0:3, 0:2])
@@ -73,13 +72,13 @@ print('H.shape', H.shape)
 print('M.shape', M.shape)
 print('X.shape', X.shape)
 
-# Hist of H
+# HIST OF H
 scimpute.hist_df(H, title='H({})'.format(file_h), dir=tag)
 scimpute.hist_df(M, title='M({})'.format(file_m), dir=tag)
 scimpute.hist_df(X, title='X({})'.format(file_x), dir=tag)
 
 
-# Hist Cell/Gene corr
+# HIST CELL/GENE CORR
 print('\n> Corr between X and H')
 hist = scimpute.hist_2matrix_corr(X.values, H.values,
                                title="Hist nz1-Gene-Corr (X vs H)\n"+file_h+'\n'+file_m,
@@ -114,7 +113,7 @@ hist = scimpute.hist_2matrix_corr(M.values, H.values,
                                )
 
 
-# MSE Calculation
+# MSE CALCULATION
 print('\n> MSE Calculation')
 max_h, min_h = scimpute.max_min_element_in_arrs([H.values])
 print('Max in H is {}, Min in H is{}'.format(max_h, min_h))
@@ -133,7 +132,7 @@ mse2 = scimpute.mse(H, M)
 mse2 = round(mse2, 5)
 print('MSE2 between H and M: ', mse2)
 
-#  Visualization of dfs, todo clustering based on H
+#  VISUALIZATION OF DFS, todo clustering based on H
 print('\n> Visualization of dfs')
 max, min = scimpute.max_min_element_in_arrs([H.values, M.values])
 scimpute.heatmap_vis(H.values,
@@ -216,19 +215,19 @@ List = p.pair_list
 for i, j in List:
     print(i, type(i), j, type(j))
     scimpute.scatterplot2(H.ix[:, i], H.ix[:, j],
-                          title='Gene' + str(i) + ' vs Gene' + str(j) + ' (H)' + tag,
+                          title='Gene' + str(i) + ' vs Gene' + str(j) + ' (H) ' + tag,
                           xlabel='Gene' + str(i), ylabel='Gene' + str(j),
                           dir=gene_pair_dir)
 # Valid, M
 for i, j in List:
     scimpute.scatterplot2(M.ix[:, i], M.ix[:, j],
-                          title="Gene" + str(i) + ' vs Gene' + str(j) + ' (M)' + tag,
+                          title="Gene" + str(i) + ' vs Gene' + str(j) + ' (M) ' + tag,
                           xlabel='Gene' + str(i), ylabel='Gene' + str(j),
                           dir=gene_pair_dir)
 # Valid, X
 for i, j in List:
     scimpute.scatterplot2(X.ix[:, i], X.ix[:, j],
-                          title="Gene" + str(i) + ' vs Gene' + str(j) + ' (X)' + tag,
+                          title="Gene" + str(i) + ' vs Gene' + str(j) + ' (X) ' + tag,
                           xlabel='Gene' + str(i), ylabel='Gene' + str(j),
                           dir=gene_pair_dir)
 

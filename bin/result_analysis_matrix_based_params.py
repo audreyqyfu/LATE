@@ -1,3 +1,14 @@
+file_h = 'saver.hd5'
+file_h_ori = 'gene_row'  # gene_row/cell_row
+
+file_x = 'm.hd5'
+file_x_ori = 'gene_row'
+
+file_m = 'm.hd5'
+file_m_ori = 'gene_row'
+
+tag = 'test_tag'
+
 
 # Gene list
 pair_list = [

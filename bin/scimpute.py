@@ -477,7 +477,7 @@ def hist_2matrix_corr(arr1, arr2, mode='column-wise', nz_mode='ignore',
     # histogram of correlation
     fig = plt.figure(figsize=(5, 5))
     plt.hist(hist, bins=100, density=True)
-    plt.xlabel(title + '\nmedian=' + str(median_corr) + ', mean=' + str(mean_corr))
+    plt.xlabel('median=' + str(median_corr) + ', mean=' + str(mean_corr))
     plt.ylabel('Density') #todo freq to density
     plt.xlim(-1, 1)
     plt.title(title)
