@@ -113,28 +113,27 @@ def df_exp_rpm_log(df, pseudocount=1):
     return df_tmp
 
 
-def data_formatting(df, format='as_is'):
+def df_transformation(df, transformation='as_is'):
     '''
     data_formatting
+    df not copied
     :param df: [genes, cells]
     :param format: as_is, log, rpm_log, exp_rpm_log
     :return: df_formatted
     '''
-    df_tmp = df.copy(df)
-
-    if format == 'as_is':
+    if transformation == 'as_is':
         pass
-    elif format == 'log':
-        df_tmp = df_log_transformation(df_tmp)
-    elif format == 'rpm_log':
-        df_tmp = df_rpm_log(df_tmp)
-    elif format == 'exp_rpm_log':
-        df_tmp == df_exp_rpm_log(df_tmp)
+    elif transformation == 'log':
+        df = df_log_transformation(df)
+    elif transformation == 'rpm_log':
+        df = df_rpm_log(df)
+    elif transformation == 'exp_rpm_log':
+        df == df_exp_rpm_log(df)
     else:
-        raise Exception('format not recognized')
+        raise Exception('format {} not recognized'.format(transformation))
 
-    print('data formatting: ', format)
-    return df_tmp
+    print('data formatting: ', transformation)
+    return df
 
 
 def mask_df(df, nz_goal):

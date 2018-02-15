@@ -33,6 +33,7 @@ tag = p.tag
 data_transformation = p.data_transformation
 
 # READ DATA
+print("> READ DATA..")
 if file_h_ori == 'gene_row':
     H = pd.read_hdf(file_h).transpose()
 elif file_h_ori == 'cell_row':
@@ -54,10 +55,9 @@ elif file_x_ori == 'cell_row':
 else:
     raise Exception('parameter err: x_orientation not correctly spelled')
 
-
 # Data Transformation for H
-H = scimpute.data_formatting(df, format=data_format)
-
+print('> DATA TRANSFORMATION..')
+H = scimpute.df_transformation(H.transpose(), transformation=data_transformation).transpose()
 
 # TEST MODE OR NOT
 test_flag = 0
@@ -70,8 +70,8 @@ if test_flag > 0:
     X = X.ix[0:m, 0:n]
 
 # INPUT SUMMARY
-print('\ninside this code, matrices are supposed to be cell_row')
-print('H:', file_h, file_h_ori, '\n', H.ix[0:3, 0:2])
+print('\ninside this code, matrices are supposed to be transformed into cell_row')
+print('H:', file_h, file_h_ori, data_transformation, '\n', H.ix[0:3, 0:2])
 print('M:', file_m, file_m_ori, '\n', M.ix[0:3, 0:2])
 print('X:', file_x, file_x_ori, '\n', X.ix[0:3, 0:2])
 print('H.shape', H.shape)

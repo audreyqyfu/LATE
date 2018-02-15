@@ -9,7 +9,7 @@ file_m_ori = 'gene_row'
 
 tag = 'test_tag'
 
-data_transformation = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+data_transformation = 'exp_rpm_log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 
 # Gene list
 pair_list = [
