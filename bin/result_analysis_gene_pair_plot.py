@@ -24,6 +24,7 @@ if len(sys.argv) == 2:
     param_file = sys.argv[1]
     param_file = param_file.rstrip('.py')
     p = importlib.import_module(param_file)
+    print(p.tag)
 else:
     raise Exception('cmd err')
 
