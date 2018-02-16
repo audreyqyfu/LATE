@@ -56,6 +56,16 @@ def read_hd5(in_name):
     return df
 
 
+def read_data_into_cell_row(fname, orientation):
+    if orientation == 'gene_row':
+        df_tmp = pd.read_hdf(fname).transpose()
+    elif orientation == 'cell_row':
+        df_tmp = pd.read_hdf(fname)
+    else:
+        raise Exception('parameter err: for {}, orientation {} not correctly spelled'.format(fname, orientation))
+    return df_tmp
+
+
 # PRE-PROCESSING OF DATA FRAMES #
 def df_filter(df):
     df_filtered = df.loc[(df.sum(axis=1) != 0), (df.sum(axis=0) != 0)]
@@ -122,7 +132,7 @@ def df_transformation(df, transformation='as_is'):
     :return: df_formatted
     '''
     if transformation == 'as_is':
-        pass
+        pass  # do nothing
     elif transformation == 'log':
         df = df_log_transformation(df)
     elif transformation == 'rpm_log':
@@ -378,6 +388,22 @@ def density_plot(x, y,
     plt.colorbar(cax)
     plt.savefig(fname + ".png", bbox_inches='tight')
     plt.close(fig)
+
+
+def gene_pair_plot(df, list, tag, dir='./plots'):
+    for i, j in list:
+        print('gene_pair: ', i, type(i), j, type(j))
+        try:
+            x = df.ix[:, i]
+            y = df.ix[:, j]
+        except KeyError:
+            print('KeyError: the gene index does not exist')
+            continue
+
+        scatterplot2(x, y,
+                     title='Gene' + str(i) + ' vs Gene' + str(j) + ' ' + tag,
+                     xlabel='Gene' + str(i), ylabel='Gene' + str(j),
+                     dir=dir)
 
 
 def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="rainbow",
