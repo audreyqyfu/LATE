@@ -113,6 +113,7 @@ mse2 = scimpute.mse(H, M)
 mse2 = round(mse2, 5)
 print('MSE2 between H and M: ', mse2)
 
+
 #  VISUALIZATION OF DFS, todo clustering based on H
 print('\n> Visualization of dfs')
 max, min = scimpute.max_min_element_in_arrs([H.values, M.values])
@@ -127,8 +128,6 @@ scimpute.heatmap_vis(M.values,
                      xlab='genes\nMSE2(H vs M)={}'.format(mse2),
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
-
-
 
 
 # Gene-Gene in M, X, H
@@ -153,14 +152,14 @@ for j in p.gene_list:
         print('KeyError: the gene index does not exist')
         continue
 
-    scimpute.scatterplot2(M.ix[:, j], H.ix[:, j], range='same',
-                          title=str('M_vs_H ' + str(j) +' '+p.tag),
+    scimpute.scatterplot2(M_j, H_j, range='same',
+                          title=str(str(j) + ' (M_vs_H) ' + p.tag),
                           xlabel='Ground Truth (M)',
                           ylabel='Prediction (H)',
                           dir=gene_dir
                           )
-    scimpute.scatterplot2(M.ix[:, j], X.ix[:, j], range='same',
-                          title=str('M_vs_X ' + str(j) +' '+p.tag),
+    scimpute.scatterplot2(M_j, X_j, range='same',
+                          title=str(str(j) + ' (M_vs_X) ' + p.tag),
                           xlabel='Ground Truth (M)',
                           ylabel='Input (X)',
                           dir=gene_dir

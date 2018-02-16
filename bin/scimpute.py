@@ -291,6 +291,19 @@ def mse(arr_h, arr_m):
     return mse
 
 
+def nz2_corr(x, y):
+    '''
+    the nz2_corr between two vectors, excluding any element with zero in either vectors
+    :param x: vector1
+    :param y: vector2
+    :return: 
+    '''
+    nas = np.logical_or(x == 0, y == 0)
+    result = pearsonr(x[~nas], y[~nas])[0]
+    result = round(result, 4)
+    return result
+
+
 # PLOTS #
 def refresh_logfolder(log_dir):
     '''delete and recreate log_dir'''
@@ -335,19 +348,35 @@ def scatterplot(x, y,
     print('heatmap vis ', title, ' done')
 
 
-def scatterplot2(x, y, title=None, xlabel=None, ylabel=None, range='same', dir='plots'):
-    '''x is slice, y is a slice
+def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir='plots'):
+    '''
+    x is slice, y is a slice
     have to be slice to help pearsonr(x,y)[0] work
-    range=[min, max]'''
+    range= same/flexible
+    
+    :param x: 
+    :param y: 
+    :param title: 
+    :param xlabel: 
+    :param ylabel: 
+    :param range: 
+    :param dir: 
+    :param corr: 
+    :return: 
+    '''
     # create plots directory
     if not os.path.exists(dir):
         os.makedirs(dir)
     fprefix = "./{}/{}".format(dir, title)
-    # plot
-    corr, _ = pearsonr(x, y)
+    # corr
+    corr = pearsonr(x, y)[0]
     corr = str(round(corr, 4))
+    # nz2_corr
+    nz2_corr1 = nz2_corr(x, y)
+    # plot
     plt.plot(x, y, 'o')
     plt.title(str(title + "\ncorr: " + corr))
+    plt.title('{}\ncorr: {}\nnz2-corr: {}'.format(title, corr, nz2_corr1))
     plt.xlabel(xlabel + "\nmean: " + str(round(np.mean(x), 2)))
     plt.ylabel(ylabel + "\nmean: " + str(round(np.mean(y), 2)))
     if range is 'same':
@@ -391,6 +420,14 @@ def density_plot(x, y,
 
 
 def gene_pair_plot(df, list, tag, dir='./plots'):
+    '''
+    scatterplot2 of two genes in a df
+    :param df: [cells, genes]
+    :param list: [2, 3] OR [id_i, id_j]
+    :param tag: output_tag e.g. 'PBMC'
+    :param dir: output_dir
+    :return: 
+    '''
     for i, j in list:
         print('gene_pair: ', i, type(i), j, type(j))
         try:

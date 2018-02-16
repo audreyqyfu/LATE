@@ -1,13 +1,7 @@
 file_h = 'saver.hd5'
 file_h_ori = 'gene_row'  # gene_row/cell_row
 
-file_x = 'm.hd5'
-file_x_ori = 'gene_row'
-
-file_m = 'm.hd5'
-file_m_ori = 'gene_row'
-
-tag = 'test_tag'
+tag = '(test_tag)'
 
 data_transformation = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 
@@ -17,8 +11,8 @@ pair_list = [
     # [4058, 7496],
     # [8495, 12871],
 
-    # # TEST
-    # [2, 3],
+    # TEST
+    [2, 3],
 
     # PBMC G5561 Non-Linear
     ['ENSG00000173372',
