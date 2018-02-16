@@ -373,12 +373,23 @@ def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir=
     corr = str(round(corr, 4))
     # nz2_corr
     nz2_corr1 = nz2_corr(x, y)
-    # plot
-    plt.plot(x, y, 'o')
-    plt.title(str(title + "\ncorr: " + corr))
+    # density plot
+    from scipy.stats import gaussian_kde
+    # Calculate the point density
+    xy = np.vstack([x, y])
+    z = gaussian_kde(xy)(xy)
+    # sort: dense on top (plotted last)
+    idx = z.argsort()
+    x, y, z = x[idx], y[idx], z[idx]
+    # plt
+    fig = plt.figure(figsize=(5, 5))
+    fig, ax = plt.subplots()
+    cax = ax.scatter(x, y, c=z, s=50, edgecolor='')
+
     plt.title('{}\ncorr: {}\nnz2-corr: {}'.format(title, corr, nz2_corr1))
     plt.xlabel(xlabel + "\nmean: " + str(round(np.mean(x), 2)))
     plt.ylabel(ylabel + "\nmean: " + str(round(np.mean(y), 2)))
+
     if range is 'same':
         max, min = max_min_element_in_arrs([x, y])
         plt.xlim(min, max)
@@ -389,8 +400,12 @@ def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir=
         plt.xlim(range[0], range[1])
         plt.ylim(range[0], range[1])
 
+    plt.colorbar(cax)
     plt.savefig(fprefix + '.png', bbox_inches='tight')
     plt.close()
+
+
+
 
 
 def density_plot(x, y,
