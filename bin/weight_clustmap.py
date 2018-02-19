@@ -7,10 +7,11 @@
 import sys
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib
 matplotlib.use('Agg')  # for plotting without GUI
 import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 
 def random_subset_arr(arr, m_max, n_max):
