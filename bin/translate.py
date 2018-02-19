@@ -207,27 +207,27 @@ with tf.name_scope('Encoder_L1'):
 with tf.name_scope('Encoder_L2'):
     e_w2, e_b2 = scimpute.weight_bias_variable('encoder2', p.n_hidden_1, p.n_hidden_2, p.sd)
     e_a2 = scimpute.dense_layer('encoder2', e_a1, e_w2, e_b2, pHidden_holder)
-# with tf.name_scope('Encoder_L3'):
-#     e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', p.n_hidden_2, p.n_hidden_3, p.sd)
-#     e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
+with tf.name_scope('Encoder_L3'):
+    e_w3, e_b3 = scimpute.weight_bias_variable('encoder3', p.n_hidden_2, p.n_hidden_3, p.sd)
+    e_a3 = scimpute.dense_layer('encoder3', e_a2, e_w3, e_b3, pHidden_holder)
 # # with tf.name_scope('Encoder_L4'):
 # #     e_w4, e_b4 = scimpute.weight_bias_variable('encoder4', p.n_hidden_3, p.n_hidden_4, p.sd)
 # #     e_a4 = scimpute.dense_layer('encoder4', e_a3, e_w4, e_b4, pHidden_holder)
 # # with tf.name_scope('Decoder_L4'):
 # #     d_w4, d_b4 = scimpute.weight_bias_variable('decoder4', p.n_hidden_4, p.n_hidden_3, p.sd)
 # #     d_a4 = scimpute.dense_layer('decoder4', e_a4, d_w4, d_b4, pHidden_holder)
-# with tf.name_scope('Decoder_L3'):
-#     d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', p.n_hidden_3, p.n_hidden_2, p.sd)
-#     d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
+with tf.name_scope('Decoder_L3'):
+    d_w3, d_b3 = scimpute.weight_bias_variable('decoder3', p.n_hidden_3, p.n_hidden_2, p.sd)
+    d_a3 = scimpute.dense_layer('decoder3', e_a3, d_w3, d_b3, pHidden_holder)
 with tf.name_scope('Decoder_L2'):
     d_w2, d_b2 = scimpute.weight_bias_variable('decoder2', p.n_hidden_2, p.n_hidden_1, p.sd)
-    d_a2 = scimpute.dense_layer('decoder2', e_a2, d_w2, d_b2, pHidden_holder)
+    d_a2 = scimpute.dense_layer('decoder2', d_a3, d_w2, d_b2, pHidden_holder)
 with tf.name_scope('Decoder_L1'):
     d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', p.n_hidden_1, n, p.sd)
     d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
 
 # define input/output
-a_bottle_neck = e_a2
+a_bottle_neck = e_a3
 h = d_a1
 
 # define loss
@@ -239,6 +239,7 @@ with tf.name_scope("Metrics"):
                         omega
                         )
                 )
+    mse = tf.reduce_mean(tf.pow(X-h, 2))
     reg_term = tf.reduce_mean(tf.pow(h, 2)) * p.reg_coef
     tf.summary.scalar('mse_omega (H vs X)', mse_omega)
 
@@ -247,7 +248,13 @@ with tf.name_scope("Metrics"):
 
 # trainer
 optimizer = tf.train.AdamOptimizer(p.learning_rate)
-trainer = optimizer.minimize(mse_omega + reg_term)  # for gene_j
+if p.mse_mode == 'mse_omega':
+    trainer = optimizer.minimize(mse_omega + reg_term)
+elif p.mse_mode == 'mse':
+    trainer = optimizer.minimize(mse + reg_term)
+else:
+    raise Exception('mse_mode spelled wrong')
+
 
 # start session
 sess = tf.Session()
