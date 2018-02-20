@@ -7,7 +7,7 @@ file_x_ori = 'cell_row'
 file_m = '../data/gtex_v7.count.4tissues_yes.hd5'
 file_m_ori = 'cell_row'
 
-tag = 'GTex_All_CountLog_Msk90_TransLate_5L'
+tag = 'GTex_NonOverlap_4tissues_CountLog_Msk90_TransLate_5L'
 
 data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H, X, M)
 

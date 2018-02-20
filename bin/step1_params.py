@@ -24,11 +24,19 @@ else:
     raise Exception('mode err')
 
 # HYPER PARAMETERS
-L = 7  # only a reporter, changing it can't alter the model structure
+L = 5  # only a reporter, changing it can't alter the model structure
 l = L//2
-n_hidden_1 = 400
-n_hidden_2 = 300  # update for different depth
-n_hidden_3 = 200
+if L == 7:
+    n_hidden_1 = 400
+    n_hidden_2 = 300  # update for different depth
+    n_hidden_3 = 200
+elif L == 5:
+    n_hidden_1 = 400
+    n_hidden_2 = 200  # update for different depth
+else:
+    raise Exception('{} L not implemented yet'.format(L))
+
+
 # n_hidden_4 = 100 # add more after changing model structure
 
 
@@ -54,9 +62,9 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 
 
 # GTEx
-file1 = '../data/gtex_v7.count.hd5'
+file1 = '../data/gtex_v7.count.4tissues_no.hd5'
 data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log
-name1 = 'GTEx.All.CountLog'
+name1 = 'GTEx.4tissues_neg.CountLog'
 file1_orientation = 'cell_row'  # cell_row/gene_row
 
 # For development usage #
