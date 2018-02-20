@@ -49,9 +49,9 @@ if test_flag > 0:
 
 # INPUT SUMMARY
 print('\ninside this code, matrices are supposed to be transformed into cell_row')
-print('H:', p.file_h, p.file_h_ori, p.data_transformation, '\n', H.ix[0:3, 0:2])
-print('M:', p.file_m, p.file_m_ori, p.data_transformation, '\n', M.ix[0:3, 0:2])
-print('X:', p.file_x, p.file_x_ori, p.data_transformation, '\n', X.ix[0:3, 0:2])
+print('H:', p.file_h, p.file_h_ori, p.file_h_transformation, '\n', H.ix[0:3, 0:2])
+print('M:', p.file_m, p.file_m_ori, p.file_m_transformation, '\n', M.ix[0:3, 0:2])
+print('X:', p.file_x, p.file_x_ori, p.file_x_transformation, '\n', X.ix[0:3, 0:2])
 print('H.shape', H.shape)
 print('M.shape', M.shape)
 print('X.shape', X.shape)
