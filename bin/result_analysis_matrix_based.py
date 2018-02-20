@@ -33,6 +33,9 @@ M = scimpute.read_data_into_cell_row(p.file_m, p.file_m_ori)
 # Data Transformation for H
 print('> DATA TRANSFORMATION..')
 H = scimpute.df_transformation(H.transpose(), transformation=p.data_transformation).transpose()
+X = scimpute.df_transformation(X.transpose(), transformation=p.data_transformation).transpose()
+M = scimpute.df_transformation(M.transpose(), transformation=p.data_transformation).transpose()
+
 
 # TEST MODE OR NOT
 test_flag = 0
@@ -47,8 +50,8 @@ if test_flag > 0:
 # INPUT SUMMARY
 print('\ninside this code, matrices are supposed to be transformed into cell_row')
 print('H:', p.file_h, p.file_h_ori, p.data_transformation, '\n', H.ix[0:3, 0:2])
-print('M:', p.file_m, p.file_m_ori, '\n', M.ix[0:3, 0:2])
-print('X:', p.file_x, p.file_x_ori, '\n', X.ix[0:3, 0:2])
+print('M:', p.file_m, p.file_m_ori, p.data_transformation, '\n', M.ix[0:3, 0:2])
+print('X:', p.file_x, p.file_x_ori, p.data_transformation, '\n', X.ix[0:3, 0:2])
 print('H.shape', H.shape)
 print('M.shape', M.shape)
 print('X.shape', X.shape)
