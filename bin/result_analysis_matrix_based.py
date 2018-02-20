@@ -119,7 +119,7 @@ print('MSE2 between H and M: ', mse2)
 
 #  VISUALIZATION OF DFS, todo clustering based on H
 print('\n> Visualization of dfs')
-max, min = scimpute.max_min_element_in_arrs([H.values, M.values])
+max, min = scimpute.max_min_element_in_arrs([H.values, M.values, X.values])
 scimpute.heatmap_vis(H.values,
                      title='H ({})'.format(p.name_h),
                      xlab='genes\nMSE1_OMEGA(H vs X)={}'.format(mse1_omega),
@@ -129,6 +129,12 @@ scimpute.heatmap_vis(H.values,
 scimpute.heatmap_vis(M.values,
                      title='M ({})'.format(p.name_m),
                      xlab='genes\nMSE2(H vs M)={}'.format(mse2),
+                     ylab='cells', vmax=max, vmin=min,
+                     dir=p.tag)
+
+scimpute.heatmap_vis(X.values,
+                     title='X ({})'.format(p.name_x),
+                     xlab='genes',
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
 
