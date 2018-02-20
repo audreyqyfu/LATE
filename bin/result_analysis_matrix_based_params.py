@@ -17,8 +17,6 @@ name_m = re.sub(r'.*/', '', file_m)
 
 tag = 'new_test'
 
-data_transformation = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (done on H, X, M)
-
 # Gene list
 pair_list = [
     # # MBM: Cd34, Gypa, Klf1, Sfpi1
