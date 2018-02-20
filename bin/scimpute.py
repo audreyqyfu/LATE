@@ -57,10 +57,23 @@ def read_hd5(in_name):
 
 
 def read_data_into_cell_row(fname, orientation):
-    if orientation == 'gene_row':
-        df_tmp = pd.read_hdf(fname).transpose()
-    elif orientation == 'cell_row':
+    '''
+    read hd5 or csv, into cell_row format
+    :param fname: 
+    :param orientation: of file
+    :return: cell_row df
+    '''
+    if fname.endwith('hd5'):
         df_tmp = pd.read_hdf(fname)
+    elif fname.endwith('csv'):
+        df_tmp = pd.read_csv(fname)
+    else:
+        raise Exception('file name not ending in hd5 nor csv, not recognized')
+
+    if orientation == 'gene_row':
+        df_tmp = df_tmp.transpose()
+    elif orientation == 'cell_row':
+        pass
     else:
         raise Exception('parameter err: for {}, orientation {} not correctly spelled'.format(fname, orientation))
     return df_tmp
