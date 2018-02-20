@@ -61,7 +61,16 @@ def tb_summary():
     print('tb_summary time:', round(toc-tic,2))
 
 
-def learning_curve_step2(skip=1):
+def learning_curve_mse(skip=1):
+    print('> plotting learning curves')
+    scimpute.learning_curve(epoch_log, mse1_batch_vec, mse1_valid_vec,
+                                title="Learning Curve MSE.{}".format(p.stage),
+                                ylabel='MSE (X vs H, nz)',
+                                dir=p.stage,
+                                skip=skip
+                            )
+
+def learning_curve_mse_omega(skip=1):
     print('> plotting learning curves')
     scimpute.learning_curve(epoch_log, mse_omega_batch_vec, mse_omega_valid_vec,
                                 title="Learning Curve MSE_OMEGA.{}".format(p.stage),
@@ -69,7 +78,6 @@ def learning_curve_step2(skip=1):
                                 dir=p.stage,
                                 skip=skip
                             )
-
 
 def snapshot():
     print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
@@ -343,7 +351,11 @@ for epoch in range(1, p.max_training_epochs+1):
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
         h_train, h_valid, h_input = snapshot()  # save
-        learning_curve_step2(skip=math.floor(epoch/2/p.display_step))
+        if p.mse_mode == 'mse_omega':
+            learning_curve_mse_omega(skip=math.floor(epoch / 5 / p.display_step))
+        elif p.mse_mode == 'mse':
+            learning_curve_mse(skip=math.floor(epoch / 5 / p.display_step))
+
         save_bottle_neck_representation()
         save_weights()
         visualize_weights()
