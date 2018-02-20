@@ -7,6 +7,7 @@ home = os.environ['HOME']
 # step2/load_saved for transfer learning (translate)
 mode = 'pre-training'  # pre-training, translate, late
 mse_mode = 'mse_omega'  # mse_omega, mse
+data_transformation = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 
 if mode == 'pre-training':
     # Reference Pretraining
@@ -53,6 +54,16 @@ snapshot_step = int(5e2)  # interval of saving session, imputation
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 
+# BMB.MAGIC
+file1 = '../data/MBM.MAGIC.9k.A.log.hd5'
+name1 = 'MBM_MAGIC_A_Log'
+file1_orientation = 'gene_row'  # cell_row/gene_row
+# file2 for result_analysis.py
+file2 = '../data/MBM.MAGIC.9k.B.msk90.log.hd5'
+name2 = 'MBM_MAGIC_B_MSK90_Log'
+file2_orientation = file1_orientation
+
+
 # # GTEx
 # file1 = home+'/imputation/data/gtex/g5561/\
 # gtex_v7.count.g5561.rpm.log.hd5'
@@ -63,19 +74,19 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 # name2 = name1
 # file2_orientation = file1_orientation
 
-# PBMC
-file1 = home+'/audrey2/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
-10xHumanPbmc.g5561.rpmLog.hd5'
-name1 = 'PBMC.G5561.RPM.LOG'
-file1_orientation = 'gene_row'  # cell_row/gene_row
-# file2 for result_analysis.py
-file2 = file1
-name2 = name1
-file2_orientation = file1_orientation
+# # PBMC
+# file1 = home+'/audrey2/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
+# 10xHumanPbmc.g5561.rpmLog.hd5'
+# name1 = 'PBMC.G5561.RPM.LOG'
+# file1_orientation = 'gene_row'  # cell_row/gene_row
+# # file2 for result_analysis.py
+# file2 = file1
+# name2 = name1
+# file2_orientation = file1_orientation
 
 # For development usage #
 seed_tf = 3
-test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 20 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 2  # interval on learning curve
