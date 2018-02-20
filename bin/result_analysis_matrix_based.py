@@ -32,9 +32,9 @@ M = scimpute.read_data_into_cell_row(p.file_m, p.file_m_ori)
 
 # Data Transformation for H
 print('> DATA TRANSFORMATION..')
-H = scimpute.df_transformation(H.transpose(), transformation=p.data_transformation).transpose()
-X = scimpute.df_transformation(X.transpose(), transformation=p.data_transformation).transpose()
-M = scimpute.df_transformation(M.transpose(), transformation=p.data_transformation).transpose()
+H = scimpute.df_transformation(H.transpose(), transformation=p.file_h_transformation).transpose()
+X = scimpute.df_transformation(X.transpose(), transformation=p.file_x_transformation).transpose()
+M = scimpute.df_transformation(M.transpose(), transformation=p.file_m_transformation).transpose()
 
 
 # TEST MODE OR NOT

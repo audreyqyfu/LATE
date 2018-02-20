@@ -1,12 +1,15 @@
 import re
 file_h = './step2/imputation.step2.hd5'
 file_h_ori = 'cell_row'  # gene_row/cell_row
+file_h_transformation = 'as_is'
 
 file_x = './saver.hd5'
 file_x_ori = 'gene_row'
+file_x_transformation = 'as_is'
 
 file_m = './saver.hd5'
 file_m_ori = 'gene_row'
+file_m_transformation = 'log'
 
 name_h = re.sub(r'.*/', '', file_h)  # prevent output name problems
 name_x = re.sub(r'.*/', '', file_x)
