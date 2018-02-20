@@ -64,9 +64,9 @@ def read_data_into_cell_row(fname, orientation):
     :return: cell_row df
     '''
     if fname.endswith('hd5'):
-        df_tmp = pd.read_hdf(fname)
+        df_tmp = read_hd5(fname)
     elif fname.endswith('csv'):
-        df_tmp = pd.read_csv(fname)
+        df_tmp = read_csv(fname)
     else:
         raise Exception('file name not ending in hd5 nor csv, not recognized')
 
@@ -76,6 +76,8 @@ def read_data_into_cell_row(fname, orientation):
         pass
     else:
         raise Exception('parameter err: for {}, orientation {} not correctly spelled'.format(fname, orientation))
+
+    print(fname, 'read into:', df_tmp.shape, '(as cell_row df)')
     return df_tmp
 
 
