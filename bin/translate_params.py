@@ -6,7 +6,7 @@ home = os.environ['HOME']
 # step2/rand_init for one step training (late)
 # step2/load_saved for transfer learning (translate)
 mode = 'pre-training'  # pre-training, translate, late
-mse_mode = 'mse'  # mse_omega, mse
+mse_mode = 'mse_omega'  # mse_omega, mse
 
 if mode == 'pre-training':
     # Reference Pretraining
