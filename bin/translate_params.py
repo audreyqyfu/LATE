@@ -63,7 +63,6 @@ file2 = '../data/MBM.MAGIC.9k.B.msk90.log.hd5'
 name2 = 'MBM_MAGIC_B_MSK90_Log'
 file2_orientation = file1_orientation
 
-
 # # GTEx
 # file1 = home+'/imputation/data/gtex/g5561/\
 # gtex_v7.count.g5561.rpm.log.hd5'
@@ -182,6 +181,7 @@ print()
 print('Parameters:')
 print('mode:', mode)
 print('mse_mode:', mse_mode)
+pritn('data_transformation:', data_transformation)
 print('stage:', stage)
 print('init:', run_flag)
 print('test_mode:', test_flag)
