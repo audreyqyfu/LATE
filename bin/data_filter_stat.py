@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 
 # get argv #
-print('usage: <data_filter_stat.py> <file.csv/hd5> <row_cell/row_gene> <reads/gene min> <reads/cell min> <out-tag>')
+print('usage: <data_filter_stat.py> <file.csv/hd5> <cell_row/gene_row> <reads/gene min> <reads/cell min> <out-tag>')
 print('min included')
 print('cmd typed:', sys.argv)
 if len(sys.argv) != 6:
@@ -31,14 +31,14 @@ tag0 = str(sys.argv[5])
 tag = '(' + str(sys.argv[5]) +')'
 
 # read data
-if matrix_mode == 'row_cell':
+if matrix_mode == 'cell_row':
     if file.endswith('.csv'):
         df = scimpute.read_csv(file).transpose()
     elif file.endswith('.hd5'):
         df = scimpute.read_hd5(file).transpose()
     else:
         raise Exception('file extension error: not hd5/csv')
-elif matrix_mode == 'row_gene':
+elif matrix_mode == 'gene_row':
     if file.endswith('.csv'):
         df = scimpute.read_csv(file)
     elif file.endswith('.hd5'):
