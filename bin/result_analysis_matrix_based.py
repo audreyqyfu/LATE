@@ -57,44 +57,44 @@ print('M.shape', M.shape)
 print('X.shape', X.shape)
 
 # HIST OF H
-scimpute.hist_df(H, title='H({})'.format(p.file_h), dir=p.tag)
-scimpute.hist_df(M, title='M({})'.format(p.file_m), dir=p.tag)
-scimpute.hist_df(X, title='X({})'.format(p.file_x), dir=p.tag)
+scimpute.hist_df(H, title='H({})'.format(p.name_h), dir=p.tag)
+scimpute.hist_df(M, title='M({})'.format(p.name_m), dir=p.tag)
+scimpute.hist_df(X, title='X({})'.format(p.name_x), dir=p.tag)
 
 
 # HIST CELL/GENE CORR
 print('\n> Corr between X and H')
 hist = scimpute.hist_2matrix_corr(X.values, H.values,
-                               title="Hist nz1-Gene-Corr (X vs H)\n"+p.file_h+'\n'+p.file_m,
-                               dir=p.tag, mode='column-wise', nz_mode='first'
-                               )
+                                  title="Hist nz1-Gene-Corr (X vs H)\n"+p.name_x+'\n'+p.name_h,
+                                  dir=p.tag, mode='column-wise', nz_mode='first'
+                                  )
 
 hist = scimpute.hist_2matrix_corr(X.values, H.values,
-                               title="Hist nz1-Cell-Corr (X vs H)\n"+p.file_h+'\n'+p.file_m,
-                               dir=p.tag, mode='row-wise', nz_mode='first'
-                               )
+                                  title="Hist nz1-Cell-Corr (X vs H)\n"+p.name_x+'\n'+p.name_h,
+                                  dir=p.tag, mode='row-wise', nz_mode='first'
+                                  )
 
 
 print('\n> Corr between M and H')
 hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                               title="Hist Gene-Corr (M vs H)\n"+p.file_h+'\n'+p.file_m,
-                               dir=p.tag, mode='column-wise', nz_mode='ignore'
-                               )
+                                  title="Hist Gene-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+                                  dir=p.tag, mode='column-wise', nz_mode='ignore'
+                                  )
 
 hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                               title="Hist Cell-Corr (M vs H)\n"+p.file_h+'\n'+p.file_m,
-                               dir=p.tag, mode='row-wise', nz_mode='ignore'
-                               )
+                                  title="Hist Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+                                  dir=p.tag, mode='row-wise', nz_mode='ignore'
+                                  )
 
 hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                               title="Hist nz1-Gene-Corr (M vs H)\n"+p.file_h+'\n'+p.file_m,
-                               dir=p.tag, mode='column-wise', nz_mode='first'
-                               )
+                                  title="Hist nz1-Gene-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+                                  dir=p.tag, mode='column-wise', nz_mode='first'
+                                  )
 
 hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                               title="Hist nz1-Cell-Corr (M vs H)\n"+p.file_h+'\n'+p.file_m,
-                               dir=p.tag, mode='row-wise', nz_mode='first'
-                               )
+                                  title="Hist nz1-Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+                                  dir=p.tag, mode='row-wise', nz_mode='first'
+                                  )
 
 
 # MSE CALCULATION
@@ -121,13 +121,13 @@ print('MSE2 between H and M: ', mse2)
 print('\n> Visualization of dfs')
 max, min = scimpute.max_min_element_in_arrs([H.values, M.values])
 scimpute.heatmap_vis(H.values,
-                     title='H ({})'.format(p.file_h),
+                     title='H ({})'.format(p.name_h),
                      xlab='genes\nMSE1_OMEGA(H vs X)={}'.format(mse1_omega),
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
 
 scimpute.heatmap_vis(M.values,
-                     title='M ({})'.format(p.file_m),
+                     title='M ({})'.format(p.name_m),
                      xlab='genes\nMSE2(H vs M)={}'.format(mse2),
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)

@@ -1,15 +1,20 @@
+import re
 file_h = './step2/imputation.step2.hd5'
 file_h_ori = 'cell_row'  # gene_row/cell_row
 
-file_x = '../data/gtex_v7.count.4tissues.msk90.hd5'
-file_x_ori = 'cell_row'
+file_x = './saver.hd5'
+file_x_ori = 'gene_row'
 
-file_m = '../data/gtex_v7.count.4tissues_yes.hd5'
-file_m_ori = 'cell_row'
+file_m = './saver.hd5'
+file_m_ori = 'gene_row'
 
-tag = 'GTex_NonOverlap_4tissues_CountLog_Msk90_TransLate_5L'
+name_h = re.sub(r'.*/', '', file_h)  # prevent output name problems
+name_x = re.sub(r'.*/', '', file_x)
+name_m = re.sub(r'.*/', '', file_m)
 
-data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H, X, M)
+tag = 'new_test'
+
+data_transformation = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (done on H, X, M)
 
 # Gene list
 pair_list = [

@@ -5,7 +5,7 @@ home = os.environ['HOME']
 # step1/rand_init for pre-training on ref (step1)
 # step2/rand_init for one step training (late)
 # step2/load_saved for transfer learning (translate)
-mode = 'pre-training'  # pre-training, translate, late
+mode = 'late'  # pre-training, translate, late
 mse_mode = 'mse_omega'  # mse_omega, mse
 data_transformation = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 
@@ -55,8 +55,8 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 
 
 # BMB.MAGIC
-file1 = '../data/MBM.MAGIC.9k.A.log.hd5'
-name1 = 'MBM_MAGIC_A_Log'
+file1 = 'saver.hd5'
+name1 = 'test'
 file1_orientation = 'gene_row'  # cell_row/gene_row
 
 
