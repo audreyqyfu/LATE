@@ -58,30 +58,21 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 file1 = '../data/MBM.MAGIC.9k.A.log.hd5'
 name1 = 'MBM_MAGIC_A_Log'
 file1_orientation = 'gene_row'  # cell_row/gene_row
-# file2 for result_analysis.py
-file2 = '../data/MBM.MAGIC.9k.B.msk90.log.hd5'
-name2 = 'MBM_MAGIC_B_MSK90_Log'
-file2_orientation = file1_orientation
+
 
 # # GTEx
 # file1 = home+'/imputation/data/gtex/g5561/\
 # gtex_v7.count.g5561.rpm.log.hd5'
 # name1 = 'GTEx.G5561.RPM.LOG'
 # file1_orientation = 'gene_row'  # cell_row/gene_row
-# # file2 for result_analysis.py
-# file2 = file1
-# name2 = name1
-# file2_orientation = file1_orientation
+
 
 # # PBMC
 # file1 = home+'/audrey2/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
 # 10xHumanPbmc.g5561.rpmLog.hd5'
 # name1 = 'PBMC.G5561.RPM.LOG'
 # file1_orientation = 'gene_row'  # cell_row/gene_row
-# # file2 for result_analysis.py
-# file2 = file1
-# name2 = name1
-# file2_orientation = file1_orientation
+
 
 # For development usage #
 seed_tf = 3
@@ -181,7 +172,7 @@ print()
 print('Parameters:')
 print('mode:', mode)
 print('mse_mode:', mse_mode)
-pritn('data_transformation:', data_transformation)
+print('data_transformation:', data_transformation)
 print('stage:', stage)
 print('init:', run_flag)
 print('test_mode:', test_flag)
