@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
-#SBATCH -p gpu-long --gres=gpu:1
-#SBATCH --nodelist=n110
+#SBATCH -p gpu-short --gres=gpu:1 --mem=62G
+#SBATCH --nodelist=n104
 
 echo $(hostname)
 echo $(date)

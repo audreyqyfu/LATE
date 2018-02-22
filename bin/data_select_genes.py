@@ -17,10 +17,15 @@ else:
     out_name = str(sys.argv[3])  # big.small.hd5
 
 # read
-print('read big-df')
+print('read big-df..')
 df_big = pd.read_hdf(big_name)
-print('read small-df')
+nz_big = scimpute.nnzero_rate_df(df_big)
+print('nz_rate big-df: ', nz_big)
+
+print('read small-df..')
 df_small = scimpute.read_hd5(small_name)
+nz_small = scimpute.nnzero_rate_df(df_small)
+print('nz_rate small_df: ', nz_small)
 
 
 # Remove .x from ID
@@ -34,6 +39,7 @@ print('df_small index is unique? {}'.format(df_small.index.is_unique))
 
 
 # SELECT
+print('selecting..')
 df_selected = df_big.ix[df_small.index]
 # Check null, fill zeros
 null_gene_num = df_selected.ix[:, 1].isnull().sum()
@@ -42,6 +48,9 @@ df_selected = df_selected.fillna(value=0)
 print('those N.A. in selected-df has been filled with zeros')
 null_gene_num2 = df_selected.ix[:, :].isnull().sum().sum()
 print('Now, there are {} null values in selected-df'.format(null_gene_num2))
+
+nz_selected = scimpute.nnzero_rate_df(df_selected)
+print('nz_rate output: ', nz_selected)
 
 
 # Finish
