@@ -24,7 +24,7 @@ else:
     raise Exception('mode err')
 
 # HYPER PARAMETERS
-L = 5  # only a reporter, changing it can't alter the model structure
+L = 7  # only a reporter, changing it can't alter the model structure
 l = L//2
 if L == 7:
     n_hidden_1 = 400
@@ -49,7 +49,7 @@ elif run_flag == 'load_saved':
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
 
-max_training_epochs = int(2e3)
+max_training_epochs = int(3e3)
 display_step = 50  # interval on learning curve
 snapshot_step = int(5e2)  # interval of saving session, imputation
 
@@ -58,11 +58,11 @@ snapshot_step = int(5e2)  # interval of saving session, imputation
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 
-# GTEx
-file1 = '../data/gtex_v7.count.4tissues.msk90.hd5'
+# PBMC
+file1 = '../data/10x_human_pbmc_68k.G9987.hd5'
 data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log
-name1 = 'GTEx.4tissues.CountLog.Msk90'
-file1_orientation = 'cell_row'  # cell_row/gene_row
+name1 = 'PBMC.G9987.CountLog'
+file1_orientation = 'gene_row'  # cell_row/gene_row
 
 
 # For development usage #
