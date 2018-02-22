@@ -67,6 +67,8 @@ def read_data_into_cell_row(fname, orientation):
         df_tmp = read_hd5(fname)
     elif fname.endswith('csv'):
         df_tmp = read_csv(fname)
+    elif fname.endswith('csv.gz'):
+        df_tmp = read_csv(fname)
     else:
         raise Exception('file name not ending in hd5 nor csv, not recognized')
 
