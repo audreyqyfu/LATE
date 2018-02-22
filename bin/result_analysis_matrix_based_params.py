@@ -3,19 +3,19 @@ file_h = './step2/imputation.step2.hd5'
 file_h_ori = 'cell_row'  # gene_row/cell_row
 file_h_transformation = 'as_is'
 
-file_x = './saver.hd5'
-file_x_ori = 'gene_row'
-file_x_transformation = 'as_is'
+file_x = '../data/gtex_v7.count.4tissues.msk90.hd5'
+file_x_ori = 'gene_row'  # cell_row/gene_row
+file_x_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
-file_m = './saver.hd5'
-file_m_ori = 'gene_row'
-file_m_transformation = 'log'
+file_m = '../data/gtex_v7.count.4tissues_yes.hd5'
+file_m_ori = 'gene_row'  # cell_row/gene_row
+file_m_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
 name_h = re.sub(r'.*/', '', file_h)  # prevent output name problems
 name_x = re.sub(r'.*/', '', file_x)
 name_m = re.sub(r'.*/', '', file_m)
 
-tag = 'new_test'
+tag = 'GTEx_All'
 
 # Gene list
 pair_list = [
@@ -60,7 +60,7 @@ gene_list = [
 
     # TEST
     2, 3,
-    # 'ENSG00000188976', 'ENSG00000188290',
+    # # 'ENSG00000188976', 'ENSG00000188290',
 
     # # PBMC G5561 Non-Linear
     # 'ENSG00000173372',

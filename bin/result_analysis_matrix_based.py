@@ -64,15 +64,17 @@ scimpute.hist_df(X, title='X({})'.format(p.name_x), dir=p.tag)
 
 # HIST CELL/GENE CORR
 print('\n> Corr between X and H')
+print('GeneCorr: X shape: ', X.shape, 'H shape: ', H.shape)
 hist = scimpute.hist_2matrix_corr(X.values, H.values,
                                   title="Hist nz1-Gene-Corr (X vs H)\n"+p.name_x+'\n'+p.name_h,
                                   dir=p.tag, mode='column-wise', nz_mode='first'
                                   )
-
-hist = scimpute.hist_2matrix_corr(X.values, H.values,
-                                  title="Hist nz1-Cell-Corr (X vs H)\n"+p.name_x+'\n'+p.name_h,
-                                  dir=p.tag, mode='row-wise', nz_mode='first'
-                                  )
+#
+# print('CellCorr: X shape: ', X.shape, 'H shape: ', H.shape)
+# hist = scimpute.hist_2matrix_corr(X.values, H.values,
+#                                   title="Hist nz1-Cell-Corr (X vs H)\n"+p.name_x+'\n'+p.name_h,
+#                                   dir=p.tag, mode='row-wise', nz_mode='first'
+#                                   )
 
 
 print('\n> Corr between M and H')
@@ -81,20 +83,20 @@ hist = scimpute.hist_2matrix_corr(M.values, H.values,
                                   dir=p.tag, mode='column-wise', nz_mode='ignore'
                                   )
 
-hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                                  title="Hist Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
-                                  dir=p.tag, mode='row-wise', nz_mode='ignore'
-                                  )
+# hist = scimpute.hist_2matrix_corr(M.values, H.values,
+#                                   title="Hist Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+#                                   dir=p.tag, mode='row-wise', nz_mode='ignore'
+#                                   )
 
 hist = scimpute.hist_2matrix_corr(M.values, H.values,
                                   title="Hist nz1-Gene-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
                                   dir=p.tag, mode='column-wise', nz_mode='first'
                                   )
-
-hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                                  title="Hist nz1-Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
-                                  dir=p.tag, mode='row-wise', nz_mode='first'
-                                  )
+#
+# hist = scimpute.hist_2matrix_corr(M.values, H.values,
+#                                   title="Hist nz1-Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+#                                   dir=p.tag, mode='row-wise', nz_mode='first'
+#                                   )
 
 
 # MSE CALCULATION
