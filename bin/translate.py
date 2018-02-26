@@ -259,8 +259,19 @@ elif p.L == 5:
         d_a1 = scimpute.dense_layer('decoder1', d_a2, d_w1, d_b1, pHidden_holder)  # todo: change input activations if model changed
     # define input/output
     a_bottle_neck = e_a2
+elif p.L == 3:
+    # change with layer
+    with tf.name_scope('Encoder_L1'):
+        e_w1, e_b1 = scimpute.weight_bias_variable('encoder1', n, p.n_hidden_1, p.sd)
+        e_a1 = scimpute.dense_layer('encoder1', X, e_w1, e_b1, pIn_holder)
+    with tf.name_scope('Decoder_L1'):
+        d_w1, d_b1 = scimpute.weight_bias_variable('decoder1', p.n_hidden_1, n, p.sd)
+        d_a1 = scimpute.dense_layer('decoder1', e_a1, d_w1, d_b1,
+                                    pHidden_holder)  # todo: change input activations if model changed
+    # define input/output
+    a_bottle_neck = e_a1
 else:
-    raise Exception("{} L not defined, only 5, 7 implemented".format(p.L))
+    raise Exception("{} L not defined, only 3, 5, 7 implemented".format(p.L))
 
 h = d_a1
 

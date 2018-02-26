@@ -25,11 +25,11 @@ else:
     raise Exception('mode err')
 
 # HYPER PARAMETERS
-L = 7  # only a reporter, changing it can't alter the model structure
+L = 3  # only a reporter, changing it can't alter the model structure
 l = L//2
 n_hidden_1 = 400
-n_hidden_2 = 300  # update for different depth
-n_hidden_3 = 200
+# n_hidden_2 = 300  # update for different depth
+# n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
 
