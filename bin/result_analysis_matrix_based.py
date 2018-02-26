@@ -107,15 +107,15 @@ max_m, min_m = scimpute.max_min_element_in_arrs([M.values])
 print('Max in M is {}, Min in M is{}'.format(max_m, min_m))
 
 mse1_omega = scimpute.mse_omega(H, X)
-mse1_omega = round(mse1_omega, 5)
+mse1_omega = round(mse1_omega, 7)
 print('mse1_omega between H and X: ', mse1_omega)
 
 mse2_omega = scimpute.mse_omega(H, M)
-mse2_omega = round(mse2_omega, 5)
+mse2_omega = round(mse2_omega, 7)
 print('mse2_omega between H and M: ', mse2_omega)
 
 mse2 = scimpute.mse(H, M)
-mse2 = round(mse2, 5)
+mse2 = round(mse2, 7)
 print('MSE2 between H and M: ', mse2)
 
 
