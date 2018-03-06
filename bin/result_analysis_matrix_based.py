@@ -36,6 +36,9 @@ H = scimpute.df_transformation(H.transpose(), transformation=p.file_h_transforma
 X = scimpute.df_transformation(X.transpose(), transformation=p.file_x_transformation).transpose()
 M = scimpute.df_transformation(M.transpose(), transformation=p.file_m_transformation).transpose()
 
+# # for MAGIC, discard missing genes from H
+# X = X.loc[:, H.columns]
+# M = M.loc[:, H.columns]
 
 # TEST MODE OR NOT
 test_flag = 0
