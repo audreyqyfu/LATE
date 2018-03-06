@@ -370,7 +370,7 @@ def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir=
     x is slice, y is a slice
     have to be slice to help pearsonr(x,y)[0] work
     range= same/flexible
-    
+
     :param x: 
     :param y: 
     :param title: 
@@ -394,14 +394,18 @@ def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir=
     from scipy.stats import gaussian_kde
     # Calculate the point density
     xy = np.vstack([x, y])
-    z = gaussian_kde(xy)(xy)
-    # sort: dense on top (plotted last)
-    idx = z.argsort()
-    x, y, z = x[idx], y[idx], z[idx]
-    # plt
-    fig = plt.figure(figsize=(5, 5))
-    fig, ax = plt.subplots()
-    cax = ax.scatter(x, y, c=z, s=50, edgecolor='')
+    try:
+        z = gaussian_kde(xy)(xy)
+        # sort: dense on top (plotted last)
+        idx = z.argsort()
+        x, y, z = x[idx], y[idx], z[idx]
+        # plt
+        fig = plt.figure(figsize=(5, 5))
+        fig, ax = plt.subplots()
+        cax = ax.scatter(x, y, c=z, s=50, edgecolor='')
+        plt.colorbar(cax)
+    except np.linalg.linalg.LinAlgError:
+        plt.plot(x, y, 'b.', alpha=0.3)
 
     plt.title('{}\ncorr: {}\nnz2-corr: {}'.format(title, corr, nz2_corr1))
     plt.xlabel(xlabel + "\nmean: " + str(round(np.mean(x), 2)))
@@ -417,12 +421,8 @@ def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir=
         plt.xlim(range[0], range[1])
         plt.ylim(range[0], range[1])
 
-    plt.colorbar(cax)
     plt.savefig(fprefix + '.png', bbox_inches='tight')
     plt.close()
-
-
-
 
 
 def density_plot(x, y,
@@ -470,7 +470,7 @@ def gene_pair_plot(df, list, tag, dir='./plots'):
             continue
 
         scatterplot2(x, y,
-                     title='Gene' + str(i) + ' vs Gene' + str(j) + ' ' + tag,
+                     title='Gene' + str(i) + ' vs Gene' + str(j) + '\n' + tag,
                      xlabel='Gene' + str(i), ylabel='Gene' + str(j),
                      dir=dir)
 
