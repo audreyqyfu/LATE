@@ -180,6 +180,40 @@ for j in p.gene_list:
                          )
 
 
+# discretized plots
+H = scimpute.df_exp_discretize_log(H)
+# Gene-Gene in M, X, H
+print('\n> Discrete Gene-gene relationship in H')
+gene_pair_dir = p.tag+'/pairs_discrete'
+List = p.pair_list
+scimpute.gene_pair_plot(H, list=List, tag='(H_discrete) '+p.tag, dir=gene_pair_dir)
+
+# M vs H, M vs X
+print("\n> Discrete H vs M")
+gene_dir = p.tag+'/genes_discrete'
+for j in p.gene_list:
+    try:
+        print('for ', j)
+        H_j = H.ix[:, j]
+        M_j = M.ix[:, j]
+        X_j = X.ix[:, j]
+    except KeyError:
+        print('KeyError: the gene index does not exist')
+        continue
+
+    scimpute.scatterplot2(M_j, H_j, range='same',
+                          title=str(str(j) + ' (M_vs_H_discrete) ' + p.tag),
+                          xlabel='Ground Truth (M)',
+                          ylabel='Prediction (H)',
+                          dir=gene_dir
+                          )
+    scimpute.scatterplot2(M_j, X_j, range='same',
+                          title=str(str(j) + ' (M_vs_X_discrete) ' + p.tag),
+                          xlabel='Ground Truth (M)',
+                          ylabel='Input (X)',
+                          dir=gene_dir
+                         )
+
 # # gene MSE
 # j = 0
 # input_j = H.ix[:, j:j+1].values
