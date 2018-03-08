@@ -140,6 +140,24 @@ def df_exp_rpm_log(df, pseudocount=1):
     return df_tmp
 
 
+def df_exp_discretize_log(df, pseudocount=1):
+    '''
+    For better comparison with ground-truth in gene-scatterplot visualization
+    Input should be the output of df_log_transformation (log10(x+1))
+    If so, all values ≥ 0
+    1. 10^x-1
+    2. arount
+    3. log10(x+1)
+    :param df: 
+    :param pseudocount: 
+    :return: 
+    '''
+    df_tmp = df.copy()
+    df_tmp = np.around(np.power(10, df_tmp) - pseudocount)
+    df_tmp = np.log10(df_tmp + pseudocount)
+    return df_tmp
+
+
 def df_transformation(df, transformation='as_is'):
     '''
     data_formatting
