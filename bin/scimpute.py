@@ -440,7 +440,7 @@ def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir=
         plt.ylim(range[0], range[1])
 
     plt.savefig(fprefix + '.png', bbox_inches='tight')
-    plt.close()
+    plt.close('all')
 
 
 def density_plot(x, y,

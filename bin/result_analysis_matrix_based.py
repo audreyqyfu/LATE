@@ -181,6 +181,7 @@ for j in p.gene_list:
 
 
 # discretized plots
+print('\n\n# Start discrete plots..')
 H = scimpute.df_exp_discretize_log(H)
 # Gene-Gene in M, X, H
 print('\n> Discrete Gene-gene relationship in H')
