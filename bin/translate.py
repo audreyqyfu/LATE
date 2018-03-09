@@ -164,12 +164,7 @@ scimpute.refresh_logfolder(log_dir)
 
 # read data into df1/2 [cells, genes]
 print('>READING DATA..')
-if p.file1_orientation == 'gene_row':
-    df1 = scimpute.read_hd5(p.file1).transpose()
-elif p.file1_orientation == 'cell_row':
-    df1 = scimpute.read_hd5(p.file1)
-else:
-    raise Exception('parameter err: file1_orientation not correctly spelled')
+df1 = scimpute.read_data_into_cell_row(p.file1, p.file1_orientation)
 
 # Data Transformation for H
 print('> DATA TRANSFORMATION..')
