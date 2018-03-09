@@ -59,24 +59,9 @@ file1 = 'saver.hd5'
 name1 = 'test'
 file1_orientation = 'gene_row'  # cell_row/gene_row
 
-
-# # GTEx
-# file1 = home+'/imputation/data/gtex/g5561/\
-# gtex_v7.count.g5561.rpm.log.hd5'
-# name1 = 'GTEx.G5561.RPM.LOG'
-# file1_orientation = 'gene_row'  # cell_row/gene_row
-
-
-# # PBMC
-# file1 = home+'/audrey2/imputation/data/10x_human_pbmc_68k/filtering/rpm/\
-# 10xHumanPbmc.g5561.rpmLog.hd5'
-# name1 = 'PBMC.G5561.RPM.LOG'
-# file1_orientation = 'gene_row'  # cell_row/gene_row
-
-
 # For development usage #
 seed_tf = 3
-test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 20 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 2  # interval on learning curve
@@ -87,76 +72,15 @@ if test_flag == 1:
 # Gene list (data frame index)
 # Gene list
 pair_list = [
-    # # MBM: Cd34, Gypa, Klf1, Sfpi1
-    # [4058, 7496],
-    # [8495, 12871],
-
     # TEST
     [2, 3],
 
-    # PBMC G5561 Non-Linear
-    ['ENSG00000173372',
-    'ENSG00000087086'],
-
-    ['ENSG00000231389',
-    'ENSG00000090382'],
-
-    ['ENSG00000158869',
-    'ENSG00000090382'],
-
-    ['ENSG00000074800',
-    'ENSG00000019582'],
-
-    ['ENSG00000157873',
-    'ENSG00000169583'],
-
-    ['ENSG00000065978',
-    'ENSG00000139193'],
-
-    ['ENSG00000117450',
-    'ENSG00000133112'],
-
-    ['ENSG00000155366',
-    'ENSG00000167996'],
-
-
+    # # PBMC G5561 Non-Linear
+    # ['ENSG00000173372',
+    # 'ENSG00000087086'],
 ]
 
-gene_list = [
-    # # MBM
-    # 4058, 7496, 8495, 12871,
-
-    # # TEST
-    # 2, 3,
-    # 'ENSG00000188976', 'ENSG00000188290',
-
-    # PBMC G5561 Non-Linear
-    'ENSG00000173372',
-    'ENSG00000087086',
-
-    'ENSG00000231389',
-    'ENSG00000090382',
-
-    'ENSG00000158869',
-    'ENSG00000090382',
-
-    'ENSG00000074800',
-    'ENSG00000019582',
-
-    'ENSG00000157873',
-    'ENSG00000169583',
-
-    'ENSG00000065978',
-    'ENSG00000139193',
-
-    'ENSG00000117450',
-    'ENSG00000133112',
-
-    'ENSG00000155366',
-    'ENSG00000167996',
-
-]
-
+gene_list = [x for pair in pair_list for x in pair]
 
 
 # print parameters

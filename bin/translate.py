@@ -25,18 +25,19 @@ import time
 import seaborn as sns
 # sys.path.append('./bin')
 import importlib
+from scipy.sparse import csr_matrix
 import scimpute
 
 
 def evaluate_epoch_step2():
-    print("> Evaluation:")
+    print("> Evaluation: epoch{}".format(epoch))
     epoch_log.append(epoch)
     # MSE: mse2 (H vs M), mse1 (H vs X)
     mse1_train, mse_omega_train = sess.run([mse1, mse_omega],
-                                                       feed_dict={X: df1_train,
+                                                       feed_dict={X: sample_train,
                                                                   pHidden_holder: 1.0, pIn_holder: 1.0})
     mse1_valid, mse_omega_valid = sess.run([mse1, mse_omega],
-                                                       feed_dict={X: df1_valid,
+                                                       feed_dict={X: sample_valid,
                                                                   pHidden_holder: 1.0, pIn_holder: 1.0})
     mse1_batch_vec.append(mse1_train)
     mse1_valid_vec.append(mse1_valid)
@@ -45,20 +46,27 @@ def evaluate_epoch_step2():
     print("mse_omega_train=", round(mse_omega_train, 3), "mse_omage_valid=", round(mse_omega_valid, 3))
     print("mse1_train=", round(mse1_train, 3), "mse1_valid=", round(mse1_valid, 3))
 
+
 def tb_summary():
     print('> Tensorboard summaries')
     tic = time.time()
     # run_metadata = tf.RunMetadata()
     # batch_writer.add_run_metadata(run_metadata, 'epoch%03d' % epoch)
     merged_summary = tf.summary.merge_all()
-    summary_batch = sess.run(merged_summary, feed_dict={X: x_batch,
-                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
-    summary_valid = sess.run(merged_summary, feed_dict={X: df1_valid.values,
-                                                        pIn_holder: 1.0, pHidden_holder: 1.0})
+    summary_batch = sess.run(merged_summary,
+                             feed_dict={
+                                 X: x_batch,
+                                 pIn_holder: 1.0,
+                                 pHidden_holder: 1.0})
+    summary_valid = sess.run(merged_summary,
+                             feed_dict={
+                                 X: sample_valid,
+                                 pIn_holder: 1.0,
+                                 pHidden_holder: 1.0})
     batch_writer.add_summary(summary_batch, epoch)
     valid_writer.add_summary(summary_valid, epoch)
     toc = time.time()
-    print('tb_summary time:', round(toc-tic,2))
+    print('tb_summary time:', round(toc-tic, 2))
 
 
 def learning_curve_mse(skip=1):
@@ -70,6 +78,7 @@ def learning_curve_mse(skip=1):
                                 skip=skip
                             )
 
+
 def learning_curve_mse_omega(skip=1):
     print('> plotting learning curves')
     scimpute.learning_curve(epoch_log, mse_omega_batch_vec, mse_omega_valid_vec,
@@ -79,14 +88,16 @@ def learning_curve_mse_omega(skip=1):
                                 skip=skip
                             )
 
+
 def snapshot():
     print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
     # inference
-    h_train = sess.run(h, feed_dict={X: df1_train.values, pIn_holder: 1, pHidden_holder: 1})
-    h_valid = sess.run(h, feed_dict={X: df1_valid.values, pIn_holder: 1, pHidden_holder: 1})
-    h_input = sess.run(h, feed_dict={X: df1.values, pIn_holder: 1, pHidden_holder: 1})
+    h_train = sess.run(h, feed_dict={X: sample_train, pIn_holder: 1, pHidden_holder: 1})
+    h_valid = sess.run(h, feed_dict={X: sample_valid, pIn_holder: 1, pHidden_holder: 1})
+    h_input = sess.run(h, feed_dict={X: sample_input, pIn_holder: 1, pHidden_holder:
+        1})
     # save pred
-    df_h_input = pd.DataFrame(data=h_input, columns=df1.columns, index=df1.index)
+    df_h_input = pd.DataFrame(data=h_input, columns=columns, index=index)
     scimpute.save_hd5(df_h_input, "{}/imputation.{}.hd5".format(p.stage, p.stage))
     # save model
     save_path = saver.save(sess, log_dir + "/{}.ckpt".format(p.stage))
@@ -98,7 +109,7 @@ def save_bottle_neck_representation():
     print("> save bottle-neck_representation")
     code_bottle_neck_input = sess.run(a_bottle_neck,
                                       feed_dict={
-                                          X: df1.values,
+                                          X: sample_input,
                                           pIn_holder: 1,
                                           pHidden_holder: 1})
     np.save('{}/code_neck_valid.{}.npy'.format(p.stage, p.stage), code_bottle_neck_input)
@@ -143,9 +154,14 @@ def save_weights():
                 sess.run(eval(decoder_bias_name)))
 
 
-print("Usage: python -u <translate.py> <params.py>")
 tic_start = time.time()
 
+# print versions / sys.path
+print('python version:', sys.version)
+print('tf.__version__', tf.__version__)
+print('sys.path', sys.path)
+
+print("Usage: python -u <translate.py> <params.py>")
 if len(sys.argv) == 2:
     param_file = sys.argv[1]
     param_file = param_file.rstrip('.py')
@@ -153,58 +169,51 @@ if len(sys.argv) == 2:
 else:
     raise Exception('cmd err')
 
-# print versions / sys.path
-print('python version:', sys.version)
-print('tf.__version__', tf.__version__)
-print('sys.path', sys.path)
-
 # refresh folder
 log_dir = './{}'.format(p.stage)
 scimpute.refresh_logfolder(log_dir)
 
 # read data into df1/2 [cells, genes]
 print('>READING DATA..')
-df1 = scimpute.read_data_into_cell_row(p.file1, p.file1_orientation)
+df1 = scimpute.read_data_into_cell_row(p.file1, p.file1_orientation) #todo removedf1
 
 # Data Transformation for H
 print('> DATA TRANSFORMATION..')
-df1 = scimpute.df_transformation(df1.transpose(),
-                                 transformation=p.data_transformation).transpose()  # [genes, cells] inside function
-
+df1 = scimpute.df_transformation(
+    df1.transpose(),
+    transformation=p.data_transformation).transpose() # [genes, cells] in df_trans()
 
 # Test or not
 if p.test_flag > 0:
     print('in test mode')
     df1 = df1.ix[:p.m, :p.n]
 
+input_matrix = csr_matrix(df1)  # todo: directly read into csr, get rid of df1
+columns = df1.columns
+index = df1.index
+df1 = None
+
+
 # Summary of data
 print("input_name:", p.name1)
-print("input_df:\n", df1.ix[0:3, 0:2], "\n")
-m, n = df1.shape  # m: n_cells; n: n_genes
-print('DF1: {} cells, {} genes\n'.format(df1.shape[0], df1.shape[1]))
-
+print("input_df:\n", input_matrix[:20, :4].todense(), "\n")
+m, n = input_matrix.shape  # m: n_cells; n: n_genes
+print('INPUT: {} cells, {} genes\n'.format(m, n))
 
 # split data and save indexes
-df1_train, df1_valid, df1_test = scimpute.split_df(df1,
-                                                   a=p.a, b=p.b, c=p.c)
+input_train, input_valid, input_test, train_idx, valid_idx, test_idx = \
+    scimpute.split__csr_matrix(input_matrix, a=p.a, b=p.b, c=p.c)
 
-df1_train.to_csv('{}/df1_train.{}_index.csv'.format(p.stage, p.stage),
-                 columns=[], header=False)
-df1_valid.to_csv('{}/df1_valid.{}_index.csv'.format(p.stage, p.stage),
-                 columns=[], header=False)
-df1_test.to_csv('{}/df1_test.{}_index.csv'.format(p.stage, p.stage),
-                columns=[], header=False)
+np.savetxt('{}/train.{}_index.txt'.format(p.stage, p.stage), train_idx, fmt='%s')
+np.savetxt('{}/valid.{}_index.txt'.format(p.stage, p.stage), valid_idx, fmt='%s')
+np.savetxt('{}/test.{}_index.txt'.format(p.stage, p.stage), test_idx, fmt='%s')
 
-
-# parameters
-n_input = n
-# todo: print_parameters()
 
 # Start model
 tf.reset_default_graph()
 
 # define placeholders and variables
-X = tf.placeholder(tf.float32, [None, n_input], name='X_input')  # input
+X = tf.placeholder(tf.float32, [None, n], name='X_input')  # input
 pIn_holder = tf.placeholder(tf.float32, name='p.pIn')
 pHidden_holder = tf.placeholder(tf.float32, name='p.pHidden')
 
@@ -295,7 +304,6 @@ elif p.mse_mode == 'mse':
 else:
     raise Exception('mse_mode spelled wrong')
 
-
 # start session
 sess = tf.Session()
 
@@ -317,12 +325,26 @@ valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 
 # prep mini-batch, and reporter vectors
 epoch = 0
-num_batch = int(math.floor(len(df1_train) // p.batch_size))  # floor
+num_batch = int(math.floor(len(train_idx) // p.batch_size))  # floor
 epoch_log = []
 mse_omega_batch_vec, mse_omega_valid_vec, mse_omega_train_vec = [], [], []
 mse1_batch_vec, mse1_valid_vec = [], []  # mse1 = MSE(X, h)
 mse1j_batch_vec, mse1j_valid_vec = [], []  # mse1j = MSE(X, h), for genej, nz_cells
 
+# todo: sample of training and valid
+sample_size = 1000
+
+sample_train_idx = np.random.choice(range(len(train_idx)),
+                                    min(sample_size, len(train_idx)))
+sample_train = input_train[sample_train_idx, :].todense()
+
+sample_valid_idx = np.random.choice(range(len(valid_idx)),
+                                    min(sample_size, len(valid_idx)))
+sample_valid = input_valid[sample_valid_idx, :].todense()
+
+sample_input_idx = np.random.choice(range(m),
+                                    min(sample_size, m))
+sample_input = input_matrix[sample_input_idx, :].todense()
 
 # evaluate epoch0
 evaluate_epoch_step2()
@@ -330,14 +352,14 @@ evaluate_epoch_step2()
 # Outer loop (epochs)
 for epoch in range(1, p.max_training_epochs+1):
     tic_cpu, tic_wall = time.clock(), time.time()
-    ridx_full = np.random.choice(len(df1_train), len(df1_train), replace=False)
-
+    ridx_full = np.random.choice(len(train_idx), len(train_idx), replace=False)
     # inner loop (mini-batches)
     for i in range(num_batch):
         # x_batch
         indices = np.arange(p.batch_size * i, p.batch_size*(i+1))
         ridx_batch = ridx_full[indices]
-        x_batch = df1_train.ix[ridx_batch, :]
+        # x_batch = df1_train.ix[ridx_batch, :]
+        x_batch = input_train[ridx_batch, :].todense()
 
         sess.run(trainer, feed_dict={X: x_batch,
                                      pIn_holder: p.pIn, pHidden_holder: p.pHidden})
@@ -347,37 +369,31 @@ for epoch in range(1, p.max_training_epochs+1):
     # report per epoch #
     if (epoch == 1) or (epoch % p.display_step == 0):
         tic_log = time.time()
-
         # overview
         print('epoch: ', epoch, '; num mini-batch:', i+1)
-
         # print training time
         print("\n#Epoch ", epoch, " took: ",
               round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
               round(toc_wall - tic_wall, 2), "Wall seconds")
-
         # debug
         # print('d_w1', sess.run(d_w1[1, 0:4]))  # verified when GradDescent used
-
         # log mse1 (H vs X)
-        mse1_batch, mse_omega_batch, h_batch = sess.run([mse1, mse_omega, h],
-                              feed_dict={X: x_batch,
-                                               pHidden_holder: 1.0, pIn_holder: 1.0})
-        mse1_valid, mse_omega_valid, h_valid = sess.run([mse1, mse_omega, h],
-                                          feed_dict={X: df1_valid,
-                                               pHidden_holder: 1.0, pIn_holder: 1.0})
+        mse1_batch, mse_omega_batch, h_batch = sess.run(
+            [mse1, mse_omega, h],
+            feed_dict={X: x_batch, pHidden_holder: 1.0, pIn_holder: 1.0})
+        mse1_valid, mse_omega_valid, h_valid = sess.run(
+            [mse1, mse_omega, h],
+            feed_dict={X: sample_valid, pHidden_holder: 1.0, pIn_holder: 1.0})
         mse1_batch_vec.append(mse1_batch)
         mse1_valid_vec.append(mse1_valid)
         mse_omega_batch_vec.append(mse_omega_batch)
         mse_omega_valid_vec.append(mse_omega_valid)
-
-        toc_log = time.time()
         epoch_log.append(epoch)
+        toc_log = time.time()
         print('mse_omega_batch:{};  mse_omage_valid: {}'.
               format(mse_omega_batch, mse_omega_valid))
         print('mse1_batch:', mse1_batch, '; mse1_valid:', mse1_valid)
-        print('log time for each epoch:', round(toc_log - tic_log, 1))
-        print()
+        print('log time for each epoch: {}\n'.format(round(toc_log - tic_log, 1)))
 
     # report and save sess per observation interval
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
