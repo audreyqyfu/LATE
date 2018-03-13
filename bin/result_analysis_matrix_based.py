@@ -13,7 +13,7 @@ import importlib
 import scimpute
 
 # READ CMD
-print('reads H.hd5, X.hd5 and M.hd5, then analysis the result')
+print('reads Y.hd5, X.hd5 and G.hd5, then analysis the result')
 print('usage: python -u result_analysis.py params.py')
 
 if len(sys.argv) == 2:
@@ -26,19 +26,19 @@ else:
 
 # READ DATA
 print("> READ DATA..")
-H = scimpute.read_data_into_cell_row(p.file_h, p.file_h_ori)
+Y = scimpute.read_data_into_cell_row(p.file_h, p.file_h_ori)
 X = scimpute.read_data_into_cell_row(p.file_x, p.file_x_ori)
-M = scimpute.read_data_into_cell_row(p.file_m, p.file_m_ori)
+G = scimpute.read_data_into_cell_row(p.file_m, p.file_m_ori)
 
-# Data Transformation for H
+# Data Transformation for Y
 print('> DATA TRANSFORMATION..')
-H = scimpute.df_transformation(H.transpose(), transformation=p.file_h_transformation).transpose()
+Y = scimpute.df_transformation(Y.transpose(), transformation=p.file_h_transformation).transpose()
 X = scimpute.df_transformation(X.transpose(), transformation=p.file_x_transformation).transpose()
-M = scimpute.df_transformation(M.transpose(), transformation=p.file_m_transformation).transpose()
+G = scimpute.df_transformation(G.transpose(), transformation=p.file_m_transformation).transpose()
 
-# # for MAGIC, discard missing genes from H
-# X = X.loc[:, H.columns]
-# M = M.loc[:, H.columns]
+# for MAGIC, discard missing genes from Y
+X = X.loc[Y.index, Y.columns]
+G = G.loc[Y.index, Y.columns]
 
 # TEST MODE OR NOT
 test_flag = 0
@@ -46,94 +46,94 @@ m = 100
 n = 200
 if test_flag > 0:
     print('in test mode')
-    H = H.ix[0:m, 0:n]
-    M = M.ix[0:m, 0:n]
+    Y = Y.ix[0:m, 0:n]
+    G = G.ix[0:m, 0:n]
     X = X.ix[0:m, 0:n]
 
 # INPUT SUMMARY
 print('\ninside this code, matrices are supposed to be transformed into cell_row')
-print('H:', p.file_h, p.file_h_ori, p.file_h_transformation, '\n', H.ix[0:3, 0:2])
-print('M:', p.file_m, p.file_m_ori, p.file_m_transformation, '\n', M.ix[0:3, 0:2])
+print('Y:', p.file_h, p.file_h_ori, p.file_h_transformation, '\n', Y.ix[0:3, 0:2])
+print('G:', p.file_m, p.file_m_ori, p.file_m_transformation, '\n', G.ix[0:3, 0:2])
 print('X:', p.file_x, p.file_x_ori, p.file_x_transformation, '\n', X.ix[0:3, 0:2])
-print('H.shape', H.shape)
-print('M.shape', M.shape)
+print('Y.shape', Y.shape)
+print('G.shape', G.shape)
 print('X.shape', X.shape)
 
-# HIST OF H
-scimpute.hist_df(H, title='H({})'.format(p.name_h), dir=p.tag)
-scimpute.hist_df(M, title='M({})'.format(p.name_m), dir=p.tag)
+# HIST OF Y
+scimpute.hist_df(Y, title='Y({})'.format(p.name_h), dir=p.tag)
+scimpute.hist_df(G, title='G({})'.format(p.name_m), dir=p.tag)
 scimpute.hist_df(X, title='X({})'.format(p.name_x), dir=p.tag)
 
 
 # HIST CELL/GENE CORR
-print('\n> Corr between X and H')
-print('GeneCorr: X shape: ', X.shape, 'H shape: ', H.shape)
-hist = scimpute.hist_2matrix_corr(X.values, H.values,
-                                  title="Hist nz1-Gene-Corr (X vs H)\n"+p.name_x+'\n'+p.name_h,
+print('\n> Corr between X and Y')
+print('GeneCorr: X shape: ', X.shape, 'Y shape: ', Y.shape)
+hist = scimpute.hist_2matrix_corr(X.values, Y.values,
+                                  title="Hist nz1-Gene-Corr (X vs Y)\n"+p.name_x+'\n'+p.name_h,
                                   dir=p.tag, mode='column-wise', nz_mode='first'
                                   )
 #
-# print('CellCorr: X shape: ', X.shape, 'H shape: ', H.shape)
-# hist = scimpute.hist_2matrix_corr(X.values, H.values,
-#                                   title="Hist nz1-Cell-Corr (X vs H)\n"+p.name_x+'\n'+p.name_h,
+# print('CellCorr: X shape: ', X.shape, 'Y shape: ', Y.shape)
+# hist = scimpute.hist_2matrix_corr(X.values, Y.values,
+#                                   title="Hist nz1-Cell-Corr (X vs Y)\n"+p.name_x+'\n'+p.name_h,
 #                                   dir=p.tag, mode='row-wise', nz_mode='first'
 #                                   )
 
 
-print('\n> Corr between M and H')
-hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                                  title="Hist Gene-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+print('\n> Corr between G and Y')
+hist = scimpute.hist_2matrix_corr(G.values, Y.values,
+                                  title="Hist Gene-Corr (G vs Y)\n"+p.name_m+'\n'+p.name_h,
                                   dir=p.tag, mode='column-wise', nz_mode='ignore'
                                   )
 
-# hist = scimpute.hist_2matrix_corr(M.values, H.values,
-#                                   title="Hist Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+# hist = scimpute.hist_2matrix_corr(G.values, Y.values,
+#                                   title="Hist Cell-Corr (G vs Y)\n"+p.name_m+'\n'+p.name_h,
 #                                   dir=p.tag, mode='row-wise', nz_mode='ignore'
 #                                   )
 
-hist = scimpute.hist_2matrix_corr(M.values, H.values,
-                                  title="Hist nz1-Gene-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+hist = scimpute.hist_2matrix_corr(G.values, Y.values,
+                                  title="Hist nz1-Gene-Corr (G vs Y)\n"+p.name_m+'\n'+p.name_h,
                                   dir=p.tag, mode='column-wise', nz_mode='first'
                                   )
 #
-# hist = scimpute.hist_2matrix_corr(M.values, H.values,
-#                                   title="Hist nz1-Cell-Corr (M vs H)\n"+p.name_m+'\n'+p.name_h,
+# hist = scimpute.hist_2matrix_corr(G.values, Y.values,
+#                                   title="Hist nz1-Cell-Corr (G vs Y)\n"+p.name_m+'\n'+p.name_h,
 #                                   dir=p.tag, mode='row-wise', nz_mode='first'
 #                                   )
 
 
 # MSE CALCULATION
 print('\n> MSE Calculation')
-max_h, min_h = scimpute.max_min_element_in_arrs([H.values])
-print('Max in H is {}, Min in H is{}'.format(max_h, min_h))
-max_m, min_m = scimpute.max_min_element_in_arrs([M.values])
-print('Max in M is {}, Min in M is{}'.format(max_m, min_m))
+max_h, min_h = scimpute.max_min_element_in_arrs([Y.values])
+print('Max in Y is {}, Min in Y is{}'.format(max_h, min_h))
+max_m, min_m = scimpute.max_min_element_in_arrs([G.values])
+print('Max in G is {}, Min in G is{}'.format(max_m, min_m))
 
-mse1_omega = scimpute.mse_omega(H, X)
+mse1_omega = scimpute.mse_omega(Y, X)
 mse1_omega = round(mse1_omega, 7)
-print('mse1_omega between H and X: ', mse1_omega)
+print('mse1_omega between Y and X: ', mse1_omega)
 
-mse2_omega = scimpute.mse_omega(H, M)
+mse2_omega = scimpute.mse_omega(Y, G)
 mse2_omega = round(mse2_omega, 7)
-print('mse2_omega between H and M: ', mse2_omega)
+print('mse2_omega between Y and G: ', mse2_omega)
 
-mse2 = scimpute.mse(H, M)
+mse2 = scimpute.mse(Y, G)
 mse2 = round(mse2, 7)
-print('MSE2 between H and M: ', mse2)
+print('MSE2 between Y and G: ', mse2)
 
 
-#  VISUALIZATION OF DFS, todo clustering based on H
+#  VISUALIZATION OF DFS, todo clustering based on Y
 print('\n> Visualization of dfs')
-max, min = scimpute.max_min_element_in_arrs([H.values, M.values, X.values])
-scimpute.heatmap_vis(H.values,
-                     title='H ({})'.format(p.name_h),
-                     xlab='genes\nMSE1_OMEGA(H vs X)={}'.format(mse1_omega),
+max, min = scimpute.max_min_element_in_arrs([Y.values, G.values, X.values])
+scimpute.heatmap_vis(Y.values,
+                     title='Y ({})'.format(p.name_h),
+                     xlab='genes\nMSE1_OMEGA(Y vs X)={}'.format(mse1_omega),
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
 
-scimpute.heatmap_vis(M.values,
-                     title='M ({})'.format(p.name_m),
-                     xlab='genes\nMSE2(H vs M)={}'.format(mse2),
+scimpute.heatmap_vis(G.values,
+                     title='G ({})'.format(p.name_m),
+                     xlab='genes\nMSE2(Y vs G)={}'.format(mse2),
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
 
@@ -144,37 +144,37 @@ scimpute.heatmap_vis(X.values,
                      dir=p.tag)
 
 
-# Gene-Gene in M, X, H
-print('\n> Gene-gene relationship (H, X, M), before/after inference')
+# Gene-Gene in G, X, Y
+print('\n> Gene-gene relationship (Y, X, G), before/after inference')
 gene_pair_dir = p.tag+'/pairs'
 List = p.pair_list
-scimpute.gene_pair_plot(H, list=List, tag='(H) '+p.tag, dir=gene_pair_dir)
+scimpute.gene_pair_plot(Y, list=List, tag='(Y) '+p.tag, dir=gene_pair_dir)
 scimpute.gene_pair_plot(X, list=List, tag='(X) '+p.tag, dir=gene_pair_dir)
-scimpute.gene_pair_plot(M, list=List, tag='(M) '+p.tag, dir=gene_pair_dir)
+scimpute.gene_pair_plot(G, list=List, tag='(G) '+p.tag, dir=gene_pair_dir)
 
 
-# M vs H, M vs X
-print("\n> M vs H, M vs X")
+# G vs Y, G vs X
+print("\n> G vs Y, G vs X")
 gene_dir = p.tag+'/genes'
 for j in p.gene_list:
     try:
         print('for ', j)
-        H_j = H.ix[:, j]
-        M_j = M.ix[:, j]
+        Y_j = Y.ix[:, j]
+        M_j = G.ix[:, j]
         X_j = X.ix[:, j]
     except KeyError:
         print('KeyError: the gene index does not exist')
         continue
 
-    scimpute.scatterplot2(M_j, H_j, range='same',
-                          title=str(str(j) + ' (M_vs_H) ' + p.tag),
-                          xlabel='Ground Truth (M)',
-                          ylabel='Prediction (H)',
+    scimpute.scatterplot2(M_j, Y_j, range='same',
+                          title=str(str(j) + ' (M_vs_Y) ' + p.tag),
+                          xlabel='Ground Truth (G)',
+                          ylabel='Prediction (Y)',
                           dir=gene_dir
                           )
     scimpute.scatterplot2(M_j, X_j, range='same',
                           title=str(str(j) + ' (M_vs_X) ' + p.tag),
-                          xlabel='Ground Truth (M)',
+                          xlabel='Ground Truth (G)',
                           ylabel='Input (X)',
                           dir=gene_dir
                          )
@@ -182,44 +182,44 @@ for j in p.gene_list:
 
 # discretized plots
 print('\n\n# Start discrete plots..')
-H = scimpute.df_exp_discretize_log(H)
-# Gene-Gene in M, X, H
-print('\n> Discrete Gene-gene relationship in H')
+Y = scimpute.df_exp_discretize_log(Y)
+# Gene-Gene in G, X, Y
+print('\n> Discrete Gene-gene relationship in Y')
 gene_pair_dir = p.tag+'/pairs_discrete'
 List = p.pair_list
-scimpute.gene_pair_plot(H, list=List, tag='(H_discrete) '+p.tag, dir=gene_pair_dir)
+scimpute.gene_pair_plot(Y, list=List, tag='(Y_discrete) '+p.tag, dir=gene_pair_dir)
 
-# M vs H, M vs X
-print("\n> Discrete H vs M")
+# G vs Y, G vs X
+print("\n> Discrete Y vs G")
 gene_dir = p.tag+'/genes_discrete'
 for j in p.gene_list:
     try:
         print('for ', j)
-        H_j = H.ix[:, j]
-        M_j = M.ix[:, j]
+        Y_j = Y.ix[:, j]
+        M_j = G.ix[:, j]
         X_j = X.ix[:, j]
     except KeyError:
         print('KeyError: the gene index does not exist')
         continue
 
-    scimpute.scatterplot2(M_j, H_j, range='same',
-                          title=str(str(j) + ' (M_vs_H_discrete) ' + p.tag),
-                          xlabel='Ground Truth (M)',
-                          ylabel='Prediction (H)',
+    scimpute.scatterplot2(M_j, Y_j, range='same',
+                          title=str(str(j) + ' (M_vs_Y_discrete) ' + p.tag),
+                          xlabel='Ground Truth (G)',
+                          ylabel='Prediction (Y)',
                           dir=gene_dir
                           )
     scimpute.scatterplot2(M_j, X_j, range='same',
                           title=str(str(j) + ' (M_vs_X_discrete) ' + p.tag),
-                          xlabel='Ground Truth (M)',
+                          xlabel='Ground Truth (G)',
                           ylabel='Input (X)',
                           dir=gene_dir
                          )
 
 # # gene MSE
 # j = 0
-# input_j = H.ix[:, j:j+1].values
+# input_j = Y.ix[:, j:j+1].values
 # pred_j = h.ix[:, j:j+1].values
-# groundTruth_j = M.ix[:, j:j+1].values
+# groundTruth_j = G.ix[:, j:j+1].values
 #
 # mse_j_input = ((pred_j - input_j) ** 2).mean()
 # mse_j_groundTruth = ((pred_j - groundTruth_j) ** 2).mean()
@@ -231,13 +231,13 @@ for j in p.gene_list:
 
 
 # # Factors Affecting Gene Prediction todo: validate
-# print('Mean and Var are calculated from H')
-# gene_corr = scimpute.gene_corr_list(M.values, H.values)
-# gene_mse = scimpute.gene_mse_list(M.values, H.values)
-# gene_mean_expression = M.sum(axis=0).values / M.shape[1]  # sum for each column
-# gene_nz_rate = scimpute.gene_nz_rate_list(M.values)
-# gene_var = scimpute.gene_var_list(M.values)
-# gene_nzvar = scimpute.gene_nzvar_list(M.values)
+# print('Mean and Var are calculated from Y')
+# gene_corr = scimpute.gene_corr_list(G.values, Y.values)
+# gene_mse = scimpute.gene_mse_list(G.values, Y.values)
+# gene_mean_expression = G.sum(axis=0).values / G.shape[1]  # sum for each column
+# gene_nz_rate = scimpute.gene_nz_rate_list(G.values)
+# gene_var = scimpute.gene_var_list(G.values)
+# gene_nzvar = scimpute.gene_nzvar_list(G.values)
 #
 # scimpute.density_plot(gene_mean_expression, gene_mse,
 #                       title='Factors, expression vs mse, {}'.format('test'),
