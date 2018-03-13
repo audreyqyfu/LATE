@@ -116,6 +116,7 @@ for l_tmp in range(1, l+1):
 print('learning_rate:', learning_rate)
 print('reg_coef:', reg_coef)
 print('batch_size:', batch_size)
+print('sample_zie: ', sample_size)
 print('data split: [{}/{}/{}]'.format(a,b,c) )
 print('pIn:', pIn)
 print('pHidden:', pHidden)
