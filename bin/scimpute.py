@@ -8,6 +8,9 @@ import pandas as pd
 import numpy as np
 from scipy.stats.stats import pearsonr
 import tensorflow as tf
+import collections
+import scipy.sparse as sp_sparse
+import tables
 
 
 # DATA I/O #
@@ -56,7 +59,69 @@ def read_hd5(in_name):
     return df
 
 
-def read_data_into_cell_row(fname, orientation):
+GeneBCMatrix = collections.namedtuple(
+    'GeneBCMatrix',
+    ['gene_ids', 'gene_names', 'barcodes', 'matrix'])
+
+
+def read_sparse_matrix_from_h5(filename, genome, file_ori):
+    '''
+    for 10x_genomics h5 file:
+    https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
+    
+    :return: cell_row sparse matrix
+    :param filename: 
+    :param genome: 
+    :return: 
+    '''
+    print('reading {} {}'.format(filename, genome))
+    with tables.open_file(filename, 'r') as f:
+        try:
+            dsets = {}
+            for node in f.walk_nodes('/' + genome, 'Array'):
+                dsets[node.name] = node.read()
+            matrix = sp_sparse.csc_matrix(
+                (dsets['data'], dsets['indices'], dsets['indptr']),
+                shape=dsets['shape'])
+            if file_ori == 'cell_row':
+                pass
+            elif file_ori == 'gene_row':
+                matrix = matrix.transpose()
+            else:
+                raise Exception('file orientation {} not recognized'.format(file_ori))
+            return GeneBCMatrix(dsets['genes'], dsets['gene_names'],
+                                dsets['barcodes'], matrix)
+        except tables.NoSuchNodeError:
+            raise Exception("Genome %s does not exist in this file." % genome)
+        except KeyError:
+            raise Exception("File is missing one or more required datasets.")
+
+def save_sparse_matrix_to_h5(gbm, filename, genome):
+    '''
+    for 10x_genomics h5 file:
+    https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
+
+    :return: 
+    :param filename: 
+    :param genome: 
+    :return: 
+    '''
+    flt = tables.Filters(complevel=1)
+    with tables.open_file(filename, 'w', filters=flt) as f:
+        try:
+            group = f.create_group(f.root, genome)
+            f.create_carray(group, 'genes', obj=gbm.gene_ids)
+            f.create_carray(group, 'gene_names', obj=gbm.gene_names)
+            f.create_carray(group, 'barcodes', obj=gbm.barcodes)
+            f.create_carray(group, 'data', obj=gbm.matrix.data)
+            f.create_carray(group, 'indices', obj=gbm.matrix.indices)
+            f.create_carray(group, 'indptr', obj=gbm.matrix.indptr)
+            f.create_carray(group, 'shape', obj=gbm.matrix.shape)
+        except:
+            raise Exception("Failed to write H5 file.")
+
+
+def read_data_into_cell_row(fname, orientation, genome='mm10'):
     '''
     read hd5 or csv, into cell_row format
     :param fname: 
@@ -69,6 +134,9 @@ def read_data_into_cell_row(fname, orientation):
         df_tmp = read_csv(fname)
     elif fname.endswith('csv.gz'):
         df_tmp = read_csv(fname)
+    elif fname.endswith('h5'):  # not hd5
+        df_tmp = read_sparse_matrix_from_h5(fname, genome)
+        print('sparse_matrix have been read')
     else:
         raise Exception('file name not ending in hd5 nor csv, not recognized')
 
@@ -81,6 +149,8 @@ def read_data_into_cell_row(fname, orientation):
 
     print(fname, 'read into:', df_tmp.shape, '(as cell_row df)')
     return df_tmp
+
+
 
 
 # PRE-PROCESSING OF DATA FRAMES #
@@ -160,7 +230,7 @@ def df_exp_discretize_log(df, pseudocount=1):
 
 def df_transformation(df, transformation='as_is'):
     '''
-    data_formatting
+    data_transformation
     df not copied
     :param df: [genes, cells]
     :param format: as_is, log, rpm_log, exp_rpm_log
@@ -179,6 +249,29 @@ def df_transformation(df, transformation='as_is'):
 
     print('data formatting: ', transformation)
     return df
+
+
+def sparse_matrix_transformation(csr_matrix, transformation='log'):
+    '''
+    data_transformation
+    df not copied
+    :param csr_matrix: 
+    :param transformation: as_is, log
+    :return: 
+    '''
+    if transformation == 'as_is':
+        pass  # do nothing
+    elif transformation == 'log':
+        csr_matrix = csr_matrix.log1p()
+    elif transformation == 'rpm_log':
+        raise Exception('rpm_log not implemented yet')
+    elif transformation == 'exp_rpm_log':
+        raise Exception('exp_rpm_log not implemented yet')
+    else:
+        raise Exception('format {} not recognized'.format(transformation))
+
+    print('data tranformation: ', transformation)
+    return csr_matrix
 
 
 def mask_df(df, nz_goal):

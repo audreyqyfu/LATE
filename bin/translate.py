@@ -21,30 +21,31 @@ import matplotlib.pyplot as plt
 from scipy.stats.stats import pearsonr
 import math
 import os
+import psutil
 import time
 import seaborn as sns
 # sys.path.append('./bin')
 import importlib
 from scipy.sparse import csr_matrix
 import scimpute
+import gc  # todo may not work
 
 
 def evaluate_epoch_step2():
     print("> Evaluation: epoch{}".format(epoch))
     epoch_log.append(epoch)
-    # MSE: mse2 (H vs M), mse1 (H vs X)
-    mse1_train, mse_omega_train = sess.run([mse1, mse_omega],
-                                                       feed_dict={X: sample_train,
-                                                                  pHidden_holder: 1.0, pIn_holder: 1.0})
-    mse1_valid, mse_omega_valid = sess.run([mse1, mse_omega],
-                                                       feed_dict={X: sample_valid,
-                                                                  pHidden_holder: 1.0, pIn_holder: 1.0})
-    mse1_batch_vec.append(mse1_train)
-    mse1_valid_vec.append(mse1_valid)
-    mse_omega_batch_vec.append(mse_omega_train)
-    mse_omega_valid_vec.append(mse_omega_valid)
-    print("mse_omega_train=", round(mse_omega_train, 3), "mse_omage_valid=", round(mse_omega_valid, 3))
-    print("mse1_train=", round(mse1_train, 3), "mse1_valid=", round(mse1_valid, 3))
+    mse_train, mse_nz_train = sess.run([mse, mse_nz],
+                                       feed_dict={X: sample_train,
+                                                  pHidden_holder: 1.0, pIn_holder: 1.0})
+    mse_valid, mse_nz_valid = sess.run([mse, mse_nz],
+                                       feed_dict={X: sample_valid,
+                                                  pHidden_holder: 1.0, pIn_holder: 1.0})
+    mse_batch_vec.append(mse_train)
+    mse_valid_vec.append(mse_valid)
+    mse_nz_batch_vec.append(mse_nz_train)
+    mse_nz_valid_vec.append(mse_nz_valid)
+    print("mse_nz_train=", round(mse_nz_train, 3), "mse_omage_valid=", round(mse_nz_valid, 3))
+    print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
 
 
 def tb_summary():
@@ -71,19 +72,19 @@ def tb_summary():
 
 def learning_curve_mse(skip=1):
     print('> plotting learning curves')
-    scimpute.learning_curve(epoch_log, mse1_batch_vec, mse1_valid_vec,
+    scimpute.learning_curve(epoch_log, mse_batch_vec, mse_valid_vec,
                                 title="Learning Curve MSE.{}".format(p.stage),
-                                ylabel='MSE (X vs H, nz)',
+                                ylabel='MSE (X vs Y, nz)',
                                 dir=p.stage,
                                 skip=skip
                             )
 
 
-def learning_curve_mse_omega(skip=1):
+def learning_curve_mse_nz(skip=1):
     print('> plotting learning curves')
-    scimpute.learning_curve(epoch_log, mse_omega_batch_vec, mse_omega_valid_vec,
-                                title="Learning Curve MSE_OMEGA.{}".format(p.stage),
-                                ylabel='MSE_OMEGA (X vs H, nz)',
+    scimpute.learning_curve(epoch_log, mse_nz_batch_vec, mse_nz_valid_vec,
+                                title="Learning Curve MSE_NZ.{}".format(p.stage),
+                                ylabel='MSE_NZ (X vs Y, nz)',
                                 dir=p.stage,
                                 skip=skip
                             )
@@ -92,17 +93,21 @@ def learning_curve_mse_omega(skip=1):
 def snapshot():
     print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
     # inference
-    h_train = sess.run(h, feed_dict={X: sample_train, pIn_holder: 1, pHidden_holder: 1})
-    h_valid = sess.run(h, feed_dict={X: sample_valid, pIn_holder: 1, pHidden_holder: 1})
-    h_input = sess.run(h, feed_dict={X: sample_input, pIn_holder: 1, pHidden_holder:
-        1})
+    Y_train_arr = sess.run(h, feed_dict={X: sample_train,
+                                     pIn_holder: 1, pHidden_holder: 1})
+    Y_valid_arr = sess.run(h, feed_dict={X: sample_valid,
+                                     pIn_holder: 1, pHidden_holder: 1})
+    Y_input_arr = sess.run(h, feed_dict={X: sample_input,
+                                     pIn_holder: 1, pHidden_holder: 1})
     # save pred
-    df_h_input = pd.DataFrame(data=h_input, columns=columns, index=index)
-    scimpute.save_hd5(df_h_input, "{}/imputation.{}.hd5".format(p.stage, p.stage))
+    Y_input_df = pd.DataFrame(data=Y_input_arr,
+                              columns=gene_ids,
+                              index=sample_input_cell_ids)
+    scimpute.save_hd5(Y_input_df, "{}/imputation.{}.hd5".format(p.stage, p.stage))
     # save model
     save_path = saver.save(sess, log_dir + "/{}.ckpt".format(p.stage))
     print("Model saved in: %s" % save_path)
-    return (h_train, h_valid, h_input)
+    return (Y_train_arr, Y_valid_arr, Y_input_arr)
 
 
 def save_bottle_neck_representation():
@@ -154,6 +159,12 @@ def save_weights():
                 sess.run(eval(decoder_bias_name)))
 
 
+def usage():
+    process = psutil.Process(os.getpid())
+    return process.memory_info()[0] / float(2 ** 20)
+
+
+
 tic_start = time.time()
 
 # print versions / sys.path
@@ -173,41 +184,120 @@ else:
 log_dir = './{}'.format(p.stage)
 scimpute.refresh_logfolder(log_dir)
 
-# read data into df1/2 [cells, genes]
+# READ DATA into cell_row
 print('>READING DATA..')
-df1 = scimpute.read_data_into_cell_row(p.file1, p.file1_orientation) #todo removedf1
+print('RAM usage before reading data: {} M'.format(usage()))
+if p.file1.endswith('h5'):
+    # for 10x genomics large h5 files
+    input_obj = scimpute.read_sparse_matrix_from_h5(p.file1, 'mm10', p.file1_orientation)
+    # gene_be_matrix.matrix = input_obj.matrix.log1p()
+    input_matrix = input_obj.matrix
+    gene_ids = input_obj.gene_ids
+    cell_ids = input_obj.barcodes
+    print('RAM usage after reading sparse matrix: {} M'.format(usage()))
+    gc.collect()
 
-# Data Transformation for H
-print('> DATA TRANSFORMATION..')
-df1 = scimpute.df_transformation(
-    df1.transpose(),
-    transformation=p.data_transformation).transpose() # [genes, cells] in df_trans()
+    # Data Transformation
+    print('> DATA TRANSFORMATION..')
+    input_matrix = scimpute.sparse_matrix_transformation(input_matrix,
+                                                         p.data_transformation)
+    print('RAM usage after {} transformation: {} M'.format(p.data_transformation,
+                                                           usage()))
 
-# Test or not
-if p.test_flag > 0:
-    print('in test mode')
-    df1 = df1.ix[:p.m, :p.n]
+    # Test or not
+    if p.test_flag > 0:
+        print('in test mode')
+        input_matrix = input_matrix[:p.m, :p.n]
+        gene_ids = gene_ids[:p.n]
+        cell_ids = cell_ids[:p.m]
+        gc.collect()
 
-input_matrix = csr_matrix(df1)  # todo: directly read into csr, get rid of df1
-columns = df1.columns
-index = df1.index
-df1 = None
+else:
+    # For smaller files (hd5, csv, csv.gz)
+    df1 = scimpute.read_data_into_cell_row(p.file1, p.file1_orientation)
+    print('RAM usage after reading df1: {} M'.format(usage()))
+
+    # Data Transformation
+    print('> DATA TRANSFORMATION..')
+    df1 = scimpute.df_transformation(
+        df1.transpose(),
+        transformation=p.data_transformation).transpose() # [genes, cells] in df_trans()
+    print('pandas df1 mem usage: ')
+    df1.info(memory_usage='deep')
+
+    # Test or not
+    if p.test_flag > 0:
+        print('in test mode')
+        df1 = df1.ix[:p.m, :p.n]
+        gc.collect()
+
+    # To sparse
+    input_matrix = csr_matrix(df1)  # todo: directly read into csr, get rid of df1
+    gene_ids = df1.columns
+    cell_ids = df1.index
+    print('RAM usage before deleting df1: {} M'.format(usage()))
+    del(df1)
+    gc.collect()  # working on mac
+    print('RAM usage after deleting df1: {} M'.format(usage()))
 
 
 # Summary of data
 print("input_name:", p.name1)
 print("input_df:\n", input_matrix[:20, :4].todense(), "\n")
 m, n = input_matrix.shape  # m: n_cells; n: n_genes
-print('INPUT: {} cells, {} genes\n'.format(m, n))
+print('input_matrix: {} cells, {} genes\n'.format(m, n))
 
 # split data and save indexes
 input_train, input_valid, input_test, train_idx, valid_idx, test_idx = \
     scimpute.split__csr_matrix(input_matrix, a=p.a, b=p.b, c=p.c)
 
-np.savetxt('{}/train.{}_index.txt'.format(p.stage, p.stage), train_idx, fmt='%s')
-np.savetxt('{}/valid.{}_index.txt'.format(p.stage, p.stage), valid_idx, fmt='%s')
-np.savetxt('{}/test.{}_index.txt'.format(p.stage, p.stage), test_idx, fmt='%s')
+cell_ids_train = cell_ids[train_idx]
+cell_ids_valid = cell_ids[valid_idx]
+cell_ids_test = cell_ids[test_idx]
 
+np.savetxt('{}/train.{}_index.txt'.format(p.stage, p.stage), cell_ids_train,
+           fmt='%s')
+np.savetxt('{}/valid.{}_index.txt'.format(p.stage, p.stage), cell_ids_valid,
+           fmt='%s')
+np.savetxt('{}/test.{}_index.txt'.format(p.stage, p.stage), cell_ids_test, fmt='%s')
+
+# todo: for backward support for older parameter files only
+try:
+    p.sample_size
+    sample_size = p.sample_size
+except:
+    sample_size = int(9e4)
+
+if sample_size < m:
+    np.random.seed(1)
+    rand_idx = np.random.choice(
+        range(len(cell_ids_train)), min(sample_size, len(cell_ids_train)))
+    sample_train = input_train[rand_idx, :].todense()
+    sample_train_cell_ids = cell_ids_train[rand_idx]
+
+    rand_idx = np.random.choice(
+        range(len(cell_ids_valid)), min(sample_size, len(cell_ids_valid)))
+    sample_valid = input_valid[rand_idx, :].todense()
+    sample_valid_cell_ids = cell_ids_valid[rand_idx]
+
+    rand_idx = np.random.choice(range(m), min(sample_size, m))
+    sample_input = input_matrix[rand_idx, :].todense()
+    sample_input_cell_ids = cell_ids[rand_idx]
+    del rand_idx
+    gc.collect()
+    np.random.seed()
+else:
+    sample_train = input_train.todense()
+    sample_valid = input_valid.todense()
+    sample_input = input_matrix.todense()
+    sample_train_cell_ids = cell_ids_train
+    sample_valid_cell_ids = cell_ids_valid
+    sample_input_cell_ids = cell_ids
+
+
+print('len of sample_train: {}, sample_valid: {}, sample_input {}'.format(
+    len(sample_train_cell_ids), len(sample_valid_cell_ids), len(sample_input_cell_ids)
+))
 
 # Start model
 tf.reset_default_graph()
@@ -282,7 +372,7 @@ h = d_a1
 # define loss
 with tf.name_scope("Metrics"):
     omega = tf.sign(X)  # 0 if 0, 1 if > 0; not possibly < 0 in our data
-    mse_omega = tf.reduce_mean(
+    mse_nz = tf.reduce_mean(
                     tf.multiply(
                         tf.pow(X-h, 2),
                         omega
@@ -290,15 +380,15 @@ with tf.name_scope("Metrics"):
                 )
     mse = tf.reduce_mean(tf.pow(X-h, 2))
     reg_term = tf.reduce_mean(tf.pow(h, 2)) * p.reg_coef
-    tf.summary.scalar('mse_omega (H vs X)', mse_omega)
+    tf.summary.scalar('mse_nz__Y_vs_X', mse_nz)
 
-    mse1 = tf.reduce_mean(tf.pow(X - h, 2))  # for report
-    tf.summary.scalar('mse1 (H vs X)', mse1)
+    mse = tf.reduce_mean(tf.pow(X - h, 2))  # for report
+    tf.summary.scalar('mse__Y_vs_X', mse)
 
 # trainer
 optimizer = tf.train.AdamOptimizer(p.learning_rate)
-if p.mse_mode == 'mse_omega':
-    trainer = optimizer.minimize(mse_omega + reg_term)
+if p.mse_mode == 'mse_omega' or 'mse_nz':
+    trainer = optimizer.minimize(mse_nz + reg_term)
 elif p.mse_mode == 'mse':
     trainer = optimizer.minimize(mse + reg_term)
 else:
@@ -327,24 +417,11 @@ valid_writer = tf.summary.FileWriter(log_dir + '/valid', sess.graph)
 epoch = 0
 num_batch = int(math.floor(len(train_idx) // p.batch_size))  # floor
 epoch_log = []
-mse_omega_batch_vec, mse_omega_valid_vec, mse_omega_train_vec = [], [], []
-mse1_batch_vec, mse1_valid_vec = [], []  # mse1 = MSE(X, h)
-mse1j_batch_vec, mse1j_valid_vec = [], []  # mse1j = MSE(X, h), for genej, nz_cells
+mse_nz_batch_vec, mse_nz_valid_vec, mse_nz_train_vec = [], [], []
+mse_batch_vec, mse_valid_vec = [], []  # mse = MSE(X, h)
+msej_batch_vec, msej_valid_vec = [], []  # msej = MSE(X, h), for genej, nz_cells
 
-# todo: sample of training and valid
-sample_size = 1000
-
-sample_train_idx = np.random.choice(range(len(train_idx)),
-                                    min(sample_size, len(train_idx)))
-sample_train = input_train[sample_train_idx, :].todense()
-
-sample_valid_idx = np.random.choice(range(len(valid_idx)),
-                                    min(sample_size, len(valid_idx)))
-sample_valid = input_valid[sample_valid_idx, :].todense()
-
-sample_input_idx = np.random.choice(range(m),
-                                    min(sample_size, m))
-sample_input = input_matrix[sample_input_idx, :].todense()
+print('RAM usage after building the model is: {} M'.format(usage()))
 
 # evaluate epoch0
 evaluate_epoch_step2()
@@ -368,39 +445,41 @@ for epoch in range(1, p.max_training_epochs+1):
 
     # report per epoch #
     if (epoch == 1) or (epoch % p.display_step == 0):
+        print('\nRAM usage at epoch {} is: {} M'.format(epoch, usage()))
         tic_log = time.time()
         # overview
-        print('epoch: ', epoch, '; num mini-batch:', i+1)
+        print('epoch: ', epoch, '; num mini-batch:', i+1, '; num_iter: ', epoch *
+              (i+1))
         # print training time
         print("\n#Epoch ", epoch, " took: ",
               round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
               round(toc_wall - tic_wall, 2), "Wall seconds")
         # debug
         # print('d_w1', sess.run(d_w1[1, 0:4]))  # verified when GradDescent used
-        # log mse1 (H vs X)
-        mse1_batch, mse_omega_batch, h_batch = sess.run(
-            [mse1, mse_omega, h],
+        # log mse (Y vs X)
+        mse_batch, mse_nz_batch, h_batch = sess.run(
+            [mse, mse_nz, h],
             feed_dict={X: x_batch, pHidden_holder: 1.0, pIn_holder: 1.0})
-        mse1_valid, mse_omega_valid, h_valid = sess.run(
-            [mse1, mse_omega, h],
+        mse_valid, mse_nz_valid, Y_valid = sess.run(
+            [mse, mse_nz, h],
             feed_dict={X: sample_valid, pHidden_holder: 1.0, pIn_holder: 1.0})
-        mse1_batch_vec.append(mse1_batch)
-        mse1_valid_vec.append(mse1_valid)
-        mse_omega_batch_vec.append(mse_omega_batch)
-        mse_omega_valid_vec.append(mse_omega_valid)
+        mse_batch_vec.append(mse_batch)
+        mse_valid_vec.append(mse_valid)
+        mse_nz_batch_vec.append(mse_nz_batch)
+        mse_nz_valid_vec.append(mse_nz_valid)
         epoch_log.append(epoch)
         toc_log = time.time()
-        print('mse_omega_batch:{};  mse_omage_valid: {}'.
-              format(mse_omega_batch, mse_omega_valid))
-        print('mse1_batch:', mse1_batch, '; mse1_valid:', mse1_valid)
+        print('mse_nz_batch:{};  mse_omage_valid: {}'.
+              format(mse_nz_batch, mse_nz_valid))
+        print('mse_batch:', mse_batch, '; mse_valid:', mse_valid)
         print('log time for each epoch: {}\n'.format(round(toc_log - tic_log, 1)))
 
     # report and save sess per observation interval
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
-        h_train, h_valid, h_input = snapshot()  # save
-        if p.mse_mode == 'mse_omega':
-            learning_curve_mse_omega(skip=math.floor(epoch / 5 / p.display_step))
+        Y_train, Y_valid, Y_input = snapshot()  # save
+        if p.mse_mode == 'mse_nz' or 'mse_omega':
+            learning_curve_mse_nz(skip=math.floor(epoch / 5 / p.display_step))
         elif p.mse_mode == 'mse':
             learning_curve_mse(skip=math.floor(epoch / 5 / p.display_step))
 
@@ -409,8 +488,8 @@ for epoch in range(1, p.max_training_epochs+1):
         visualize_weights()
         toc_log2 = time.time()
         log2_time = round(toc_log2 - tic_log2, 1)
-        min_mse_valid = min(mse_omega_valid_vec)
-        print('min_MSE_OMEGA_valid till now: {}'.format(min_mse_valid))
+        min_mse_valid = min(mse_nz_valid_vec)
+        print('min_mse_nz_valid till now: {}'.format(min_mse_valid))
         print('snapshot_step: {}s'.format(log2_time))
 
 batch_writer.close()

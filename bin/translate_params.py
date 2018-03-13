@@ -7,7 +7,7 @@ home = os.environ['HOME']
 # step2/load_saved for transfer learning (translate)
 mode = 'late'  # pre-training, translate, late
 mse_mode = 'mse_omega'  # mse_omega, mse
-data_transformation = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 
 if mode == 'pre-training':
     # Reference Pretraining
@@ -27,8 +27,8 @@ else:
 # HYPER PARAMETERS
 L = 3  # only a reporter, changing it can't alter the model structure
 l = L//2
-n_hidden_1 = 400
-# n_hidden_2 = 300  # update for different depth
+n_hidden_1 = 200
+# n_hidden_2 = 800  # update for different depth
 # n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
@@ -44,6 +44,7 @@ elif run_flag == 'load_saved':
     learning_rate = 3e-5  # step2: 3e-5 for 3-7L, 3e-6 for 9L
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
+sample_size = int(9e4)  # todo: for test
 
 max_training_epochs = int(1e3)
 display_step = 50  # interval on learning curve
@@ -55,19 +56,26 @@ patience = 5  # early stop patience epochs, just print warning, early stop not i
 
 
 # BMB.MAGIC
-file1 = 'saver.hd5'
+# file1 = 'saver.hd5'
+# file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
+#         '/filtering/10x_human_pbmc_68k.g949.hd5'
+file1 = '/Volumes/radio/audrey2/imputation/data/10x_mouse_brain_1.3M' \
+        '/1M_neurons_matrix_subsampled_20k_filtered.h5'
+genome1 = 'mm10'  # only for 10x_genomics sparse matrix h5 data
 name1 = 'test'
 file1_orientation = 'gene_row'  # cell_row/gene_row
 
 # For development usage #
 seed_tf = 3
-test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
-    max_training_epochs = 20 # 3L:100, 5L:1000, 7L:1000, 9L:3000
-    display_step = 2  # interval on learning curve
-    snapshot_step = 10  # interval of saving session, imputation
+    max_training_epochs = 10 # 3L:100, 5L:1000, 7L:1000, 9L:3000
+    display_step = 1  # interval on learning curve
+    snapshot_step = 5  # interval of saving session, imputation
     m = 1000
     n = 300
+    sample_size = int(240)  # todo: for test
+
 
 # Gene list (data frame index)
 # Gene list
