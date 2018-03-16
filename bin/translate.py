@@ -1,16 +1,4 @@
 #!/usr/bin/python
-
-#  todo:
-# 1. [x] restore (TL)
-# 2. [x] use functions in model
-# 3. [x] mtask (one gene a time with one network)
-# 4. [x] exclude zeros or not
-# 5. [ ] search for 'change with layer' after changing layers
-# 6. [ ] split analysis of final result from imputation; only plot learning curve here
-
-# import
-from __future__ import division  # fix division // get float bug
-from __future__ import print_function  # fix printing \n
 import tensorflow as tf
 import sys
 import numpy as np
@@ -28,7 +16,9 @@ import seaborn as sns
 import importlib
 from scipy.sparse import csr_matrix, csc_matrix
 import scimpute
-import gc  # todo may not work
+import gc
+
+large_data = 1e5  # consider large data if sample size above this
 
 
 def evaluate_epoch_step2():
@@ -103,58 +93,77 @@ def learning_curve_mse_nz(skip=1):
     _.to_csv("./{}/mse_nz.csv".format(p.stage))
 
 
-def snapshot():
-    print("> Snapshot (save inference, save session, calculate whole dataset cell-pearsonr ): ")
-    # inference
-    Y_train_arr = sess.run(h, feed_dict={X: sample_train,
-                                     pIn_holder: 1, pHidden_holder: 1})
-    Y_valid_arr = sess.run(h, feed_dict={X: sample_valid,
-                                     pIn_holder: 1, pHidden_holder: 1})
-    Y_input_arr = sess.run(h, feed_dict={X: sample_input,
-                                     pIn_holder: 1, pHidden_holder: 1})
-    # save pred
-    Y_input_df = pd.DataFrame(data=Y_input_arr,
-                              columns=gene_ids,
-                              index=sample_input_cell_ids)
-    scimpute.save_hd5(Y_input_df, "{}/imputation.{}.hd5".format(p.stage, p.stage))
-
-    # save whole matrix by mini-batch
-    # input_matrix = csc_matrix(np.arange(24).reshape(12, 2))
-    # print(input_matrix.todense())
-    # m, n = input_matrix.shape
-    # print(len(cell_ids))
-    # df_ = pd.DataFrame(cell_ids[0:1000])
-    # df_.to_csv('input.index', index=False)
-    n_out_batches = m//p.batch_size
-    print('num_out_batches:', n_out_batches)
-    with open('./{}/imputation.{}.csv'.format(p.stage, p.stage), 'w') as handle:
-        for i in range(n_out_batches+1):
-            start_idx = i*p.batch_size
-            end_idx = min((i+1)*p.batch_size, m)
-            print('saving:', start_idx, end_idx)
-            x_out_batch = input_matrix[start_idx:end_idx, :].todense()
-            # print('x_out_batch:', x_out_batch.todense())
-            y_out_batch = sess.run(h, feed_dict={X: x_out_batch,
+def save_fast_imputation():
+    print("> Impute and save.. ")
+    # Imputation of samples
+    # Y_train_arr = sess.run(h, feed_dict={X: sample_train,
+    #                                  pIn_holder: 1, pHidden_holder: 1})
+    # Y_valid_arr = sess.run(h, feed_dict={X: sample_valid,
+    #                                  pIn_holder: 1, pHidden_holder: 1})
+    if m > large_data:
+        Y_input_arr = sess.run(h, feed_dict={X: sample_input,
                                          pIn_holder: 1, pHidden_holder: 1})
-            # y_out_batch = x_out_batch.todense()
-            # y_out_batch = csc_matrix(y_out_batch)
-            # print('y_out_batch: ', y_out_batch)
-            df_out_batch = pd.DataFrame(data=y_out_batch,
-                                        columns=gene_ids,
-                                        index=cell_ids[range(start_idx, end_idx)]
-                                        )
-            if (i == 0):
-                df_out_batch.to_csv(handle)
-            else:
-                df_out_batch.to_csv(handle, header=None)
+        # save sample imputation
+        Y_input_df = pd.DataFrame(data=Y_input_arr,
+                                  columns=gene_ids,
+                                  index=sample_input_cell_ids)
+        print('RAM usage during sample imputation and saving output: ',
+              '{} M'.format(usage()))
+        scimpute.save_hd5(Y_input_df, "{}/sample_imputation.{}.hd5".format(p.stage,
+                                                                        p.stage))
+    else:
+        Y_input_arr = sess.run(h, feed_dict={X: input_matrix.todense(),
+                                         pIn_holder: 1, pHidden_holder: 1})
+        # save sample imputation
+        Y_input_df = pd.DataFrame(data=Y_input_arr,
+                                  columns=gene_ids,
+                                  index=cell_ids)
+        print('RAM usage during whole data imputation and saving output: ',
+              '{} M'.format(usage()))
+        scimpute.save_hd5(Y_input_df, "{}/imputation.{}.hd5".format(p.stage,
+                                                                        p.stage))
 
 
+def save_whole_imputation():
+    if m > large_data:
+        # impute and save whole matrix by mini-batch
+        n_out_batches = m//p.sample_size
+        print('num_out_batches:', n_out_batches)
+        with open('./{}/imputation.{}.csv'.format(p.stage, p.stage), 'w') as handle:
+            for i_ in range(n_out_batches+1):
+                start_idx = i_*p.sample_size
+                end_idx = min((i_+1)*p.sample_size, m)
+                print('saving:', start_idx, end_idx)
+                x_out_batch = input_matrix[start_idx:end_idx, :].todense()
+                y_out_batch = sess.run(h, feed_dict={X: x_out_batch,
+                                                     pIn_holder: 1, pHidden_holder: 1})
+                df_out_batch = pd.DataFrame(data=y_out_batch,
+                                            columns=gene_ids,
+                                            index=cell_ids[range(start_idx, end_idx)]
+                                            )
+                if i_ == 0:
+                    df_out_batch.to_csv(handle)
+                    print('RAM usage during mini-batch imputation and saving output: ',
+                          '{} M'.format(usage()))
+                else:
+                    df_out_batch.to_csv(handle, header=None)
+    else:
+        Y_input_arr = sess.run(h, feed_dict={X: input_matrix.todense(),
+                                         pIn_holder: 1, pHidden_holder: 1})
+        # save sample imputation
+        Y_input_df = pd.DataFrame(data=Y_input_arr,
+                                  columns=gene_ids,
+                                  index=cell_ids)
+        print('RAM usage during whole data imputation and saving output: ',
+              '{} M'.format(usage()))
+        scimpute.save_hd5(Y_input_df, "{}/imputation.{}.hd5".format(p.stage,
+                                                                        p.stage))
 
 
-    # save model
+def save_model():    # save model
+    print('> Saving model..')
     save_path = saver.save(sess, log_dir + "/{}.ckpt".format(p.stage))
     print("Model saved in: %s" % save_path)
-    return (Y_train_arr, Y_valid_arr, Y_input_arr)
 
 
 def save_bottle_neck_representation():
@@ -164,7 +173,8 @@ def save_bottle_neck_representation():
                                           X: sample_input,
                                           pIn_holder: 1,
                                           pHidden_holder: 1})
-    np.save('{}/code_neck_valid.{}.npy'.format(p.stage, p.stage), code_bottle_neck_input)
+    np.save('{}/code_neck_valid.{}.npy'.format(p.stage, p.stage),
+            code_bottle_neck_input)
 
 
 def visualize_weight(w_name, b_name):
@@ -463,9 +473,9 @@ elif p.run_flag == 'impute':
     saver.restore(sess, './step2/step2.ckpt')
     p.max_training_epochs = 0
     p.learning_rate = 0.0
-    snapshot()
+    save_whole_imputation()
     print('imputation finished')
-    raise Exception('die')
+    exit()
 else:
     raise Exception('run_flag err')
 
@@ -534,10 +544,12 @@ for epoch in range(1, p.max_training_epochs+1):
         print('mse_batch:', mse_batch, '; mse_valid:', mse_valid)
         print('log time for each epoch: {}\n'.format(round(toc_log - tic_log, 1)))
 
+
     # report and save sess per observation interval
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
-        Y_train, Y_valid, Y_input = snapshot()  # save
+        save_fast_imputation()
+        save_model()
         if p.mse_mode in ('mse_nz', 'mse_omega'):
             learning_curve_mse_nz(skip=math.floor(epoch / 5 / p.display_step))
         elif p.mse_mode == 'mse':
@@ -549,6 +561,10 @@ for epoch in range(1, p.max_training_epochs+1):
         toc_log2 = time.time()
         log2_time = round(toc_log2 - tic_log2, 1)
         min_mse_valid = min(mse_nz_valid_vec)
+        os.system(
+            'for file in {0}/*npy;do python -u weight_clustmap.py $file {0};done'
+                .format(p.stage)
+        )
         print('min_mse_nz_valid till now: {}'.format(min_mse_valid))
         print('snapshot_step: {}s'.format(log2_time))
 
@@ -559,3 +575,4 @@ toc_stop = time.time()
 time_finish = round((toc_stop - tic_start), 2)
 print("Imputation Finished!")
 print("Wall Time Used: {} seconds".format(time_finish))
+exit()

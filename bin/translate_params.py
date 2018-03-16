@@ -1,11 +1,11 @@
 import os
 home = os.environ['HOME']
 
-# file1 = 'saver.hd5'
+file1 = 'saver.hd5'
 
 # # BMB.MAGIC
-file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
-        '/filtering/10x_human_pbmc_68k.g949.hd5'
+# file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
+#         '/filtering/10x_human_pbmc_68k.g949.hd5'
 name1 = 'test_pbmc'
 file1_orientation = 'gene_row'
 data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
@@ -24,27 +24,26 @@ data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 # step1/rand_init for pre-training on ref (step1)
 # step2/rand_init for one step training (late)
 # step2/load_saved for transfer learning (translate)
-mode = 'impute'  # pre-training, translate, late, imputation
+mode = 'late'  # pre-training, translate, late, imputation
 mse_mode = 'mse_nz'  # mse, mse_nz
 
-max_training_epochs = int(1)
-display_step = 50  # interval on learning curve
-snapshot_step = int(1)  # interval of saving session, imputation
+max_training_epochs = int(50)
+display_step = 5  # interval on learning curve
+snapshot_step = int(20)  # interval of saving session, imputation
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 # HYPER PARAMETERS
-L = 3  # only a reporter, changing it can't alter the model structure
+L = 5  # only a reporter, changing it can't alter the model structure
 l = L//2
-n_hidden_1 = 200
-# n_hidden_2 = 800  # update for different depth
+n_hidden_1 = 800
+n_hidden_2 = 400  # update for different depth
 # n_hidden_3 = 200
 # n_hidden_4 = 100 # add more after changing model structure
 
 # TRAINING PARAMETERS
-pIn = 0.8
-pHidden = 0.5
+pIn = 1 # 0.8
+pHidden = 1  # 0.5
 reg_coef = 0.0  # reg3=1e-2, can set to 0.0
-
 
 # mode
 if mode == 'pre-training':
