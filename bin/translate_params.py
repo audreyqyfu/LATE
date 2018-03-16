@@ -1,13 +1,52 @@
 import os
 home = os.environ['HOME']
 
+# file1 = 'saver.hd5'
+
+# # BMB.MAGIC
+file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
+        '/filtering/10x_human_pbmc_68k.g949.hd5'
+name1 = 'test_pbmc'
+file1_orientation = 'gene_row'
+data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+
+# Mouse Brain Small
+# file1 = '/Volumes/radio/audrey2/imputation/data/10x_mouse_brain_1.3M' \
+#         '/1M_neurons_matrix_subsampled_20k_filtered.h5'
+# genome1 = 'mm10'  # only for 10x_genomics sparse matrix h5 data
+# name1 = 'test'
+# file1_orientation = 'gene_row'  # cell_row/gene_row
+# data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+
+[a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
+
 # MODE
 # step1/rand_init for pre-training on ref (step1)
 # step2/rand_init for one step training (late)
 # step2/load_saved for transfer learning (translate)
-mode = 'late'  # pre-training, translate, late
-mse_mode = 'mse_omega'  # mse_omega, mse
+mode = 'impute'  # pre-training, translate, late, imputation
+mse_mode = 'mse_nz'  # mse, mse_nz
 
+max_training_epochs = int(1)
+display_step = 50  # interval on learning curve
+snapshot_step = int(1)  # interval of saving session, imputation
+patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
+
+# HYPER PARAMETERS
+L = 3  # only a reporter, changing it can't alter the model structure
+l = L//2
+n_hidden_1 = 200
+# n_hidden_2 = 800  # update for different depth
+# n_hidden_3 = 200
+# n_hidden_4 = 100 # add more after changing model structure
+
+# TRAINING PARAMETERS
+pIn = 0.8
+pHidden = 0.5
+reg_coef = 0.0  # reg3=1e-2, can set to 0.0
+
+
+# mode
 if mode == 'pre-training':
     # Reference Pretraining
     stage = 'step1'
@@ -20,56 +59,22 @@ elif mode == 'late':
     # Late
     stage = 'step2'
     run_flag = 'rand_init'
+elif mode == 'impute':
+    stage = 'impute'
+    run_flag = 'impute'
 else:
     raise Exception('mode err')
 
-# HYPER PARAMETERS
-L = 3  # only a reporter, changing it can't alter the model structure
-l = L//2
-n_hidden_1 = 200
-# n_hidden_2 = 800  # update for different depth
-# n_hidden_3 = 200
-# n_hidden_4 = 100 # add more after changing model structure
-
-
-# TRAINING PARAMETERS
-pIn = 0.8
-pHidden = 0.5
-reg_coef = 0.0  # reg3=1e-2, can set to 0.0
-
+# parameters
 if run_flag == 'rand_init':
     learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
 elif run_flag == 'load_saved':
     learning_rate = 3e-5  # step2: 3e-5 for 3-7L, 3e-6 for 9L
+elif run_flag == 'impute':
+    learning_rate = 0.0
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
-sample_size = int(9e4)  # todo: for test
-
-max_training_epochs = int(1e3)
-display_step = 50  # interval on learning curve
-snapshot_step = int(5e2)  # interval of saving session, imputation
-
-[a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
-
-patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
-
-
-# file1 = 'saver.hd5'
-
-# BMB.MAGIC
-file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
-        '/filtering/10x_human_pbmc_68k.g949.hd5'
-name1 = 'test_pbmc'
-file1_orientation = 'gene_row'
-data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
-
-# # Mouse Brain Small
-# file1 = '/Volumes/radio/audrey2/imputation/data/10x_mouse_brain_1.3M' \
-#         '/1M_neurons_matrix_subsampled_20k_filtered.h5'
-# genome1 = 'mm10'  # only for 10x_genomics sparse matrix h5 data
-# name1 = 'test'
-# file1_orientation = 'gene_row'  # cell_row/gene_row
-# data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+sample_size = int(9e4)  # max sample_size for learning curve
 
 
 # For development usage #

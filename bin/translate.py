@@ -44,7 +44,8 @@ def evaluate_epoch_step2():
     mse_valid_vec.append(mse_valid)
     mse_nz_batch_vec.append(mse_nz_train)
     mse_nz_valid_vec.append(mse_nz_valid)
-    print("mse_nz_train=", round(mse_nz_train, 3), "mse_omage_valid=", round(mse_nz_valid, 3))
+    print("mse_nz_train=", round(mse_nz_train, 3), "mse_nz_valid=",
+          round(mse_nz_valid, 3))
     print("mse_train=", round(mse_train, 3), "mse_valid=", round(mse_valid, 3))
 
 
@@ -78,6 +79,12 @@ def learning_curve_mse(skip=1):
                                 dir=p.stage,
                                 skip=skip
                             )
+    _ = np.asarray(list(zip(epoch_log, mse_batch_vec, mse_valid_vec)))
+    _ = pd.DataFrame(data=_,
+                     index=epoch_log,
+                     columns=['Epoch', 'MSE_batch', 'MSE_valid']
+                     ).set_index('Epoch')
+    _.to_csv("./{}/mse.csv".format(p.stage))
 
 
 def learning_curve_mse_nz(skip=1):
@@ -88,6 +95,12 @@ def learning_curve_mse_nz(skip=1):
                                 dir=p.stage,
                                 skip=skip
                             )
+    _ = np.asarray(list(zip(epoch_log, mse_nz_batch_vec, mse_nz_valid_vec)))
+    _ = pd.DataFrame(data=_,
+                     index=epoch_log,
+                     columns=['Epoch', 'MSE_NZ_batch', 'MSE_NZ_valid']
+                     ).set_index('Epoch')
+    _.to_csv("./{}/mse_nz.csv".format(p.stage))
 
 
 def snapshot():
@@ -118,7 +131,7 @@ def snapshot():
         for i in range(n_out_batches+1):
             start_idx = i*p.batch_size
             end_idx = min((i+1)*p.batch_size, m)
-            print(start_idx, end_idx)
+            print('saving:', start_idx, end_idx)
             x_out_batch = input_matrix[start_idx:end_idx, :].todense()
             # print('x_out_batch:', x_out_batch.todense())
             y_out_batch = sess.run(h, feed_dict={X: x_out_batch,
@@ -424,9 +437,11 @@ with tf.name_scope("Metrics"):
 
 # trainer
 optimizer = tf.train.AdamOptimizer(p.learning_rate)
-if p.mse_mode == 'mse_omega' or 'mse_nz':
+if p.mse_mode in ('mse_omega', 'mse_nz'):
+    print('training on mse_nz')
     trainer = optimizer.minimize(mse_nz + reg_term)
 elif p.mse_mode == 'mse':
+    print('training on mse')
     trainer = optimizer.minimize(mse + reg_term)
 else:
     raise Exception('mse_mode spelled wrong')
@@ -443,6 +458,14 @@ elif p.run_flag == 'rand_init':
     print('*** In Rand Init Mode')
     init = tf.global_variables_initializer()
     sess.run(init)
+elif p.run_flag == 'impute':
+    print('*** In impute mode   loading "step2.ckpt"..')
+    saver.restore(sess, './step2/step2.ckpt')
+    p.max_training_epochs = 0
+    p.learning_rate = 0.0
+    snapshot()
+    print('imputation finished')
+    raise Exception('die')
 else:
     raise Exception('run_flag err')
 
@@ -515,7 +538,7 @@ for epoch in range(1, p.max_training_epochs+1):
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
         Y_train, Y_valid, Y_input = snapshot()  # save
-        if p.mse_mode == 'mse_nz' or 'mse_omega':
+        if p.mse_mode in ('mse_nz', 'mse_omega'):
             learning_curve_mse_nz(skip=math.floor(epoch / 5 / p.display_step))
         elif p.mse_mode == 'mse':
             learning_curve_mse(skip=math.floor(epoch / 5 / p.display_step))
@@ -536,7 +559,3 @@ toc_stop = time.time()
 time_finish = round((toc_stop - tic_start), 2)
 print("Imputation Finished!")
 print("Wall Time Used: {} seconds".format(time_finish))
-
-# # Result analysis
-os.system('for file in {0}/*_w*npy;do python -u weight_clustmap.py $file {0};done'.format(p.stage))
-os.system('for file in {0}/code*npy;do python -u weight_clustmap.py $file {0};done'.format(p.stage))
