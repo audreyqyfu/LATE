@@ -7,7 +7,6 @@ home = os.environ['HOME']
 # step2/load_saved for transfer learning (translate)
 mode = 'late'  # pre-training, translate, late
 mse_mode = 'mse_omega'  # mse_omega, mse
-data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 
 if mode == 'pre-training':
     # Reference Pretraining
@@ -55,19 +54,27 @@ snapshot_step = int(5e2)  # interval of saving session, imputation
 patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
 
 
-# BMB.MAGIC
 # file1 = 'saver.hd5'
-# file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
-#         '/filtering/10x_human_pbmc_68k.g949.hd5'
-file1 = '/Volumes/radio/audrey2/imputation/data/10x_mouse_brain_1.3M' \
-        '/1M_neurons_matrix_subsampled_20k_filtered.h5'
-genome1 = 'mm10'  # only for 10x_genomics sparse matrix h5 data
-name1 = 'test'
-file1_orientation = 'gene_row'  # cell_row/gene_row
+
+# BMB.MAGIC
+file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
+        '/filtering/10x_human_pbmc_68k.g949.hd5'
+name1 = 'test_pbmc'
+file1_orientation = 'gene_row'
+data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+
+# # Mouse Brain Small
+# file1 = '/Volumes/radio/audrey2/imputation/data/10x_mouse_brain_1.3M' \
+#         '/1M_neurons_matrix_subsampled_20k_filtered.h5'
+# genome1 = 'mm10'  # only for 10x_genomics sparse matrix h5 data
+# name1 = 'test'
+# file1_orientation = 'gene_row'  # cell_row/gene_row
+# data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+
 
 # For development usage #
 seed_tf = 3
-test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 10 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve

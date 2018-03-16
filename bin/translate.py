@@ -164,7 +164,6 @@ def usage():
     return process.memory_info()[0] / float(2 ** 20)
 
 
-
 tic_start = time.time()
 
 # print versions / sys.path
@@ -201,6 +200,8 @@ if p.file1.endswith('h5'):
     print('> DATA TRANSFORMATION..')
     input_matrix = scimpute.sparse_matrix_transformation(input_matrix,
                                                          p.data_transformation)
+    del(input_obj)
+    gc.collect()
     print('RAM usage after {} transformation: {} M'.format(p.data_transformation,
                                                            usage()))
 
