@@ -26,7 +26,7 @@ import time
 import seaborn as sns
 # sys.path.append('./bin')
 import importlib
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, csc_matrix
 import scimpute
 import gc  # todo may not work
 
@@ -104,6 +104,40 @@ def snapshot():
                               columns=gene_ids,
                               index=sample_input_cell_ids)
     scimpute.save_hd5(Y_input_df, "{}/imputation.{}.hd5".format(p.stage, p.stage))
+
+    # save whole matrix by mini-batch
+    # input_matrix = csc_matrix(np.arange(24).reshape(12, 2))
+    # print(input_matrix.todense())
+    # m, n = input_matrix.shape
+    # print(len(cell_ids))
+    # df_ = pd.DataFrame(cell_ids[0:1000])
+    # df_.to_csv('input.index', index=False)
+    n_out_batches = m//p.batch_size
+    print('num_out_batches:', n_out_batches)
+    with open('./{}/imputation.{}.csv'.format(p.stage, p.stage), 'w') as handle:
+        for i in range(n_out_batches+1):
+            start_idx = i*p.batch_size
+            end_idx = min((i+1)*p.batch_size, m)
+            print(start_idx, end_idx)
+            x_out_batch = input_matrix[start_idx:end_idx, :].todense()
+            # print('x_out_batch:', x_out_batch.todense())
+            y_out_batch = sess.run(h, feed_dict={X: x_out_batch,
+                                         pIn_holder: 1, pHidden_holder: 1})
+            # y_out_batch = x_out_batch.todense()
+            # y_out_batch = csc_matrix(y_out_batch)
+            # print('y_out_batch: ', y_out_batch)
+            df_out_batch = pd.DataFrame(data=y_out_batch,
+                                        columns=gene_ids,
+                                        index=cell_ids[range(start_idx, end_idx)]
+                                        )
+            if (i == 0):
+                df_out_batch.to_csv(handle)
+            else:
+                df_out_batch.to_csv(handle, header=None)
+
+
+
+
     # save model
     save_path = saver.save(sess, log_dir + "/{}.ckpt".format(p.stage))
     print("Model saved in: %s" % save_path)
@@ -244,7 +278,9 @@ else:
 
 # Summary of data
 print("input_name:", p.name1)
-print("input_df:\n", input_matrix[:20, :4].todense(), "\n")
+_ = pd.DataFrame(data=input_matrix[:20, :4].todense(), index=cell_ids[:20],
+                 columns=gene_ids[:4])
+print("input_df:\n", _, "\n")
 m, n = input_matrix.shape  # m: n_cells; n: n_genes
 print('input_matrix: {} cells, {} genes\n'.format(m, n))
 
