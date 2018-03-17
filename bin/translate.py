@@ -473,6 +473,8 @@ elif p.run_flag == 'impute':
     p.learning_rate = 0.0
     save_whole_imputation()
     print('imputation finished')
+    toc_stop = time.time()
+    print("reading took {:.1f} seconds".format(toc_stop - tic_start))
     exit()
 else:
     raise Exception('run_flag err')
