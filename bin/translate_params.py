@@ -1,16 +1,16 @@
 import os
 home = os.environ['HOME']
 
-file1 = 'saver.hd5'
+# file1 = 'saver.hd5'
 
-# # BMB.MAGIC
-# file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
-#         '/filtering/10x_human_pbmc_68k.g949.hd5'
+# BMB.MAGIC
+file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
+        '/filtering/10x_human_pbmc_68k.g949.hd5'
 name1 = 'test_pbmc'
 file1_orientation = 'gene_row'
 data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
-
-# Mouse Brain Small
+#
+# # Mouse Brain Small
 # file1 = '/Volumes/radio/audrey2/imputation/data/10x_mouse_brain_1.3M' \
 #         '/1M_neurons_matrix_subsampled_20k_filtered.h5'
 # genome1 = 'mm10'  # only for 10x_genomics sparse matrix h5 data
@@ -73,7 +73,8 @@ elif run_flag == 'impute':
     learning_rate = 0.0
 sd = 1e-3  # 3-7L:1e-3, 9L:1e-4, update for different depth
 batch_size = 256
-sample_size = int(9e4)  # max sample_size for learning curve
+sample_size = int(1000)  # max sample_size for learning curve
+large_data = 1e5  # if above, use slow but robust method for imputation and output
 
 
 # For development usage #

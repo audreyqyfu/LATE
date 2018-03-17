@@ -64,18 +64,19 @@ GeneBCMatrix = collections.namedtuple(
     ['gene_ids', 'gene_names', 'barcodes', 'matrix'])
 
 
-def read_sparse_matrix_from_h5(filename, genome, file_ori):
+def read_sparse_matrix_from_h5(fname, genome, file_ori):
     '''
     for 10x_genomics h5 file:
     https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
     
     :return: cell_row sparse matrix
-    :param filename: 
+    :param fname: 
     :param genome: 
     :return: 
     '''
-    print('reading {} {}'.format(filename, genome))
-    with tables.open_file(filename, 'r') as f:
+    tic = time.time()
+    print('reading {} {}'.format(fname, genome))
+    with tables.open_file(fname, 'r') as f:
         try:
             dsets = {}
             for node in f.walk_nodes('/' + genome, 'Array'):
@@ -89,8 +90,17 @@ def read_sparse_matrix_from_h5(filename, genome, file_ori):
                 matrix = matrix.transpose()
             else:
                 raise Exception('file orientation {} not recognized'.format(file_ori))
-            return GeneBCMatrix(dsets['genes'], dsets['gene_names'],
+            obj = GeneBCMatrix(dsets['genes'], dsets['gene_names'],
                                 dsets['barcodes'], matrix)
+            nz_count = len(obj.matrix.nonzero()[0])
+            nz_rate = nz_count / (obj.matrix.shape[0] * obj.matrix.shape[1])
+            nz_rate = round(nz_rate, 3)
+            print('shape is {}'.format(obj.matrix.shape))
+            print('nz_rate is {}'.format(nz_rate))
+            print('nz_count is {}\n'.format(nz_count))
+            toc = time.time()
+            print("reading took {:.1f} seconds".format(toc - tic))
+            return obj
         except tables.NoSuchNodeError:
             raise Exception("Genome %s does not exist in this file." % genome)
         except KeyError:
@@ -128,6 +138,8 @@ def read_data_into_cell_row(fname, orientation, genome='mm10'):
     :param orientation: of file
     :return: cell_row df
     '''
+    tic = time.time()
+    print('reading {} as cell_row data frame'.format(fname))
     if fname.endswith('hd5'):
         df_tmp = read_hd5(fname)
     elif fname.endswith('csv'):
@@ -147,7 +159,11 @@ def read_data_into_cell_row(fname, orientation, genome='mm10'):
     else:
         raise Exception('parameter err: for {}, orientation {} not correctly spelled'.format(fname, orientation))
 
-    print(fname, 'read into:', df_tmp.shape, '(as cell_row df)')
+    print('shape is {}'.format(df_tmp.shape))
+    print('nz_rate is {}'.format(nnzero_rate_df(df_tmp)))
+    print('nz_count is {}\n'.format(nnzero_count_df(df_tmp)))
+    toc = time.time()
+    print("reading took {:.1f} seconds".format(toc - tic))
     return df_tmp
 
 
@@ -418,7 +434,12 @@ def median_corr(arr1, arr2, num=100, accuracy=3, seed_var=100):
 def nnzero_rate_df(df):
     idx = df != 0
     nnzero_rate = round(sum(sum(idx.values)) / df.size, 3)
-    return (nnzero_rate)
+    return nnzero_rate
+
+def nnzero_count_df(df):
+    idx = df != 0
+    nnzero_count = sum(sum(idx.values))
+    return nnzero_count
 
 
 def mean_df(df):

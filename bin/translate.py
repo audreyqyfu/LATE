@@ -18,8 +18,6 @@ from scipy.sparse import csr_matrix, csc_matrix
 import scimpute
 import gc
 
-large_data = 1e5  # consider large data if sample size above this
-
 
 def evaluate_epoch_step2():
     print("> Evaluation: epoch{}".format(epoch))
@@ -100,7 +98,7 @@ def save_fast_imputation():
     #                                  pIn_holder: 1, pHidden_holder: 1})
     # Y_valid_arr = sess.run(h, feed_dict={X: sample_valid,
     #                                  pIn_holder: 1, pHidden_holder: 1})
-    if m > large_data:
+    if m > p.large_data:
         Y_input_arr = sess.run(h, feed_dict={X: sample_input,
                                          pIn_holder: 1, pHidden_holder: 1})
         # save sample imputation
@@ -125,7 +123,7 @@ def save_fast_imputation():
 
 
 def save_whole_imputation():
-    if m > large_data:
+    if m > p.large_data:
         # impute and save whole matrix by mini-batch
         n_out_batches = m//p.sample_size
         print('num_out_batches:', n_out_batches)
