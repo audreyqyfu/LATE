@@ -1,22 +1,21 @@
 import os
 home = os.environ['HOME']
 
-# file1 = 'saver.hd5'
 
 # BMB.MAGIC
 file1 = '/Volumes/radio/audrey2/imputation/data/10x_human_pbmc_68k' \
         '/filtering/10x_human_pbmc_68k.g949.hd5'
 name1 = 'test_pbmc'
 file1_orientation = 'gene_row'
-data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
-#
+data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log
+
 # # Mouse Brain Small
 # file1 = '/Volumes/radio/audrey2/imputation/data/10x_mouse_brain_1.3M' \
 #         '/1M_neurons_matrix_subsampled_20k_filtered.h5'
 # genome1 = 'mm10'  # only for 10x_genomics sparse matrix h5 data
 # name1 = 'test'
 # file1_orientation = 'gene_row'  # cell_row/gene_row
-# data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
+# data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
 [a, b, c] = [0.7, 0.15, 0.15]  # splitting proportion: train/valid/test
 
@@ -27,22 +26,23 @@ data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log (done on H)
 mode = 'late'  # pre-training, translate, late, imputation
 mse_mode = 'mse_nz'  # mse, mse_nz
 
-max_training_epochs = int(50)
+max_training_epochs = int(100)
 display_step = 5  # interval on learning curve
-snapshot_step = int(20)  # interval of saving session, imputation
-patience = 5  # early stop patience epochs, just print warning, early stop not implemented yet
+snapshot_step = int(50)  # interval of saving session, imputation
+patience = 3  # early stop patience epochs, just print warning, early stop not
+# implemented yet
 
 # HYPER PARAMETERS
-L = 5  # only a reporter, changing it can't alter the model structure
+L = 5  # 3/5/7
 l = L//2
 n_hidden_1 = 800
 n_hidden_2 = 400  # update for different depth
 # n_hidden_3 = 200
-# n_hidden_4 = 100 # add more after changing model structure
+# n_hidden_4 = 100
 
 # TRAINING PARAMETERS
-pIn = 1 # 0.8
-pHidden = 1  # 0.5
+pIn = 0.8 # 0.8
+pHidden = 0.5  # 0.5
 reg_coef = 0.0  # reg3=1e-2, can set to 0.0
 
 # mode
@@ -79,7 +79,7 @@ large_data = 1e5  # if above, use slow but robust method for imputation and outp
 
 # For development usage #
 seed_tf = 3
-test_flag = 1  # [0, 1], in test mode only 10000 gene, 1000 cells tested
+test_flag = 0  # [0, 1], in test mode only 10000 gene, 1000 cells tested
 if test_flag == 1:
     max_training_epochs = 10 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve

@@ -1,4 +1,0 @@
-# template (push)
-local='imputation/scImpute/bin/'
-remote='rui@fortyfour.ibest.uidaho.edu:~/imputation/scImpute/bin/'
-rsync -avh $local $remote
