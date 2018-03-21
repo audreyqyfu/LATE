@@ -319,6 +319,8 @@ np.savetxt('{}/valid.{}_index.txt'.format(p.stage, p.stage), cell_ids_valid,
            fmt='%s')
 np.savetxt('{}/test.{}_index.txt'.format(p.stage, p.stage), cell_ids_test, fmt='%s')
 
+print('RAM usage after splitting input data is: {} M'.format(usage()))
+
 # todo: for backward support for older parameter files only
 try:
     p.sample_size
