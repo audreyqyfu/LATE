@@ -23,7 +23,7 @@ data_transformation = 'log'  # as_is/log/rpm_log/exp_rpm_log
 # step1/rand_init for pre-training on ref (step1)
 # step2/rand_init for one step training (late)
 # step2/load_saved for transfer learning (translate)
-mode = 'late'  # pre-training, translate, late, imputation
+mode = 'late'  # pre-training, translate, late, impute
 mse_mode = 'mse_nz'  # mse, mse_nz
 
 max_training_epochs = int(100)
