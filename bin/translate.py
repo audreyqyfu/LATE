@@ -12,9 +12,8 @@ import os
 import psutil
 import time
 import seaborn as sns
-# sys.path.append('./bin')
 import importlib
-from scipy.sparse import csr_matrix, csc_matrix
+from scipy.sparse import csr_matrix
 import scimpute
 import gc
 
@@ -98,7 +97,7 @@ def save_fast_imputation():
     #                                  pIn_holder: 1, pHidden_holder: 1})
     # Y_valid_arr = sess.run(h, feed_dict={X: sample_valid,
     #                                  pIn_holder: 1, pHidden_holder: 1})
-    if m > p.large_data:
+    if m > p.large_size:
         Y_input_arr = sess.run(h, feed_dict={X: sample_input,
                                          pIn_holder: 1, pHidden_holder: 1})
         # save sample imputation
@@ -123,7 +122,7 @@ def save_fast_imputation():
 
 
 def save_whole_imputation():
-    if m > p.large_data:
+    if m > p.large_size:
         # impute and save whole matrix by mini-batch
         n_out_batches = m//p.sample_size
         print('num_out_batches:', n_out_batches)
@@ -216,15 +215,15 @@ def save_weights():
 
 def usage():
     process = psutil.Process(os.getpid())
-    return process.memory_info()[0] / float(2 ** 20)
+    ram = process.memory_info()[0] / float(2 ** 20)
+    ram = round(ram, 1)
+    return ram
 
 
-tic_start = time.time()
-
-# print versions / sys.path
+# sys.path.append('./bin')
+# print('sys.path', sys.path)
 print('python version:', sys.version)
 print('tf.__version__', tf.__version__)
-print('sys.path', sys.path)
 
 print("Usage: python -u <translate.py> <params.py>")
 if len(sys.argv) == 2:
@@ -237,13 +236,14 @@ else:
 # refresh folder
 log_dir = './{}'.format(p.stage)
 scimpute.refresh_logfolder(log_dir)
+tic_start = time.time()
 
 # READ DATA into cell_row
 print('>READING DATA..')
 print('RAM usage before reading data: {} M'.format(usage()))
-if p.file1.endswith('h5'):
+if p.fname_input.endswith('h5'):
     # for 10x genomics large h5 files
-    input_obj = scimpute.read_sparse_matrix_from_h5(p.file1, 'mm10', p.file1_orientation)
+    input_obj = scimpute.read_sparse_matrix_from_h5(p.fname_input, 'mm10', p.ori_input)
     # gene_be_matrix.matrix = input_obj.matrix.log1p()
     input_matrix = input_obj.matrix
     gene_ids = input_obj.gene_ids
@@ -254,10 +254,10 @@ if p.file1.endswith('h5'):
     # Data Transformation
     print('> DATA TRANSFORMATION..')
     input_matrix = scimpute.sparse_matrix_transformation(input_matrix,
-                                                         p.data_transformation)
+                                                         p.transformation_input)
     del(input_obj)
     gc.collect()
-    print('RAM usage after {} transformation: {} M'.format(p.data_transformation,
+    print('RAM usage after {} transformation: {} M'.format(p.transformation_input,
                                                            usage()))
 
     # Test or not
@@ -270,35 +270,36 @@ if p.file1.endswith('h5'):
 
 else:
     # For smaller files (hd5, csv, csv.gz)
-    df1 = scimpute.read_data_into_cell_row(p.file1, p.file1_orientation)
-    print('RAM usage after reading df1: {} M'.format(usage()))
+    input_df = scimpute.read_data_into_cell_row(p.fname_input, p.ori_input)
+    print('RAM usage after reading input_df: {} M'.format(usage()))
 
     # Data Transformation
     print('> DATA TRANSFORMATION..')
-    df1 = scimpute.df_transformation(
-        df1.transpose(),
-        transformation=p.data_transformation).transpose() # [genes, cells] in df_trans()
-    print('pandas df1 mem usage: ')
-    df1.info(memory_usage='deep')
+    input_df = scimpute.df_transformation(
+        input_df.transpose(),
+        transformation=p.transformation_input
+    ).transpose() # [genes, cells] in df_trans()
+    print('pandas input_df mem usage: ')
+    input_df.info(memory_usage='deep')
 
     # Test or not
     if p.test_flag > 0:
         print('in test mode')
-        df1 = df1.ix[:p.m, :p.n]
+        input_df = input_df.ix[:p.m, :p.n]
         gc.collect()
 
     # To sparse
-    input_matrix = csr_matrix(df1)  # todo: directly read into csr, get rid of df1
-    gene_ids = df1.columns
-    cell_ids = df1.index
-    print('RAM usage before deleting df1: {} M'.format(usage()))
-    del(df1)
+    input_matrix = csr_matrix(input_df)  # todo: directly read into csr, get rid of input_df
+    gene_ids = input_df.columns
+    cell_ids = input_df.index
+    print('RAM usage before deleting input_df: {} M'.format(usage()))
+    del(input_df)
     gc.collect()  # working on mac
-    print('RAM usage after deleting df1: {} M'.format(usage()))
+    print('RAM usage after deleting input_df: {} M'.format(usage()))
 
 
 # Summary of data
-print("input_name:", p.name1)
+print("name_input:", p.name_input)
 _ = pd.DataFrame(data=input_matrix[:20, :4].todense(), index=cell_ids[:20],
                  columns=gene_ids[:4])
 print("input_df:\n", _, "\n")
@@ -514,27 +515,27 @@ for epoch in range(1, p.max_training_epochs+1):
                                      pIn_holder: p.pIn, pHidden_holder: p.pHidden})
     toc_cpu, toc_wall = time.clock(), time.time()
 
-
-    # report per epoch #
+    # display step
     if (epoch == 1) or (epoch % p.display_step == 0):
-        print('\nRAM usage at epoch {} is: {} M'.format(epoch, usage()))
         tic_log = time.time()
-        # overview
-        print('epoch: ', epoch, '; num mini-batch:', i+1, '; num_iter: ', epoch *
-              (i+1))
-        # print training time
-        print("\n#Epoch ", epoch, " took: ",
-              round(toc_cpu - tic_cpu, 2), " CPU seconds; ",
-              round(toc_wall - tic_wall, 2), "Wall seconds")
+
+        print('#Epoch  {}  took:  {}  CPU seconds;  {} Wall seconds'.format(
+            epoch, round(toc_cpu - tic_cpu, 2), round(toc_wall - tic_wall, 2)
+        ))
+        print('num-mini-batch per epoch: {}, till now: {}'.format(i+1, epoch*(i+1)))
+        print('RAM usage: {:0.1f} M'.format(usage()))
+
         # debug
         # print('d_w1', sess.run(d_w1[1, 0:4]))  # verified when GradDescent used
-        # log mse (Y vs X)
+
         mse_batch, mse_nz_batch, h_batch = sess.run(
             [mse, mse_nz, h],
-            feed_dict={X: x_batch, pHidden_holder: 1.0, pIn_holder: 1.0})
+            feed_dict={X: x_batch, pHidden_holder: 1.0, pIn_holder: 1.0}
+        )
         mse_valid, mse_nz_valid, Y_valid = sess.run(
             [mse, mse_nz, h],
-            feed_dict={X: sample_valid, pHidden_holder: 1.0, pIn_holder: 1.0})
+            feed_dict={X: sample_valid, pHidden_holder: 1.0, pIn_holder: 1.0}
+        )
         mse_batch_vec.append(mse_batch)
         mse_valid_vec.append(mse_valid)
         mse_nz_batch_vec.append(mse_nz_batch)
@@ -546,8 +547,7 @@ for epoch in range(1, p.max_training_epochs+1):
         print('mse_batch:', mse_batch, '; mse_valid:', mse_valid)
         print('log time for each epoch: {}\n'.format(round(toc_log - tic_log, 1)))
 
-
-    # report and save sess per observation interval
+    # snapshot step
     if (epoch % p.snapshot_step == 0) or (epoch == p.max_training_epochs):
         tic_log2 = time.time()
         save_fast_imputation()
@@ -564,8 +564,9 @@ for epoch in range(1, p.max_training_epochs+1):
         log2_time = round(toc_log2 - tic_log2, 1)
         min_mse_valid = min(mse_nz_valid_vec)
         os.system(
-            'for file in {0}/*npy;do python -u weight_clustmap.py $file {0};done'
-                .format(p.stage)
+            '''for file in {0}/*npy
+            do python -u weight_clustmap.py $file {0}
+            done'''.format(p.stage)
         )
         print('min_mse_nz_valid till now: {}'.format(min_mse_valid))
         print('snapshot_step: {}s'.format(log2_time))
