@@ -140,7 +140,7 @@ def save_whole_imputation():
                                             index=cell_ids[range(start_idx, end_idx)]
                                             )
                 if i_ == 0:
-                    df_out_batch.to_csv(handle)
+                    df_out_batch.to_csv(handle, float_format='%.6f')
                     print('RAM usage during mini-batch imputation and saving output: ',
                           '{} M'.format(usage()))
                 else:
