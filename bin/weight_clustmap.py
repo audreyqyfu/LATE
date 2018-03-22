@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-
 def random_subset_arr(arr, m_max, n_max):
     [m, n] = arr.shape
     m_reduce = min(m, m_max)
@@ -30,7 +29,7 @@ def random_subset_arr(arr, m_max, n_max):
 
 # read cmd
 if len(sys.argv) != 3:
-    print('usage: <weights_visualization.py> <w_name.npy> <out_tag>')
+    print('\n\nusage: <weights_visualization.py> <w_name.npy> <out_tag>')
     print(sys.argv)
     raise Exception('cmd error')
 in_name = sys.argv[1]
@@ -60,4 +59,3 @@ if (m > m_max or n > n_max):
 # seaborn clustering (the rows are rows, columns are columns in clustmap)
 heatmap = sns.clustermap(arr, method='average', cmap="summer", robust=True)
 heatmap.savefig(in_name+'.'+tag+'.png', bbox_inches='tight')
-print('\n\n')

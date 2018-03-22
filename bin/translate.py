@@ -563,11 +563,11 @@ for epoch in range(1, p.max_training_epochs+1):
         toc_log2 = time.time()
         log2_time = round(toc_log2 - tic_log2, 1)
         min_mse_valid = min(mse_nz_valid_vec)
-        os.system(
-            '''for file in {0}/*npy
-            do python -u weight_clustmap.py $file {0}
-            done'''.format(p.stage)
-        )
+        # os.system(
+        #     '''for file in {0}/*npy
+        #     do python -u weight_clustmap.py $file {0}
+        #     done'''.format(p.stage)
+        # )
         print('min_mse_nz_valid till now: {}'.format(min_mse_valid))
         print('snapshot_step: {}s'.format(log2_time))
 

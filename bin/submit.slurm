@@ -2,7 +2,7 @@
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -p gpu-long --gres=gpu:1 --mem=102G
-#SBATCH --nodelist=n110
+#SBATCH --nodelist=n105
 
 echo $(hostname)
 echo $(date)
@@ -12,17 +12,15 @@ source /usr/modules/init/bash
 module load python/3.5.2
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-
 echo "*--training NN--*"
-python -u ./translate.py translate_params.py
+python -u ./translate.py params.py
 
 echo "*--weight_clustermap--*"
 for file in step2/*_w*npy;do python -u weight_clustmap.py $file step2;done
 for file in step2/code*npy;do python -u weight_clustmap.py $file step2;done
 
 echo "*--result analysis--*"
-python -u ./result_analysis_matrix_based.py result_analysis_matrix_based_params.py
-
+python -u ./result_analysis.py params.py
 
 echo "*--done--*\n\n"
 echo $(date)
