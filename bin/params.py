@@ -130,7 +130,7 @@ print()
 
 
 # FOR RESULT ANALYSIS
-if sys.argv[0] == 'result_analysis.py':
+if 'result_analysis.py' in sys.argv[0]:
     fname_imputation = './step2/imputation.step2.hd5'
     name_imputation = '{}_({})'.format(name_input, mode)
     ori_imputation = 'cell_row'  # gene_row/cell_row
