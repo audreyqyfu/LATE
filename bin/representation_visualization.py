@@ -9,13 +9,14 @@ import pandas
 import scimpute
 
 # input data
-arr = np.load('pre_train/code_neck_valid.npy')
-print('representatio.shape:', narr.shape)
+arr = np.load('step2/code_neck_valid.step2.npy')
+print('code.shape:', arr.shape)
 
 # Variation of each node
 var = np.var(arr, 0)
 # Hist
-scimpute.hist_arr_flat(var, title='Hist var(bottle_neck_activations)', xlab='variance of each node', ylab='frequency')
+scimpute.hist_arr_flat(var, title='Hist var(code)', xlab='variance of each node',
+                       ylab='frequency')
 
 # index, from small to large
 index_increasing = var.argsort()
