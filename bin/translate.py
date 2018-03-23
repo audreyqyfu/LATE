@@ -261,7 +261,7 @@ if p.fname_input.endswith('h5'):
                                                            usage()))
 
     # Test or not
-    if p.test_flag > 0:
+    if p.test_flag:
         print('in test mode')
         input_matrix = input_matrix[:p.m, :p.n]
         gene_ids = gene_ids[:p.n]
@@ -283,7 +283,7 @@ else:
     input_df.info(memory_usage='deep')
 
     # Test or not
-    if p.test_flag > 0:
+    if p.test_flag:
         print('in test mode')
         input_df = input_df.ix[:p.m, :p.n]
         gc.collect()

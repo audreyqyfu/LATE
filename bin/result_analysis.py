@@ -29,6 +29,9 @@ if len(sys.argv) == 2:
 else:
     raise Exception('cmd err')
 
+# refresh folder
+log_dir = './{}'.format(p.tag)
+scimpute.refresh_logfolder(log_dir)
 
 # READ DATA
 print("> READ DATA..")
@@ -43,48 +46,59 @@ X = scimpute.df_transformation(X.transpose(), transformation=p.transformation_in
 G = scimpute.df_transformation(G.transpose(), transformation=p.transformation_ground_truth).transpose()
 
 # subset/sort X, G to match Y
+# todo: support sparse matrix
 X = X.loc[Y.index, Y.columns]
 G = G.loc[Y.index, Y.columns]
 
 # TEST MODE OR NOT
-test_flag = 0
-m = 100
-n = 200
-if test_flag > 0:
+if p.test_flag:
     print('in test mode')
-    Y = Y.ix[0:m, 0:n]
-    G = G.ix[0:m, 0:n]
-    X = X.ix[0:m, 0:n]
+    Y = Y.ix[0:p.m, 0:p.n]
+    G = G.ix[0:p.m, 0:p.n]
+    X = X.ix[0:p.m, 0:p.n]
 
 # INPUT SUMMARY
 print('\ninside this code, matrices are supposed to be transformed into cell_row')
-print('Y:', p.fname_imputation, p.ori_imputation, p.transformation_imputation, '\n', Y.ix[0:3, 0:2])
-print('G:', p.fname_ground_truth, p.ori_ground_truth, p.transformation_ground_truth, '\n', G.ix[0:3, 0:2])
-print('X:', p.fname_input, p.ori_input, p.transformation_input, '\n', X.ix[0:3, 0:2])
+print('Y:', p.fname_imputation, p.ori_imputation, p.transformation_imputation,
+      '\n', Y.ix[0:20, 0:3])
+print('X:', p.fname_input, p.ori_input, p.transformation_input,
+      '\n', X.ix[0:20, 0:3])
+print('G:', p.fname_ground_truth, p.ori_ground_truth, p.transformation_ground_truth,
+      '\n', G.ix[0:20, 0:3])
 print('Y.shape', Y.shape)
-print('G.shape', G.shape)
 print('X.shape', X.shape)
+print('G.shape', G.shape)
 
-# HIST OF Y
-scimpute.hist_df(Y, title='Y({})'.format(p.name_imputation), dir=p.tag)
-scimpute.hist_df(G, title='G({})'.format(p.name_ground_truth), dir=p.tag)
-scimpute.hist_df(X, title='X({})'.format(p.name_input), dir=p.tag)
+# HIST OF EXPRESSION
+scimpute.hist_df(
+    Y, xlab='expression', title='Imputation({})'.format(p.name_imputation),
+    dir=p.tag)
+scimpute.hist_df(
+    X,  xlab='expression', title='Input({})'.format(p.name_input),
+    dir=p.tag)
+scimpute.hist_df(
+    G,  xlab='expression', title='Ground_truth({})'.format(p.name_ground_truth),
+    dir=p.tag)
 
-
-# HIST CELL/GENE CORR
+# HIST OF CELL/GENE CORR
 print('\n> Corr between X and Y')
 print('GeneCorr: X shape: ', X.shape, 'Y shape: ', Y.shape)
-hist = scimpute.hist_2matrix_corr(X.values, Y.values,
-                                  title="Hist nz1-Gene-Corr (X vs Y)\n"+p.name_input+'\n'+p.name_imputation,
-                                  dir=p.tag, mode='column-wise', nz_mode='first'
-                                  )
-#
-# print('CellCorr: X shape: ', X.shape, 'Y shape: ', Y.shape)
-# hist = scimpute.hist_2matrix_corr(X.values, Y.values,
-#                                   title="Hist nz1-Cell-Corr (X vs Y)\n"+p.name_input+'\n'+p.name_imputation,
-#                                   dir=p.tag, mode='row-wise', nz_mode='first'
-#                                   )
+hist = scimpute.hist_2matrix_corr(
+    X.values, Y.values,
+    title="Hist Gene-Corr-NZ (Input vs Imputation)\n{}\n{}".
+        format(p.name_input, p.name_imputation),
+    dir=p.tag, mode='column-wise', nz_mode='first'
+)
 
+print('CellCorr: X shape: ', X.shape, 'Y shape: ', Y.shape)
+hist = scimpute.hist_2matrix_corr(
+    X.values, Y.values,
+    title="Hist Cell-Corr-NZ (Input vs Imputation)\n{}\n{}".
+        format(p.name_input, p.name_imputation),
+    dir=p.tag, mode='row-wise', nz_mode='first'
+)
+
+# todo: edit from there
 
 print('\n> Corr between G and Y')
 hist = scimpute.hist_2matrix_corr(G.values, Y.values,
