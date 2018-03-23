@@ -81,46 +81,22 @@ scimpute.hist_df(
     dir=p.tag)
 
 # HIST OF CELL/GENE CORR
-print('\n> Corr between X and Y')
-print('GeneCorr: X shape: ', X.shape, 'Y shape: ', Y.shape)
+print('\n> Corr between G and Y')
+print('GeneCorr: G shape: ', G.shape, 'Y shape: ', Y.shape)
 hist = scimpute.hist_2matrix_corr(
-    X.values, Y.values,
-    title="Hist Gene-Corr-NZ (Input vs Imputation)\n{}\n{}".
-        format(p.name_input, p.name_imputation),
-    dir=p.tag, mode='column-wise', nz_mode='first'
+    G.values, Y.values,
+    title="Hist Gene-Corr-NZ\n(Ground_truth vs Imputation)\n{}\n{}".
+        format(p.name_ground_truth, p.name_imputation),
+    dir=p.tag, mode='column-wise', nz_mode='first'  # or ignore
 )
 
-print('CellCorr: X shape: ', X.shape, 'Y shape: ', Y.shape)
+print('CellCorr: G shape: ', G.shape, 'Y shape: ', Y.shape)
 hist = scimpute.hist_2matrix_corr(
-    X.values, Y.values,
-    title="Hist Cell-Corr-NZ (Input vs Imputation)\n{}\n{}".
-        format(p.name_input, p.name_imputation),
+    G.values, Y.values,
+    title="Hist Cell-Corr-NZ\n(Ground_truth vs Imputation)\n{}\n{}".
+        format(p.name_ground_truth, p.name_imputation),
     dir=p.tag, mode='row-wise', nz_mode='first'
 )
-
-# todo: edit from there
-
-print('\n> Corr between G and Y')
-hist = scimpute.hist_2matrix_corr(G.values, Y.values,
-                                  title="Hist Gene-Corr (G vs Y)\n"+p.name_ground_truth+'\n'+p.name_imputation,
-                                  dir=p.tag, mode='column-wise', nz_mode='ignore'
-                                  )
-
-# hist = scimpute.hist_2matrix_corr(G.values, Y.values,
-#                                   title="Hist Cell-Corr (G vs Y)\n"+p.name_ground_truth+'\n'+p.name_imputation,
-#                                   dir=p.tag, mode='row-wise', nz_mode='ignore'
-#                                   )
-
-hist = scimpute.hist_2matrix_corr(G.values, Y.values,
-                                  title="Hist nz1-Gene-Corr (G vs Y)\n"+p.name_ground_truth+'\n'+p.name_imputation,
-                                  dir=p.tag, mode='column-wise', nz_mode='first'
-                                  )
-#
-# hist = scimpute.hist_2matrix_corr(G.values, Y.values,
-#                                   title="Hist nz1-Cell-Corr (G vs Y)\n"+p.name_ground_truth+'\n'+p.name_imputation,
-#                                   dir=p.tag, mode='row-wise', nz_mode='first'
-#                                   )
-
 
 # MSE CALCULATION
 print('\n> MSE Calculation')
@@ -131,49 +107,49 @@ print('Max in G is {}, Min in G is{}'.format(max_g, min_g))
 
 mse1_omega = scimpute.mse_omega(Y, X)
 mse1_omega = round(mse1_omega, 7)
-print('mse1_omega between Y and X: ', mse1_omega)
+print('MSE_NZ between Imputation and Input: ', mse1_omega)
 
 mse2_omega = scimpute.mse_omega(Y, G)
 mse2_omega = round(mse2_omega, 7)
-print('mse2_omega between Y and G: ', mse2_omega)
+print('MSE_NZ between Imputation and Ground_truth: ', mse2_omega)
 
 mse2 = scimpute.mse(Y, G)
 mse2 = round(mse2, 7)
-print('MSE2 between Y and G: ', mse2)
+print('MSE between Imputation and Ground_truth: ', mse2)
+
 
 
 #  VISUALIZATION OF DFS, todo clustering based on Y
 print('\n> Visualization of dfs')
 max, min = scimpute.max_min_element_in_arrs([Y.values, G.values, X.values])
 scimpute.heatmap_vis(Y.values,
-                     title='Y ({})'.format(p.name_imputation),
-                     xlab='genes\nMSE1_OMEGA(Y vs X)={}'.format(mse1_omega),
-                     ylab='cells', vmax=max, vmin=min,
-                     dir=p.tag)
-
-scimpute.heatmap_vis(G.values,
-                     title='G ({})'.format(p.name_ground_truth),
-                     xlab='genes\nMSE2(Y vs G)={}'.format(mse2),
+                     title='Imputation ({})'.format(p.name_imputation),
+                     xlab='genes\nMSE_NZ(Imputation vs Input)={}'.format(mse1_omega),
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
 
 scimpute.heatmap_vis(X.values,
-                     title='X ({})'.format(p.name_input),
+                     title='Input ({})'.format(p.name_input),
                      xlab='genes',
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
 
+scimpute.heatmap_vis(G.values,
+                     title='Ground_truth ({})'.format(p.name_ground_truth),
+                     xlab='genes\nMSE_NZ(Imputation vs Ground_truth)={}'.format(
+                         mse2_omega),
+                     ylab='cells', vmax=max, vmin=min,
+                     dir=p.tag)
 
-# Gene-Gene in G, X, Y
-print('\n> Gene-gene relationship (Y, X, G), before/after inference')
+
+# Gene/Pair plots
+print('\n> Gene-pair relationship (Y, X, G), before/after inference')
 gene_pair_dir = p.tag+'/pairs'
 List = p.pair_list
-scimpute.gene_pair_plot(Y, list=List, tag='(Y) '+p.tag, dir=gene_pair_dir)
-scimpute.gene_pair_plot(X, list=List, tag='(X) '+p.tag, dir=gene_pair_dir)
-scimpute.gene_pair_plot(G, list=List, tag='(G) '+p.tag, dir=gene_pair_dir)
+scimpute.gene_pair_plot(Y, list=List, tag='(Imputation)', dir=gene_pair_dir)
+scimpute.gene_pair_plot(X, list=List, tag='(Input)', dir=gene_pair_dir)
+scimpute.gene_pair_plot(G, list=List, tag='(Ground_truth)', dir=gene_pair_dir)
 
-
-# G vs Y, G vs X
 print("\n> G vs Y, G vs X")
 gene_dir = p.tag+'/genes'
 for j in p.gene_list:
@@ -187,29 +163,28 @@ for j in p.gene_list:
         continue
 
     scimpute.scatterplot2(G_j, Y_j, range='same',
-                          title=str(str(j) + ' (G_vs_Y) ' + p.tag),
-                          xlabel='Ground Truth (G)',
-                          ylabel='Prediction (Y)',
+                          title=str(str(j) + '\n(Ground_truth vs Imputation) '),
+                          xlabel='Ground Truth',
+                          ylabel='Imputation',
                           dir=gene_dir
                           )
     scimpute.scatterplot2(G_j, X_j, range='same',
-                          title=str(str(j) + ' (G_vs_X) ' + p.tag),
-                          xlabel='Ground Truth (G)',
-                          ylabel='Input (X)',
+                          title=str(str(j) + '\n(Ground_truth vs Imputation) '),
+                          xlabel='Ground Truth',
+                          ylabel='Input',
                           dir=gene_dir
-                         )
+                          )
 
 
-# discretized plots
-print('\n\n# Start discrete plots..')
+# Discrete (changed Y, only use at end of script
 Y = scimpute.df_exp_discretize_log(Y)
-# Gene-Gene in G, X, Y
-print('\n> Discrete Gene-gene relationship in Y')
+
+print('\n> Discrete Gene-pair relationship in Y')
 gene_pair_dir = p.tag+'/pairs_discrete'
 List = p.pair_list
-scimpute.gene_pair_plot(Y, list=List, tag='(Y_discrete) '+p.tag, dir=gene_pair_dir)
+scimpute.gene_pair_plot(Y, list=List, tag='(Imputation Discrete) ',
+                        dir=gene_pair_dir)
 
-# G vs Y, G vs X
 print("\n> Discrete Y vs G")
 gene_dir = p.tag+'/genes_discrete'
 for j in p.gene_list:
@@ -223,17 +198,24 @@ for j in p.gene_list:
         continue
 
     scimpute.scatterplot2(G_j, Y_j, range='same',
-                          title=str(str(j) + ' (G_vs_Y_discrete) ' + p.tag),
-                          xlabel='Ground Truth (G)',
-                          ylabel='Prediction (Y)',
+                          title=str(str(j) + '\n(Ground_truth vs Imputation) '),
+                          xlabel='Ground Truth',
+                          ylabel='Imputation',
                           dir=gene_dir
                           )
     scimpute.scatterplot2(G_j, X_j, range='same',
-                          title=str(str(j) + ' (G_vs_X_discrete) ' + p.tag),
-                          xlabel='Ground Truth (G)',
-                          ylabel='Input (X)',
+                          title=str(str(j) + '\n(Ground_truth vs Imputation) '),
+                          xlabel='Ground Truth',
+                          ylabel='Input',
                           dir=gene_dir
-                         )
+                          )
+
+# weight clustmap
+os.system(
+    '''for file in {0}/*npy
+    do python -u weight_clustmap.py $file {0}
+    done'''.format(p.stage)
+)
 
 # # gene MSE
 # j = 0

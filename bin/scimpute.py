@@ -565,7 +565,7 @@ def scatterplot2(x, y, title='title', xlabel='x', ylabel='y', range='same', dir=
     except np.linalg.linalg.LinAlgError:
         plt.plot(x, y, 'b.', alpha=0.3)
 
-    plt.title('{}\ncorr: {}\nnz2-corr: {}'.format(title, corr, nz2_corr1))
+    plt.title('{}\ncorr: {}; corr-nz: {}'.format(title, corr, nz2_corr1))  # nz2
     plt.xlabel(xlabel + "\nmean: " + str(round(np.mean(x), 2)))
     plt.ylabel(ylabel + "\nmean: " + str(round(np.mean(y), 2)))
 

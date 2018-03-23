@@ -80,14 +80,14 @@ sample_size = int(1000)  # sample_size for learning curve, slow output
 large_size = int(1e5)  # if num-cells larger than this, use slow but robust method
 #  for imputation and output
 
-max_training_epochs = int(100)  # num_mini_batch / (training_size/batch_size)
+max_training_epochs = int(10)  # num_mini_batch / (training_size/batch_size)
 display_step = int(5)  # interval on learning curve, 20 displays recommended
 snapshot_step = int(50)  # interval of saving session, saving imputation
 patience = int(3)  # early stop patience epochs, just print warning, no real stop
 
 # For development usage #
 seed_tf = 3
-test_flag = True  # [True, False]
+test_flag = False  # [True, False]
 if test_flag == 1:
     max_training_epochs = 10 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
