@@ -169,7 +169,7 @@ for j in p.gene_list:
                           dir=gene_dir
                           )
     scimpute.scatterplot2(G_j, X_j, range='same',
-                          title=str(str(j) + '\n(Ground_truth vs Imputation) '),
+                          title=str(str(j) + '\n(Ground_truth vs Input) '),
                           xlabel='Ground Truth',
                           ylabel='Input',
                           dir=gene_dir
@@ -204,7 +204,7 @@ for j in p.gene_list:
                           dir=gene_dir
                           )
     scimpute.scatterplot2(G_j, X_j, range='same',
-                          title=str(str(j) + '\n(Ground_truth vs Imputation) '),
+                          title=str(str(j) + '\n(Ground_truth vs Input) '),
                           xlabel='Ground Truth',
                           ylabel='Input',
                           dir=gene_dir
