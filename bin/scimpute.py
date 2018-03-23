@@ -106,6 +106,7 @@ def read_sparse_matrix_from_h5(fname, genome, file_ori):
         except KeyError:
             raise Exception("File is missing one or more required datasets.")
 
+
 def save_sparse_matrix_to_h5(gbm, filename, genome):
     '''
     for 10x_genomics h5 file:
@@ -165,8 +166,6 @@ def read_data_into_cell_row(fname, orientation, genome='mm10'):
     toc = time.time()
     print("reading took {:.1f} seconds".format(toc - tic))
     return df_tmp
-
-
 
 
 # PRE-PROCESSING OF DATA FRAMES #
@@ -267,29 +266,6 @@ def df_transformation(df, transformation='as_is'):
     return df
 
 
-def sparse_matrix_transformation(csr_matrix, transformation='log'):
-    '''
-    data_transformation
-    df not copied
-    :param csr_matrix: 
-    :param transformation: as_is, log
-    :return: 
-    '''
-    if transformation == 'as_is':
-        pass  # do nothing
-    elif transformation == 'log':
-        csr_matrix = csr_matrix.log1p()
-    elif transformation == 'rpm_log':
-        raise Exception('rpm_log not implemented yet')
-    elif transformation == 'exp_rpm_log':
-        raise Exception('exp_rpm_log not implemented yet')
-    else:
-        raise Exception('format {} not recognized'.format(transformation))
-
-    print('data tranformation: ', transformation)
-    return csr_matrix
-
-
 def mask_df(df, nz_goal):
     '''
     
@@ -337,32 +313,6 @@ def split_arr(arr, a=0.8, b=0.1, c=0.1, seed_var=1):
     return (arr_train, arr_valid, arr_test)
 
 
-def split__csr_matrix(csr_matrix, a=0.8, b=0.1, c=0.1, seed_var=1):
-    """
-    input: csr_matrix(cell_row), 
-    output: rand split datasets (train/valid/test)
-    a: train
-    b: valid
-    c: test
-    e.g. [csr_train, csr_valid, csr_test] = split(df.values)"""
-    print(">splitting data..")
-    np.random.seed(seed_var)  # for splitting consistency
-    [m, n] = csr_matrix.shape
-    train_indices = np.random.choice(m, int(round(m*a//(a+b+c))), replace=False)
-    remain_indices = np.array(list(set(range(m)) - set(train_indices)))
-    valid_indices = np.random.choice(remain_indices, int(round(len(remain_indices)*b//(b + c))), replace=False)
-    test_indices = np.array(list(set(remain_indices) - set(valid_indices)))
-    np.random.seed()  # cancel seed effect
-    print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
-    print('train:', len(train_indices), ' valid:', len(valid_indices), 'test:', len(test_indices))
-
-    csr_train = csr_matrix[train_indices, :]
-    csr_valid = csr_matrix[valid_indices, :]
-    csr_test = csr_matrix[test_indices, :]
-
-    return (csr_train, csr_valid, csr_test, train_indices, valid_indices, test_indices)
-
-
 def split_df(df, a=0.8, b=0.1, c=0.1, seed_var=1):
     """input df, output rand split dfs
     a: train, b: valid, c: test
@@ -401,6 +351,70 @@ def subset_df(df_big, df_subset):
     return (df_big.ix[df_subset.index, df_subset.columns])
 
 
+def sparse_matrix_transformation(csr_matrix, transformation='log'):
+    '''
+    data_transformation
+    df not copied
+    :param csr_matrix: 
+    :param transformation: as_is, log
+    :return: 
+    '''
+    if transformation == 'as_is':
+        pass  # do nothing
+    elif transformation == 'log':
+        csr_matrix = csr_matrix.log1p()
+    elif transformation == 'rpm_log':
+        raise Exception('rpm_log not implemented yet')
+    elif transformation == 'exp_rpm_log':
+        raise Exception('exp_rpm_log not implemented yet')
+    else:
+        raise Exception('format {} not recognized'.format(transformation))
+
+    print('data tranformation: ', transformation)
+    return csr_matrix
+
+
+def subsample_matrix(gbm, barcode_indices):
+    return GeneBCMatrix(gbm.gene_ids, gbm.gene_names,
+                        gbm.barcodes[barcode_indices],
+                        gbm.matrix[:, barcode_indices])
+
+def subgene_matrix(gbm, gene_indices):
+    return GeneBCMatrix(gbm.gene_ids[gene_indices], gbm.gene_names[gene_indices],
+                        gbm.barcodes,
+                        gbm.matrix[gene_indices, :])
+
+def get_expression(gbm, gene_name):
+    gene_indices = np.where(gbm.gene_names == gene_name)[0]
+    if len(gene_indices) == 0:
+        raise Exception("%s was not found in list of gene names." % gene_name)
+    return gbm.matrix[gene_indices[0], :].toarray().squeeze()
+
+
+def split__csr_matrix(csr_matrix, a=0.8, b=0.1, c=0.1, seed_var=1):
+    """
+    input: csr_matrix(cell_row), 
+    output: rand split datasets (train/valid/test)
+    a: train
+    b: valid
+    c: test
+    e.g. [csr_train, csr_valid, csr_test] = split(df.values)"""
+    print(">splitting data..")
+    np.random.seed(seed_var)  # for splitting consistency
+    [m, n] = csr_matrix.shape
+    train_indices = np.random.choice(m, int(round(m*a//(a+b+c))), replace=False)
+    remain_indices = np.array(list(set(range(m)) - set(train_indices)))
+    valid_indices = np.random.choice(remain_indices, int(round(len(remain_indices)*b//(b + c))), replace=False)
+    test_indices = np.array(list(set(remain_indices) - set(valid_indices)))
+    np.random.seed()  # cancel seed effect
+    print("total samples being split: ", len(train_indices) + len(valid_indices) + len(test_indices))
+    print('train:', len(train_indices), ' valid:', len(valid_indices), 'test:', len(test_indices))
+
+    csr_train = csr_matrix[train_indices, :]
+    csr_valid = csr_matrix[valid_indices, :]
+    csr_test = csr_matrix[test_indices, :]
+
+    return (csr_train, csr_valid, csr_test, train_indices, valid_indices, test_indices)
 
 
 
