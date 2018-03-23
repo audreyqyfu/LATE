@@ -210,12 +210,12 @@ for j in p.gene_list:
                           dir=gene_dir
                           )
 
-# weight clustmap
-os.system(
-    '''for file in {0}/*npy
-    do python -u weight_clustmap.py $file {0}
-    done'''.format(p.stage)
-)
+# # weight clustmap
+# os.system(
+#     '''for file in {0}/*npy
+#     do python -u weight_clustmap.py $file {0}
+#     done'''.format(p.stage)
+# )
 
 # # gene MSE
 # j = 0
