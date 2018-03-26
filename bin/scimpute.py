@@ -807,7 +807,13 @@ def hist_2matrix_corr(arr1, arr2, mode='column-wise', nz_mode='ignore',
     fprefix = "./{}/{}".format(dir, title)
 
     # if arr1.shape is arr2.shape:
-    range_size = arr2.shape[1]
+    if mode == 'column-wise':
+        range_size = arr2.shape[1]
+    elif mode == 'row-wise':
+        range_size = arr2.shape[0]
+    else:
+        raise Exception('mode not recognized')
+
     hist = []
     for i in range(range_size):
         if mode == 'column-wise':
