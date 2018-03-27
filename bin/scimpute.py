@@ -462,6 +462,32 @@ def mean_df(df):
     return (Mean)
 
 
+def square_err(arr1, arr2):
+    '''
+    arr1 and arr2 of same shape, return squared err between them
+    arr and df both works
+    '''
+    diff = np.subtract(arr1, arr2)
+    square_err_ = np.sum(np.power(diff, 2))
+    count = int(arr1.shape[0] * arr1.shape[1])
+    return square_err_, count
+
+
+def square_err_omega(arr, arr_ground_truth):
+    '''
+    input: arr and arr_ground_truth of same shape
+    return: squared err omega (excluding zeros in ground truth)
+    arr and df both works
+    only zeros are ignored, negatives should not show up
+    '''
+    omega = np.sign(arr_ground_truth)
+    diff = np.subtract(arr, arr_ground_truth)
+    square_err_ = np.power(diff, 2)
+    square_err_nz = np.sum(np.multiply(square_err_, omega))
+    count = int(arr.shape[0] * arr.shape[1])
+    return square_err_nz, count
+
+
 def mse_omega(arr_h, arr_m):
     '''arr and df both works'''
     omega = np.sign(arr_m)
