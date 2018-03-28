@@ -13,7 +13,7 @@ module load python/3.5.2
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
 echo "*--training NN--*"
-python -u ./translate.py params.py
+python3 -u ./translate.py params.py
 
 echo "*--weight_clustermap--*"
 for file in step2/*_w*npy;do python -u weight_clustmap.py $file step2;done

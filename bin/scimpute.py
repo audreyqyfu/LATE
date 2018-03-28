@@ -12,6 +12,13 @@ import collections
 import scipy.sparse as sp_sparse
 import tables
 
+# Sys
+def usage():
+    process = psutil.Process(os.getpid())
+    ram = process.memory_info()[0] / float(2 ** 20)
+    ram = round(ram, 1)
+    return ram
+
 
 # DATA I/O #
 def read_csv(fname):
