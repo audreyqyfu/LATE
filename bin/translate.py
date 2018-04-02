@@ -243,7 +243,8 @@ print('>READING DATA..')
 print('RAM usage before reading data: {} M'.format(usage()))
 if p.fname_input.endswith('h5'):
     # for 10x genomics large h5 files
-    input_obj = scimpute.read_sparse_matrix_from_h5(p.fname_input, 'mm10', p.ori_input)
+    input_obj = scimpute.read_sparse_matrix_from_h5(p.fname_input, p.genome_input,
+                                                    p.ori_input)
     # gene_be_matrix.matrix = input_obj.matrix.log1p()
     input_matrix = input_obj.matrix
     gene_ids = input_obj.gene_ids
