@@ -3,16 +3,17 @@ import sys
 import time
 home = os.environ['HOME']
 
-# DATA
-# BMB.MAGIC
-fname_input = home + '/imputation/data/10x_human_pbmc_68k' \
-        '/filtering/10x_human_pbmc_68k.g949.hd5'
-name_input = 'test_pbmc'
+# DATA (the input file should contain index and header)
+# PBMC_G949
+fname_input = home + '/imputation/data/10x_human_pbmc_68k/filtering/msk/' \
+                     '10x_human_pbmc_68k.nz40.msk90.hd5'
+name_input = 'pbmc_g949_msk'
 ori_input = 'gene_row'
 transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
-fname_ground_truth = fname_input
-name_ground_truth = name_input
+fname_ground_truth = home + '/imputation/data/10x_human_pbmc_68k/filtering/' \
+                            '10x_human_pbmc_68k.g949.hd5'
+name_ground_truth = 'pbmc_g949'
 ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
 
@@ -80,7 +81,7 @@ sample_size = int(1000)  # sample_size for learning curve, slow output
 large_size = int(1e5)  # if num-cells larger than this, use slow but robust method
 #  for imputation and output
 
-max_training_epochs = int(10)  # num_mini_batch / (training_size/batch_size)
+max_training_epochs = int(100)  # num_mini_batch / (training_size/batch_size)
 display_step = int(5)  # interval on learning curve, 20 displays recommended
 snapshot_step = int(50)  # interval of saving session, saving imputation
 patience = int(3)  # early stop patience epochs, just print warning, no real stop

@@ -34,7 +34,7 @@ log_dir = './{}'.format(p.tag)
 scimpute.refresh_logfolder(log_dir)
 
 # READ DATA
-print("> READ DATA..")
+print("> READ DATA..")  # todo: add support for h5 sparse
 Y = scimpute.read_data_into_cell_row(p.fname_imputation, p.ori_imputation)
 X = scimpute.read_data_into_cell_row(p.fname_input, p.ori_input)
 G = scimpute.read_data_into_cell_row(p.fname_ground_truth, p.ori_ground_truth)
@@ -68,6 +68,52 @@ print('G:', p.fname_ground_truth, p.ori_ground_truth, p.transformation_ground_tr
 print('Y.shape', Y.shape)
 print('X.shape', X.shape)
 print('G.shape', G.shape)
+
+# STD of genes in Y and X
+print('calculating STD for Y and X')
+y_std_df = Y.std(axis=0)
+x_std_df = X.std(axis=0)
+g_std_df = G.std(axis=0)
+std_ratio_yx_df = pd.DataFrame(data= y_std_df.values / x_std_df.values,
+                            index=X.columns, columns=['std_ratio'])
+std_ratio_yg_df = pd.DataFrame(data= y_std_df.values / g_std_df.values,
+                            index=X.columns, columns=['std_ratio'])
+
+std_min = min(y_std_df.min(), x_std_df.min(), g_std_df.min())
+std_max = max(y_std_df.max(), x_std_df.max(), g_std_df.max())
+
+
+scimpute.hist_df(
+    y_std_df,
+    xlab='STD(Imputation)', title='STD Imputation({})'.format(p.name_imputation),
+    range=(std_min, std_max),
+    dir=p.tag)
+scimpute.hist_df(
+    x_std_df,
+    xlab='STD(Input)', title='STD Input({})'.format(p.name_input),
+    range=(std_min, std_max),
+    dir=p.tag)
+scimpute.hist_df(
+    g_std_df,
+    xlab='STD(Ground Truth)', title='STD Ground Truth({})'.format(p.name_input),
+    range=(std_min, std_max),
+    dir=p.tag)
+scimpute.hist_df(
+    std_ratio_yx_df,
+    xlab='Ratio STD(Imputation) div STD(Input)',
+    title='Ratio STD Imputation div STD Input({})'.format(p.name_input),
+    range=(std_min, std_max),  # todo remove hard code here
+    dir=p.tag)
+scimpute.hist_df(
+    std_ratio_yg_df,
+    xlab='Ratio STD(Imputation) div STD(Ground Truth)',
+    title='Ratio STD Imputation div STD Ground Truth({})'.format(p.name_input),
+    range=(std_min, std_max),
+    dir=p.tag)
+
+std_ratio_yx_df.to_csv('std_ratio_y_div_x.csv')
+std_ratio_yg_df.to_csv('std_ratio_y_div_g.csv')
+
 
 # HIST OF EXPRESSION
 scimpute.hist_df(

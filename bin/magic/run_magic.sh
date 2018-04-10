@@ -17,7 +17,7 @@ outname='10x_human_pbmc_68k.G9987.magic3.csv'
 
 echo $(date)
 
-MAGIC.py csv -d $file -o $outname \
+python -u ~/vir/bin/MAGIC.py csv -d $file -o $outname \
 --cell-axis=columns -p 100 -t=9 -k=12 -ka=4 \
 1>./$outname.log 2>&1
 

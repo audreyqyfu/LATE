@@ -20,7 +20,7 @@ def usage():
     return ram
 
 
-# DATA I/O #
+# DATA I/O # todo: check gene_id barcode uniqueness
 def read_csv(fname):
     '''read_csv into pd.df, assuming index_col=0, and header=True'''
     print('reading ', fname)
@@ -804,12 +804,12 @@ def hist_arr_flat(arr, title='hist', xlab='x', ylab='Frequency', bins=100, dir='
     print("histogram ", title, ' done')
 
 
-def hist_df(df, title="hist of df", xlab='xlab', bins=100, dir='plots'):
+def hist_df(df, title="hist of df", xlab='xlab', bins=100, dir='plots', range=None):
     if not os.path.exists(dir):
         os.makedirs(dir)
     df_flat = df.values.reshape(df.size, 1)
     # fig = plt.figure(figsize=(9, 9))
-    hist = plt.hist(df_flat, bins=bins, density=True)
+    hist = plt.hist(df_flat, bins=bins, density=True, range=range)
     plt.title(title)
     plt.xlabel(xlab)
     plt.ylabel('Density')
