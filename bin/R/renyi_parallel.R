@@ -4,6 +4,16 @@ library(scales)  # for alpha in plotting
 library(foreach)
 library(doParallel)
 
+# Description
+cat(
+"This script finds non-linearly correlated gene-pairs from a gene expression matirx, 
+by calculating renyi/dCov correlation
+full result saved in ``
+samples of good gene-pair plots saved in flag1/ and flag2/ 
+flag2 uses more strict filters"
+)
+
+
 # Parameters
 fname='../../imputation.sub.csv'
 mode = 'dCov'  # 'renyi', 'dCov'
@@ -13,14 +23,13 @@ matrix_direction = 'cell_row'  # cell_row/gene_row
 
 # Thresholds
 min_samples = 200 # 200
-
 min_pearsonr = -0.1 #disabled
 max_pearsonr = 0.4 #Renyi:0.5; dCov: 0.4
 
 min_nl_corr_xy = 0.2 #flag1: renyi: 0.4-0.6; dCov: 0.2
 min_nl_ratio = 1.0 #flag2: renyi: 1.1-2; dCov: < 1.0
 
-max_figs = 500
+max_figs = 50  # max figures to plot, other positive results saved in csv
 
 # folders
 getwd()
@@ -38,6 +47,7 @@ df[0:2, 0:2]
 
 # subsampling
 cat('taking sub-sample from cells, sample_size=', subsample_size, '\n')
+
 n_gene = nrow(df)
 n_samples = ncol(df)
 if (subsampling){
@@ -55,6 +65,7 @@ df[0:2, 0:2]
 # main
 count1 = 0
 count2 = 0
+
 # header of csv's
 cat(paste('i', 'j', 'genei', 'genej', 'nl_corr_xy', 'pearson_xy', 'nl_ratio','\n', sep = ','),
     file="results.csv", append=TRUE)
@@ -74,7 +85,8 @@ cat('ncpu:', ncpu,'\n')
 foreach (i=1:n_gene) %dopar%{
       genei =  row.names(df)[i]
       cat('i:', i, genei, '\n')
-      
+
+      # zero -> NA for gene-i   
       x = t(df[i, ])
       x[x == 0] <- NA
       x_sd = sd(x, na.rm=T)
@@ -93,21 +105,25 @@ foreach (i=1:n_gene) %dopar%{
             genej =  row.names(df)[j]
             cat('i:', i, 'j:', j, genei, genej, '\n')
             
+            
             y = t(df[j,])
             y[y == 0] <- NA
             y_sd = sd(y, na.rm=T)
             
+            # zero -> NA for gene-j     
             if (is.na(y_sd)||y_sd == 0){
                   cat('next: y_sd issue\n')
                   next
             }
             
             # Remove NA if one in genei/genej is NA
+            # Excluding zeros from non-linear corr calculation
             xy = df[c(i, j),]
             xy[xy == 0] = NA
             xy = t(xy)
             xy = na.omit(xy)
             xy = t(xy)
+            
             if (dim(xy)[2] < min_samples){
                   cat('next: xy_too_short issue, dim(xy)', dim(xy), '\n')
                   next
@@ -115,8 +131,10 @@ foreach (i=1:n_gene) %dopar%{
             x = xy[1,]
             y = xy[2,]
             
-            # Cal corrs
+            # Pearsonr
             pearson_xy <- round(cor(x, y), 3)
+            
+            # Exception filters
             if (is.na(pearson_xy)){
                   cat('pearson_xy is NA\n')
                   next
@@ -127,6 +145,8 @@ foreach (i=1:n_gene) %dopar%{
                   next
             }
             
+            
+            # Non-linear corr
             if (mode == 'dCov'){
                   dCov_xy <- round(dcov(x, y), 3) #slow
                   nl_corr_xy = dCov_xy
@@ -138,12 +158,13 @@ foreach (i=1:n_gene) %dopar%{
                   stop('mode err')
             }
             
+            # Exception filter
             if(any(is.na(nl_corr_xy))){
                   cat('nl_corr is NA\n')
                   next
             }
             
-            # if there were no issues
+            # if there were no issues, save result
             nl_ratio = abs(nl_corr_xy / pearson_xy)
             cat(paste(i, j, genei, genej, nl_corr_xy, pearson_xy, nl_ratio,'\n', sep = ','),
                 file="results.csv", append=TRUE)
