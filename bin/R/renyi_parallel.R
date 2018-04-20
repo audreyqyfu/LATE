@@ -7,7 +7,7 @@ library(doParallel)
 # Description
 cat(
 "This script finds non-linearly correlated gene-pairs from a gene expression matirx, 
-by calculating renyi/dCov correlation
+by calculating renyi/dCor correlation
 full result saved in ``
 samples of good gene-pair plots saved in flag1/ and flag2/ 
 flag2 uses more strict filters"
@@ -16,18 +16,18 @@ flag2 uses more strict filters"
 
 # Parameters
 fname='../../imputation.sub.csv'
-mode = 'dCov'  # 'renyi', 'dCov'
+mode = 'dCor'  # 'renyi', 'dCor'
 subsampling = T  # T/F
-subsample_size = 2500 # renyi: 5000; dCov: 2500
+subsample_size = 2500 # renyi: 5000; dCor: 2500
 matrix_direction = 'cell_row'  # cell_row/gene_row
 
 # Thresholds
 min_samples = 200 # 200
 min_pearsonr = -0.1 #disabled
-max_pearsonr = 0.4 #Renyi:0.5; dCov: 0.4
+max_pearsonr = 0.4 #Renyi:0.5; dCor: 0.4
 
-min_nl_corr_xy = 0.2 #flag1: renyi: 0.4-0.6; dCov: 0.2
-min_nl_ratio = 1.0 #flag2: renyi: 1.1-2; dCov: < 1.0
+min_nl_corr_xy = 0.2 #flag1: renyi: 0.4-0.6; dCor: 0.2
+min_nl_ratio = 1.0 #flag2: renyi: 1.1-2; dCor: < 1.0
 
 max_figs = 50  # max figures to plot, other positive results saved in csv
 
@@ -147,9 +147,9 @@ foreach (i=1:n_gene) %dopar%{
             
             
             # Non-linear corr
-            if (mode == 'dCov'){
-                  dCov_xy <- round(dcov(x, y), 3) #slow
-                  nl_corr_xy = dCov_xy
+            if (mode == 'dCor'){
+                  dCor_xy <- round(dcor(x, y), 3) #slow
+                  nl_corr_xy = dCor_xy
             } else if (mode == 'renyi'){
                   ace_xy <- ace(x,y)
                   renyi_xy <- round(ace_xy$rsq, 3)
