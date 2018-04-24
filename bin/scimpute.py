@@ -680,6 +680,44 @@ def gene_pair_plot(df, list, tag, dir='./plots'):
                      dir=dir)
 
 
+def cluster_scatterplot(df2d, labels, title):
+    '''
+    PCA or t-SNE 2D visualization
+    
+    `cluster_scatterplot(tsne_projection, cluster_info.Cluster.values.astype(int),
+                    title='projection.csv t-SNE')`
+                    
+    :param df2d: PCA or t-SNE projection df, cell as row, feature as columns
+    :param labels: 
+    :param title: 
+    :return: 
+    '''
+    legends = np.unique(labels)
+    print('all labels:', legends)
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = plt.subplot(111)
+
+    for i in legends:
+        _ = df2d.iloc[labels == i]
+        num_cells = str(len(_))
+        percent_cells = str(round(int(num_cells) / len(df2d) * 100, 1)) + '%'
+        ax.scatter(_.iloc[:, 0], _.iloc[:, 1],
+                   alpha=0.5, marker='.',
+                   label='c' + str(i) + ':' + num_cells + ', ' + percent_cells
+                   )
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.title(title)
+    plt.xlabel('legend format:  cluster_id:num-cells')
+
+    plt.savefig(title + '.png', bbox_inches='tight')
+    plt.show()
+    plt.close('all')
+
+
 def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="rainbow",
                 vmin=None, vmax=None, xlab='', ylab='', dir='plots'):
     '''heatmap visualization of 2D matrix, with plt.imshow(), in a square manner
