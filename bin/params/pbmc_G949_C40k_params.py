@@ -16,7 +16,7 @@ ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
 
 # DATA SPLIT PROPORTION
-[a, b, c] = [0.85, 0.15, 0]  # train/valid/test
+[a, b, c] = [0.7, 0.15, 0.15]  # train/valid/test
 
 # MODE
 mse_mode = 'mse_nz'  # mse, mse_nz
