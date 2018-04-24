@@ -153,15 +153,15 @@ print('Max in G is {}, Min in G is{}'.format(max_g, min_g))
 
 mse1_omega = scimpute.mse_omega(Y, X)
 mse1_omega = round(mse1_omega, 7)
-print('MSE_NZ between Imputation and Input: ', mse1_omega)
+print('MSE1_NZ between Imputation and Input: ', mse1_omega)
 
 mse2_omega = scimpute.mse_omega(Y, G)
 mse2_omega = round(mse2_omega, 7)
-print('MSE_NZ between Imputation and Ground_truth: ', mse2_omega)
+print('MSE2_NZ between Imputation and Ground_truth: ', mse2_omega)
 
 mse2 = scimpute.mse(Y, G)
 mse2 = round(mse2, 7)
-print('MSE between Imputation and Ground_truth: ', mse2)
+print('MSE2 between Imputation and Ground_truth: ', mse2)
 
 
 
