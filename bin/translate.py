@@ -137,8 +137,10 @@ def save_whole_imputation():
 
                 y_out_batch = sess.run(
                     h,
-                    feed_dict={X: x_out_batch,
-                               pIn_holder: 1, pHidden_holder: 1}
+                    feed_dict={
+                        X: x_out_batch,
+                        pIn_holder: 1, pHidden_holder: 1
+                    }
                 )
                 df_out_batch = pd.DataFrame(
                     data=y_out_batch,
@@ -148,8 +150,11 @@ def save_whole_imputation():
 
                 latent_code = sess.run(
                     a_bottle_neck,
-                    feed_dict={X: x_out_batch.todense(),
-                               pIn_holder: 1, pHidden_holder: 1})
+                    feed_dict={
+                        X: x_out_batch,
+                        pIn_holder: 1, pHidden_holder: 1
+                    }
+                )
                 latent_code_df = pd.DataFrame(
                     data=latent_code,
                     index=cell_ids[range(start_idx, end_idx)]
