@@ -132,18 +132,29 @@ def save_whole_imputation():
                 start_idx = i_*p.sample_size
                 end_idx = min((i_+1)*p.sample_size, m)
                 print('saving:', start_idx, end_idx)
+
                 x_out_batch = input_matrix[start_idx:end_idx, :].todense()
-                y_out_batch = sess.run(h, feed_dict={X: x_out_batch,
-                                                     pIn_holder: 1, pHidden_holder: 1})
-                df_out_batch = pd.DataFrame(data=y_out_batch,
-                                            columns=gene_ids,
-                                            index=cell_ids[range(start_idx, end_idx)]
-                                            )
-                latent_code = sess.run(a_bottle_neck,
-                                       feed_dict={X: input_matrix.todense(),
-                                                  pIn_holder: 1, pHidden_holder: 1})
-                latent_code_df = pd.DataFrame(data=latent_code,
-                                              index=cell_ids)
+
+                y_out_batch = sess.run(
+                    h,
+                    feed_dict={X: x_out_batch,
+                               pIn_holder: 1, pHidden_holder: 1}
+                )
+                df_out_batch = pd.DataFrame(
+                    data=y_out_batch,
+                    columns=gene_ids,
+                    index=cell_ids[range(start_idx, end_idx)]
+                )
+
+                latent_code = sess.run(
+                    a_bottle_neck,
+                    feed_dict={X: x_out_batch.todense(),
+                               pIn_holder: 1, pHidden_holder: 1})
+                latent_code_df = pd.DataFrame(
+                    data=latent_code,
+                    index=cell_ids[range(start_idx, end_idx)]
+                )
+
                 if i_ == 0:
                     df_out_batch.to_csv(handle, float_format='%.6f')
                     latent_code_df.to_csv(handle2, float_format='%.6f')
