@@ -126,6 +126,7 @@ def save_whole_imputation():
         # impute and save whole matrix by mini-batch
         n_out_batches = m//p.sample_size
         print('num_out_batches:', n_out_batches)
+        latent_code_handle = open('./{}/latent_code.{}.csv', 'w')
         with open('./{}/imputation.{}.csv'.format(p.stage, p.stage), 'w') as handle:
             for i_ in range(n_out_batches+1):
                 start_idx = i_*p.sample_size
@@ -138,12 +139,21 @@ def save_whole_imputation():
                                             columns=gene_ids,
                                             index=cell_ids[range(start_idx, end_idx)]
                                             )
+                latent_code = sess.run(a_bottle_neck,
+                                       feed_dict={X: input_matrix.todense(),
+                                                  pIn_holder: 1, pHidden_holder: 1})
+                latent_code_df = pd.DataFrame(data=latent_code,
+                                              index=cell_ids)
                 if i_ == 0:
                     df_out_batch.to_csv(handle, float_format='%.6f')
+                    latent_code_df.to_csv(latent_code_handle, float_format='%.6f')
                     print('RAM usage during mini-batch imputation and saving output: ',
                           '{} M'.format(usage()))
                 else:
                     df_out_batch.to_csv(handle, header=None)
+                    latent_code_df.to_csv(latent_code_handle, header=None)
+        latent_code_handle.close()
+
     else:
         Y_input_arr = sess.run(h, feed_dict={X: input_matrix.todense(),
                                          pIn_holder: 1, pHidden_holder: 1})
