@@ -151,10 +151,16 @@ def save_whole_imputation():
         Y_input_df = pd.DataFrame(data=Y_input_arr,
                                   columns=gene_ids,
                                   index=cell_ids)
+        latent_code = sess.run(a_bottle_neck, feed_dict={X: input_matrix.todense(),
+                                         pIn_holder: 1, pHidden_holder: 1})
+        latent_code_df = pd.DataFrame(data=latent_code,
+                                  index=cell_ids)
         print('RAM usage during whole data imputation and saving output: ',
               '{} M'.format(usage()))
         scimpute.save_hd5(Y_input_df, "{}/imputation.{}.hd5".format(p.stage,
                                                                         p.stage))
+        scimpute.save_hd5(latent_code_df, "{}/latent_code.{}.hd5".format(p.stage,
+                                                                    p.stage))
 
 
 def save_model():    # save model
