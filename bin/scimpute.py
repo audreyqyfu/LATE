@@ -35,6 +35,19 @@ def read_csv(fname):
     print("reading took {:.1f} seconds".format(toc - tic))
     return df
 
+def read_tsv(fname):
+    '''read_csv into pd.df, assuming index_col=0, and header=True'''
+    print('reading ', fname)
+    tic = time.time()
+    df = pd.read_csv(fname, index_col=0, delimiter='\t')
+    # print("read matrix: [genes, cells]")
+    print(df.shape)
+    # print(df.axes)
+    if df.shape[0] > 2 and df.shape[1] > 2:
+        print(df.ix[0:3, 0:2])
+    toc = time.time()
+    print("reading took {:.1f} seconds".format(toc - tic))
+    return df
 
 def save_csv(arr, fname):
     '''if fname=x.csv.gz, will be compressed
@@ -152,6 +165,8 @@ def read_data_into_cell_row(fname, orientation, genome='mm10'):
         df_tmp = read_hd5(fname)
     elif fname.endswith('csv'):
         df_tmp = read_csv(fname)
+    elif fname.endswith('tsv'):
+        df_tmp = read_tsv(fname)
     elif fname.endswith('csv.gz'):
         df_tmp = read_csv(fname)
     elif fname.endswith('h5'):  # not hd5
