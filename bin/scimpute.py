@@ -92,6 +92,7 @@ GeneBCMatrix = collections.namedtuple(
 def read_sparse_matrix_from_h5(fname, genome, file_ori):
     '''
     for 10x_genomics h5 file:
+    always transpose into cell_row if gene_row is the input
     https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
     
     :return: cell_row sparse matrix
@@ -188,7 +189,7 @@ def read_data_into_cell_row(fname, orientation='cell_row', genome='mm10'):
     else:
         raise Exception('parameter err: for {}, orientation {} not correctly spelled'.format(fname, orientation))
 
-    print("after transpose")
+    print("after transpose into cell row (if correct file_orientation provided)")
     if fname.endswith('h5'):
         print("shape is {}".format(df_tmp.matrix.shape))
     else:
