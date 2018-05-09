@@ -30,7 +30,7 @@ def read_csv(fname):
     tic = time.time()
     df = pd.read_csv(fname, index_col=0)
     # print("read matrix: [genes, cells]")
-    print(df.shape)
+    print('shape:', df.shape)
     # print(df.axes)
     if df.shape[0] > 2 and df.shape[1] > 2:
         print(df.ix[0:3, 0:2])
@@ -44,7 +44,7 @@ def read_tsv(fname):
     tic = time.time()
     df = pd.read_csv(fname, index_col=0, delimiter='\t')
     # print("read matrix: [genes, cells]")
-    print(df.shape)
+    print('shape:', df.shape)
     # print(df.axes)
     if df.shape[0] > 2 and df.shape[1] > 2:
         print(df.ix[0:3, 0:2])
@@ -56,6 +56,7 @@ def save_csv(arr, fname):
     '''if fname=x.csv.gz, will be compressed
     if fname=x.csv, will not be compressed'''
     tic = time.time()
+    print('saving: ', arr.shape)
     np.savetxt(fname, arr, delimiter=',', newline='\n')
     toc = time.time()
     print("saving" + fname + " took {:.1f} seconds".format(toc - tic))
@@ -63,7 +64,7 @@ def save_csv(arr, fname):
 
 def save_hd5(df, out_name):
     tic = time.time()
-    print('saving', df.shape)
+    print('saving: ', df.shape)
     df.to_hdf(out_name, key='null', mode='w', complevel=9, complib='blosc')
     toc = time.time()
     print("saving" + out_name + " took {:.1f} seconds".format(toc - tic))
@@ -142,6 +143,7 @@ def save_sparse_matrix_to_h5(gbm, filename, genome):
     :return: 
     '''
     flt = tables.Filters(complevel=1)
+    print('saving: ', gbm.matrix.shape)
     with tables.open_file(filename, 'w', filters=flt) as f:
         try:
             group = f.create_group(f.root, genome)
@@ -164,7 +166,7 @@ def read_data_into_cell_row(fname, orientation, genome='mm10'):
     :return: cell_row df
     '''
     tic = time.time()
-    print('reading {} as cell_row data frame'.format(fname))
+    print('reading {} into cell_row data frame'.format(fname))
     if fname.endswith('hd5'):
         df_tmp = read_hd5(fname)
     elif fname.endswith('csv'):
@@ -186,7 +188,7 @@ def read_data_into_cell_row(fname, orientation, genome='mm10'):
     else:
         raise Exception('parameter err: for {}, orientation {} not correctly spelled'.format(fname, orientation))
 
-    print('shape is {}'.format(df_tmp.shape))
+    print("after transformation\nshape is {}".format(df_tmp.shape))
     print('nz_rate is {}'.format(nnzero_rate_df(df_tmp)))
     print('nz_count is {}\n'.format(nnzero_count_df(df_tmp)))
     toc = time.time()
