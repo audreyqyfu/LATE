@@ -11,6 +11,9 @@ import tensorflow as tf
 import collections
 import scipy.sparse as sp_sparse
 import tables
+from sklearn.decomposition import PCA
+# from sklearn.manifold import TSNE  # single core
+from MulticoreTSNE import MulticoreTSNE as TSNE  # MCORE
 
 # Sys
 def usage():
@@ -60,6 +63,7 @@ def save_csv(arr, fname):
 
 def save_hd5(df, out_name):
     tic = time.time()
+    print('saving', df.shape)
     df.to_hdf(out_name, key='null', mode='w', complevel=9, complib='blosc')
     toc = time.time()
     print("saving" + out_name + " took {:.1f} seconds".format(toc - tic))
@@ -72,7 +76,7 @@ def read_hd5(in_name):
     '''
     print('reading: ', in_name)
     df = pd.read_hdf(in_name)
-    print(df.shape)
+    print('read', df.shape)
     # print(df.axes)
     if df.shape[0] > 2 and df.shape[1] > 2:
         print(df.ix[0:3, 0:2])
@@ -472,6 +476,7 @@ def nnzero_rate_df(df):
     nnzero_rate = round(sum(sum(idx.values)) / df.size, 3)
     return nnzero_rate
 
+
 def nnzero_count_df(df):
     idx = df != 0
     nnzero_count = sum(sum(idx.values))
@@ -512,7 +517,7 @@ def square_err_omega(arr, arr_ground_truth):
 
 def mse_omega(arr_h, arr_m):
     '''arr and df both works'''
-    omega = np.sign(arr_m)
+    omega = np.sign(arr_m)  # if x>0, 1; elif x == 0, 0;
     diff = np.subtract(arr_h, arr_m)
     squared = np.power(diff, 2)
     non_zero_squared = np.multiply(squared, omega)
@@ -732,10 +737,6 @@ def cluster_scatterplot(df2d, labels, title):
     plt.show()
     plt.close('all')
 
-# PCA tSNE
-from sklearn.decomposition import PCA
-# from sklearn.manifold import TSNE  # single core
-from MulticoreTSNE import MulticoreTSNE as TSNE  # MCORE
 
 def pca_tsne(X, cluster_info, title='title', num_pc=50, num_tsne=2, ncores=8):
     '''
