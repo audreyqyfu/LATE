@@ -158,7 +158,7 @@ def save_sparse_matrix_to_h5(gbm, filename, genome):
             raise Exception("Failed to write H5 file.")
 
 
-def read_data_into_cell_row(fname, orientation, genome='mm10'):
+def read_data_into_cell_row(fname, orientation='cell_row', genome='mm10'):
     '''
     read hd5 or csv, into cell_row format
     :param fname: 
