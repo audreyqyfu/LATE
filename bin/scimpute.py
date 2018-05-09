@@ -176,7 +176,7 @@ def read_data_into_cell_row(fname, orientation='cell_row', genome='mm10'):
     elif fname.endswith('csv.gz'):
         df_tmp = read_csv(fname)
     elif fname.endswith('h5'):  # not hd5
-        df_tmp = read_sparse_matrix_from_h5(fname, genome)
+        df_tmp = read_sparse_matrix_from_h5(fname, genome=genome, file_ori=orientation)
         print('sparse_matrix have been read')
     else:
         raise Exception('file name not ending in hd5 nor csv, not recognized')
