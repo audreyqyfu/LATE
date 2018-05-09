@@ -188,9 +188,13 @@ def read_data_into_cell_row(fname, orientation='cell_row', genome='mm10'):
     else:
         raise Exception('parameter err: for {}, orientation {} not correctly spelled'.format(fname, orientation))
 
-    print("after transformation\nshape is {}".format(df_tmp.shape))
-    print('nz_rate is {}'.format(nnzero_rate_df(df_tmp)))
-    print('nz_count is {}\n'.format(nnzero_count_df(df_tmp)))
+    print("after transpose")
+    if fname.endswith('h5'):
+        print("shape is {}".format(df_tmp.matrix.shape))
+    else:
+        print("shape is {}".format(df_tmp.shape))
+        print('nz_rate is {}'.format(nnzero_rate_df(df_tmp)))
+        print('nz_count is {}\n'.format(nnzero_count_df(df_tmp)))
     toc = time.time()
     print("reading took {:.1f} seconds".format(toc - tic))
     return df_tmp
