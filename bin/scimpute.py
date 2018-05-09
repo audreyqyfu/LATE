@@ -110,6 +110,8 @@ def read_sparse_matrix_from_h5(fname, genome, file_ori):
             matrix = sp_sparse.csc_matrix(
                 (dsets['data'], dsets['indices'], dsets['indptr']),
                 shape=dsets['shape'])
+            print('shape is {}'.format(matrix.shape))
+
             if file_ori == 'cell_row':
                 pass
             elif file_ori == 'gene_row':
@@ -121,7 +123,6 @@ def read_sparse_matrix_from_h5(fname, genome, file_ori):
             nz_count = len(obj.matrix.nonzero()[0])
             nz_rate = nz_count / (obj.matrix.shape[0] * obj.matrix.shape[1])
             nz_rate = round(nz_rate, 3)
-            print('shape is {}'.format(obj.matrix.shape))
             print('nz_rate is {}'.format(nz_rate))
             print('nz_count is {}\n'.format(nz_count))
             toc = time.time()
