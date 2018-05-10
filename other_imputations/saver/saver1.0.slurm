@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
-#SBATCH -p long --mem=100G
+#SBATCH -p long --mem=128G
 
 # PREP GENERAL
 date
