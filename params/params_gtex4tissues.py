@@ -63,7 +63,7 @@ elif mode == 'impute':
     run_flag = 'impute'
 else:
     stage = 'result_analysis'
-    run_flag = 'result_analysis'
+    run_flag = 'impute'
     print('The mode you entered can not be recognized by translate.py for '
           'imputation')
     print('It can only be used for result_analysis.py')
