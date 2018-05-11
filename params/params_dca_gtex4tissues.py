@@ -10,12 +10,12 @@ mode = 'DCA'  # pre-training, translate, late, impute
 
 # DATA (the input file should contain index and header)
 # PBMC_G949 [hd5/csv]
-fname_input = home + '/data/cell_row/gtex_v7.4tissues.msk90.csv'
+fname_input = home + '/data/cell_row/gtex_v7.4tissues.msk90.hd5'
 name_input = 'GTEx_4Tissues_MSK'
 ori_input = 'cell_row'
 transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
-fname_ground_truth = home + '/data/cell_row/gtex_v7.4tissues.csv'
+fname_ground_truth = home + '/data/cell_row/gtex_v7.4tissues.hd5'
 name_ground_truth = 'GTEx_4Tissues'
 ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log

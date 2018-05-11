@@ -10,12 +10,12 @@ mode = 'DCA'  # pre-training, translate, late, impute
 
 # DATA (the input file should contain index and header)
 # PBMC_G949 [hd5/csv]
-fname_input = home + '/data/cell_row/pbmc.g949_c21k.msk90.csv'
+fname_input = home + '/data/cell_row/pbmc.g949_c21k.msk90.hd5'
 name_input = 'pbmc.g949_c21k.msk'
 ori_input = 'cell_row'
 transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
-fname_ground_truth = home + '/data/cell_row/pbmc.g949_c21k.csv'
+fname_ground_truth = home + '/data/cell_row/pbmc.g949_c21k.hd5'
 name_ground_truth = 'pbmc.g949_c21k'
 ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
