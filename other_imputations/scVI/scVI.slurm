@@ -42,9 +42,3 @@ date
 everything_end=$SECONDS
 duration=$((everything_end - everything_start))
 echo "everything duration: $(($duration / 60))min $(($duration % 60))s"
-
-
-# LOG RAM USAGE, AND MORE
-# sacct --format="JobID, JobName, Partition, AllocCPUS, ReqMem, AveVmSize,
-MaxVmSize, State, ExitCode" > sacct.txt
-# sacct --format="ALL" >> sacct.txt
