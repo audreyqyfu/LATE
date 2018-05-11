@@ -1,8 +1,9 @@
 #!/bin/bash
+#SBATCH -
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -p gpu-long --gres=gpu:1 --mem=102G
-# #SBATCH --nodelist=n105
+##SBATCH --nodelist=n105
 
 
 # PREP GENERAL
@@ -45,5 +46,8 @@ everything_end=$SECONDS
 duration=$((everything_end - everything_start))
 echo "everything duration: $(($duration / 60))min $(($duration % 60))s"
 
+sacct --format="JobID, JobName, Partition, AllocCPUS, ReqMem, AveVmSize,
+MaxVmSize, State, ExitCode" > sacct.txt
+sacct --format="ALL" >> sacct.txt
 
 # THIS IS A TEMPLATE: sbatch; log timing, hostname, cpu, gpu

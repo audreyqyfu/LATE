@@ -18,7 +18,7 @@ df[0:3, 0:3]
 
 # run in parallel
 library(doParallel)
-cl <- makeCluster(8, outfile = "")
+cl <- makeCluster(4, outfile = "")
 registerDoParallel(cl)
 saver5 <- saver(df)
 gc(verbose=TRUE) #RAM usage
