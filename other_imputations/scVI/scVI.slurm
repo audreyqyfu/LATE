@@ -1,9 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name='scVI_Run'
+#SBATCH --job-name='scVI325kC'
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
 ##SBATCH -p gpu-long --gres=gpu:1 --mem=100G
 #SBATCH -p reg --nodes=1 --ntasks-per-node=8 --mem=50GB
+## SBATCH -p reg --nodes=1 --ntasks-per-node=16 --mem=150GB # for large dataset
+
 
 # PREP GENERAL
 date
