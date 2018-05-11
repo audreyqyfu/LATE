@@ -3,21 +3,31 @@ import sys
 import time
 home = os.environ['HOME']
 
+# MODE
+mse_mode = 'mse_nz'  # mse, mse_nz
+mode = 'late'  # pre-training, translate, late, impute
+# takes 'scVI/DCA/anything' for result_analysis.py
+
 # DATA (the input file should contain index and header)
-# PBMC_G949
-fname_input = home + '/imputation/data/10x_human_pbmc_68k/filtering/msk/' \
-                     '10x_human_pbmc_68k.nz40.msk90.hd5'
-name_input = 'pbmc_g949_msk'
-ori_input = 'gene_row'
+# PBMC_G949 [hd5/csv]
+fname_input = home + '/data/cell_row/pbmc.g949_c21k.msk90.hd5'
+name_input = 'pbmc_g949_c21k_msk'
+ori_input = 'cell_row'
 transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
-fname_ground_truth = home + '/imputation/data/10x_human_pbmc_68k/filtering/' \
-                            '10x_human_pbmc_68k.g949.hd5'
-name_ground_truth = 'pbmc_g949'
+fname_ground_truth = home + '/data/cell_row/pbmc.g949_c21k.hd5'
+name_ground_truth = 'pbmc_g949_c21k'
 ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
 
-# # Mouse Brain Small
+# For result analysis
+fname_imputation = './step2/imputation.step2.hd5'  # can be changed
+name_imputation = '{}_({})'.format(name_input, mode)
+ori_imputation = 'cell_row'  # gene_row/cell_row
+transformation_imputation = 'as_is'
+tag = 'Eval'  # folder name for analysis results
+
+# # Mouse Brain Small [h5 from 10x-genomics]
 # fname_input = home + '/imputation/data/10x_mouse_brain_1.3M/20k/' \
 #               'mouse_brain.10kg.h5'
 # genome_input = 'mm10'  # only for 10x_genomics sparse matrix h5 data
@@ -33,9 +43,6 @@ transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_
 # DATA SPLIT PROPORTION
 [a, b, c] = [0.7, 0.15, 0.15]  # train/valid/test
 
-# MODE
-mse_mode = 'mse_nz'  # mse, mse_nz
-mode = 'late'  # pre-training, translate, late, impute
 
 # Automated Process
 if mode == 'pre-training':
@@ -55,7 +62,11 @@ elif mode == 'impute':
     stage = 'impute'
     run_flag = 'impute'
 else:
-    raise Exception('mode err')
+    stage = 'result_analysis'
+    run_flag = 'result_analysis'
+    print('The mode you entered can not be recognized by translate.py for '
+          'imputation')
+    print('It can only be used for result_analysis.py')
 
 # HYPER PARAMETERS
 L = 5  # 3/5/7
@@ -132,11 +143,7 @@ print()
 
 # FOR RESULT ANALYSIS
 if 'result_analysis.py' in sys.argv[0]:
-    fname_imputation = './step2/imputation.step2.hd5'
-    name_imputation = '{}_({})'.format(name_input, mode)
-    ori_imputation = 'cell_row'  # gene_row/cell_row
-    transformation_imputation = 'as_is'
-    tag = 'Eval'  # folder name for analysis results
+
 
     pair_list = [
         # TEST
