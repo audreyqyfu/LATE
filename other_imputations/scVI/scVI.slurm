@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name='scVI'
+#SBATCH --job-name='scVI_Run'
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
 ##SBATCH -p gpu-long --gres=gpu:1 --mem=100G
-#SBATCH -p short --nodes=1 --ntasks-per-node=8 --mem=50GB
+#SBATCH -p reg --nodes=1 --ntasks-per-node=8 --mem=50GB
 
 # PREP GENERAL
 date
@@ -14,6 +14,7 @@ totalm=$(free -m | awk '/^Mem:/{print $2}') ; echo 'RAM' $totalm 'MB'
 
 # PREP SPECIFIC
 source activate py27
+cp ~/bin/scVI/* .  #modules
 
 
 # RUN
@@ -42,6 +43,6 @@ echo "everything duration: $(($duration / 60))min $(($duration % 60))s"
 
 
 # LOG RAM USAGE, AND MORE
-sacct --format="JobID, JobName, Partition, AllocCPUS, ReqMem, AveVmSize,
+# sacct --format="JobID, JobName, Partition, AllocCPUS, ReqMem, AveVmSize,
 MaxVmSize, State, ExitCode" > sacct.txt
-sacct --format="ALL" >> sacct.txt
+# sacct --format="ALL" >> sacct.txt
