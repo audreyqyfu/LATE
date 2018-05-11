@@ -81,8 +81,6 @@ std_ratio_yg_df = pd.DataFrame(data= y_std_df.values / g_std_df.values,
 
 std_min = min(y_std_df.min(), x_std_df.min(), g_std_df.min())
 std_max = max(y_std_df.max(), x_std_df.max(), g_std_df.max())
-
-
 scimpute.hist_df(
     y_std_df,
     xlab='STD(Imputation)', title='STD Imputation({})'.format(p.name_imputation),
@@ -189,11 +187,11 @@ scimpute.heatmap_vis(G.values,
 
 # PCA, tSNE
 tsne_df = scimpute.pca_tsne(df_cell_row=Y, cluster_info=None,#todo add cluster info
-                            title=p.name_imputation)
+                            title=p.name_imputation, dir=p.tag)
 tsne_df = scimpute.pca_tsne(df_cell_row=X, cluster_info=None,
-                            title=p.name_input)
+                            title=p.name_input, dir=p.tag)
 tsne_df = scimpute.pca_tsne(df_cell_row=G, cluster_info=None,
-                            title=p.name_ground_truth)
+                            title=p.name_ground_truth, dir=p.tag)
 
 
 # Gene/Pair plots
@@ -263,6 +261,34 @@ for j in p.gene_list:
                           ylabel='Input',
                           dir=gene_dir
                           )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # # weight clustmap
 # os.system(

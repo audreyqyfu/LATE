@@ -413,10 +413,12 @@ def subsample_matrix(gbm, barcode_indices):
                         gbm.barcodes[barcode_indices],
                         gbm.matrix[:, barcode_indices])
 
+
 def subgene_matrix(gbm, gene_indices):
     return GeneBCMatrix(gbm.gene_ids[gene_indices], gbm.gene_names[gene_indices],
                         gbm.barcodes,
                         gbm.matrix[gene_indices, :])
+
 
 def get_expression(gbm, gene_name):
     gene_indices = np.where(gbm.gene_names == gene_name)[0]
@@ -746,10 +748,10 @@ def cluster_scatterplot(df2d, labels, title):
     plt.close('all')
 
 
-def pca_tsne(df_cell_row, cluster_info=None, title='data', num_pc=50, num_tsne=2,
-             ncores=8):
+def pca_tsne(df_cell_row, cluster_info=None, title='data', dir='plots',
+             num_pc=50, num_tsne=2, ncores=8):
     '''
-    
+    PCA and tSNE plots for DF_cell_row, save projections.csv
     :param df_cell_row: data matrix, features as columns, e.g. [cell, gene] 
     :param cluster_info: cluster_id for each cell_id
     :param title: figure title, e.g. Late
@@ -757,6 +759,12 @@ def pca_tsne(df_cell_row, cluster_info=None, title='data', num_pc=50, num_tsne=2
     :param num_tsne: 2
     :return: tsne_df, plots saved, pc_projection.csv, tsne_projection.csv saved
     '''
+
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+    title = './'+dir+'/'+title
+
     df = df_cell_row
     if cluster_info == None:
         cluster_info = pd.DataFrame(0, index=df.index, columns=['cluster_id'])
