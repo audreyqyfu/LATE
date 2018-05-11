@@ -21,6 +21,8 @@ ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
 
 # For result analysis
+cluster_file = home + '/data/pbmc_40kC_10clusters.csv'
+
 fname_imputation = 'default_dca/mean.tsv'  # can be changed
 name_imputation = '{}_({})'.format(name_input, mode)
 ori_imputation = 'cell_row'  # gene_row/cell_row

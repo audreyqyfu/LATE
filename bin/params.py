@@ -21,6 +21,10 @@ ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
 
 # For result analysis
+# cluster_info.csv with cell_id as index and cluster_id as 1st column
+cluster_file = None  # path or None (no coloring of tSNE)
+# cluster_file = home + '/data/pbmc_40kC_10clusters.csv'
+
 fname_imputation = './step2/imputation.step2.hd5'  # can be changed
 name_imputation = '{}_({})'.format(name_input, mode)
 ori_imputation = 'cell_row'  # gene_row/cell_row

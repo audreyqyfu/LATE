@@ -186,11 +186,11 @@ scimpute.heatmap_vis(G.values,
                      dir=p.tag)
 
 # PCA, tSNE
-tsne_df = scimpute.pca_tsne(df_cell_row=Y, cluster_info=None,#todo add cluster info
+tsne_df = scimpute.pca_tsne(df_cell_row=Y, cluster_info=p.cluster_file,
                             title=p.name_imputation, dir=p.tag)
-tsne_df = scimpute.pca_tsne(df_cell_row=X, cluster_info=None,
+tsne_df = scimpute.pca_tsne(df_cell_row=X, cluster_info=p.cluster_file,
                             title=p.name_input, dir=p.tag)
-tsne_df = scimpute.pca_tsne(df_cell_row=G, cluster_info=None,
+tsne_df = scimpute.pca_tsne(df_cell_row=G, cluster_info=p.cluster_file,
                             title=p.name_ground_truth, dir=p.tag)
 
 
