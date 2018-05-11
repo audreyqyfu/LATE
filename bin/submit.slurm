@@ -2,7 +2,7 @@
 #SBATCH --job-name='imputation'
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
-#SBATCH -p gpu-long --gres=gpu:1 --mem=102G
+#SBATCH -p gpu-long --gres=gpu:1 --ntasks-per-node=8 --mem=102G
 ##SBATCH --nodelist=n105
 #SBATCH --time=7-00:00:00
 

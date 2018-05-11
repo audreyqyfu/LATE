@@ -165,7 +165,7 @@ print('MSE2 between Imputation and Ground_truth: ', mse2)
 
 
 
-#  VISUALIZATION OF DFS, todo clustering based on Y
+#  VISUALIZATION OF DFS
 print('\n> Visualization of dfs')
 max, min = scimpute.max_min_element_in_arrs([Y.values, G.values, X.values])
 scimpute.heatmap_vis(Y.values,
@@ -186,6 +186,14 @@ scimpute.heatmap_vis(G.values,
                          mse2_omega),
                      ylab='cells', vmax=max, vmin=min,
                      dir=p.tag)
+
+# PCA, tSNE
+tsne_df = scimpute.pca_tsne(df_cell_row=Y, cluster_info=None,#todo add cluster info
+                            title=p.name_imputation)
+tsne_df = scimpute.pca_tsne(df_cell_row=X, cluster_info=None,
+                            title=p.name_input)
+tsne_df = scimpute.pca_tsne(df_cell_row=G, cluster_info=None,
+                            title=p.name_ground_truth)
 
 
 # Gene/Pair plots

@@ -746,44 +746,50 @@ def cluster_scatterplot(df2d, labels, title):
     plt.close('all')
 
 
-def pca_tsne(X, cluster_info, title='title', num_pc=50, num_tsne=2, ncores=8):
+def pca_tsne(df_cell_row, cluster_info=None, title='data', num_pc=50, num_tsne=2,
+             ncores=8):
     '''
     
-    :param X: data matrix, features as columns, e.g. [cell, gene] 
+    :param df_cell_row: data matrix, features as columns, e.g. [cell, gene] 
     :param cluster_info: cluster_id for each cell_id
     :param title: figure title, e.g. Late
     :param num_pc: 50
     :param num_tsne: 2
-    :return: plots saved, and X_tSNE_df
+    :return: tsne_df, plots saved, pc_projection.csv, tsne_projection.csv saved
     '''
+    df = df_cell_row
+    if cluster_info == None:
+        cluster_info = pd.DataFrame(0, index=df.index, columns=['cluster_id'])
+
     tic = time.time()
     pca = PCA(n_components=num_pc)
-    pc_x = pca.fit_transform(X)
-    X_pc_df = pd.DataFrame(data = pc_x, index=X.index, columns=range(num_pc))
-    X_pc_df.index.name='cell_id'
-    X_pc_df.columns.name='PC'
-#     print(X_pc_df.head(2))
-    print('dim before PCA', X.shape)
-    print('dim after PCA', X_pc_df.shape)
+    pc_x = pca.fit_transform(df)
+    df_pc_df = pd.DataFrame(data=pc_x, index=df.index, columns=range(num_pc))
+    df_pc_df.index.name = 'cell_id'
+    df_pc_df.columns.name = 'PC'
+    df_pc_df.to_csv(title+'.pc_projection.csv')
+#     print(df_pc_df.head(2))
+    print('dim before PCA', df.shape)
+    print('dim after PCA', df_pc_df.shape)
     print('explained variance ratio: {}'.format(
         sum(pca.explained_variance_ratio_)))
 
-    colors = cluster_info.reindex(X_pc_df.index)
+    colors = cluster_info.reindex(df_pc_df.index)
     colors = colors.dropna().iloc[:, 0]
     colors.head()
 
-    X_pc_ = X_pc_df.reindex(colors.index)  # only 40k cells in cluster_info
-    cluster_scatterplot(X_pc_, colors.values.astype(int), title= title+' (PCA)')
+    df_pc_ = df_pc_df.reindex(colors.index)  # only 40k cells in cluster_info
+    cluster_scatterplot(df_pc_, colors.values.astype(int), title=title+' (PCA)')
 
     # tSNE
     print('MCORE-TSNE, with ', ncores, ' cores')
-    X_tsne = TSNE(n_components=num_tsne, n_jobs=ncores).fit_transform(X_pc_)
-    X_tsne_df = pd.DataFrame(data=X_tsne, index=X_pc_.index)
-    cluster_scatterplot(X_tsne_df, colors.values.astype(int), title=title+' (t-SNE)')
+    df_tsne = TSNE(n_components=num_tsne, n_jobs=ncores).fit_transform(df_pc_)
+    df_tsne_df = pd.DataFrame(data=df_tsne, index=df_pc_.index)
+    cluster_scatterplot(df_tsne_df, colors.values.astype(int), title=title+' (t-SNE)')
     toc = time.time()
     print('PCA and tSNE took {:.1f} seconds\n'.format(toc-tic))
 
-    return X_tsne_df
+    return df_tsne_df
 
 
 def heatmap_vis(arr, title='visualization of matrix in a square manner', cmap="rainbow",
