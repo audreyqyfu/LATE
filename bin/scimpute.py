@@ -819,19 +819,17 @@ def pca_tsne(df_cell_row, cluster_info=None, title='data', dir='plots',
     title = './'+dir+'/'+title
 
     df = df_cell_row
-    if cluster_info:
-        pass
-    else:  # None
+    if cluster_info is None:
         cluster_info = pd.DataFrame(0, index=df.index, columns=['cluster_id'])
 
     tic = time.time()
+    # PCA
     pca = PCA(n_components=num_pc)
     pc_x = pca.fit_transform(df)
     df_pc_df = pd.DataFrame(data=pc_x, index=df.index, columns=range(num_pc))
     df_pc_df.index.name = 'cell_id'
     df_pc_df.columns.name = 'PC'
-    df_pc_df.to_csv(title+'.pc_projection.csv')
-#     print(df_pc_df.head(2))
+    df_pc_df.to_csv(title+'.pca.csv')
     print('dim before PCA', df.shape)
     print('dim after PCA', df_pc_df.shape)
     print('explained variance ratio: {}'.format(
@@ -839,16 +837,19 @@ def pca_tsne(df_cell_row, cluster_info=None, title='data', dir='plots',
 
     colors = cluster_info.reindex(df_pc_df.index)
     colors = colors.dropna().iloc[:, 0]
+    print('matched cluster_info:', colors.shape)
     colors.head()
 
-    df_pc_ = df_pc_df.reindex(colors.index)  # only 40k cells in cluster_info
-    cluster_scatterplot(df_pc_, colors.values.astype(int), title=title+' (PCA)')
+    df_pc_ = df_pc_df.reindex(colors.index)  # only plot labeled data?
+    cluster_scatterplot(df_pc_, colors.values.astype(str), title=title+' (PCA)')
 
     # tSNE
     print('MCORE-TSNE, with ', ncores, ' cores')
     df_tsne = TSNE(n_components=num_tsne, n_jobs=ncores).fit_transform(df_pc_)
     df_tsne_df = pd.DataFrame(data=df_tsne, index=df_pc_.index)
-    cluster_scatterplot(df_tsne_df, colors.values.astype(int), title=title+' (t-SNE)')
+    df_pc_df.to_csv(title+'.tsne.csv')
+    cluster_scatterplot(df_tsne_df, colors.values.astype(str), title=title+' ('
+                                                                           't-SNE)')
     toc = time.time()
     print('PCA and tSNE took {:.1f} seconds\n'.format(toc-tic))
 
