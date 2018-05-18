@@ -186,7 +186,11 @@ scimpute.heatmap_vis(G.values,
                      dir=p.tag)
 
 # PCA, tSNE
-cluster_info = scimpute.read_data_into_cell_row(p.cluster_file)
+print('\n> PCA and TSNE')
+if p.cluster_file:
+    cluster_info = scimpute.read_data_into_cell_row(p.cluster_file)
+else:
+    cluster_info = None
 
 tsne_df = scimpute.pca_tsne(df_cell_row=Y, cluster_info=cluster_info,
                             title=p.name_imputation, dir=p.tag)

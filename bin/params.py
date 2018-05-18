@@ -156,6 +156,27 @@ if 'result_analysis.py' in sys.argv[0]:
         # # PBMC G5561 Non-Linear
         # ['ENSG00000173372',
         # 'ENSG00000087086'],
+        #
+        # ['ENSG00000231389',
+        # 'ENSG00000090382'],
+        #
+        # ['ENSG00000158869',
+        # 'ENSG00000090382'],
+        #
+        # ['ENSG00000074800',
+        # 'ENSG00000019582'],
+        #
+        # ['ENSG00000157873',
+        # 'ENSG00000169583'],
+        #
+        # ['ENSG00000065978',
+        # 'ENSG00000139193'],
+        #
+        # ['ENSG00000117450',
+        # 'ENSG00000133112'],
+        #
+        # ['ENSG00000155366',
+        # 'ENSG00000167996'],
     ]
 
     gene_list = [gene for pair in pair_list for gene in pair]
