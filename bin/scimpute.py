@@ -847,7 +847,7 @@ def pca_tsne(df_cell_row, cluster_info=None, title='data', dir='plots',
     print('MCORE-TSNE, with ', ncores, ' cores')
     df_tsne = TSNE(n_components=num_tsne, n_jobs=ncores).fit_transform(df_pc_)
     df_tsne_df = pd.DataFrame(data=df_tsne, index=df_pc_.index)
-    df_pc_df.to_csv(title+'.tsne.csv')
+    df_tsne_df.to_csv(title+'.tsne.csv')
     cluster_scatterplot(df_tsne_df, colors.values.astype(str), title=title+' ('
                                                                            't-SNE)')
     toc = time.time()
