@@ -15,7 +15,7 @@ name_input = 'mbm_magic_msk'
 ori_input = 'cell_row'
 transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
-fname_ground_truth = home + '/data/cell_row/MBM.MAGIC.9k.B.hd5
+fname_ground_truth = home + '/data/cell_row/MBM.MAGIC.9k.B.hd5'
 name_ground_truth = 'mbm_magic'
 ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
