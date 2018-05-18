@@ -819,7 +819,9 @@ def pca_tsne(df_cell_row, cluster_info=None, title='data', dir='plots',
     title = './'+dir+'/'+title
 
     df = df_cell_row
-    if cluster_info == None:
+    if cluster_info:
+        pass
+    else:  # None
         cluster_info = pd.DataFrame(0, index=df.index, columns=['cluster_id'])
 
     tic = time.time()

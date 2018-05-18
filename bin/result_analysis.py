@@ -192,12 +192,16 @@ if p.cluster_file:
 else:
     cluster_info = None
 
-tsne_df = scimpute.pca_tsne(df_cell_row=Y, cluster_info=cluster_info,
+tsne_df_y = scimpute.pca_tsne(df_cell_row=Y, cluster_info=cluster_info,
                             title=p.name_imputation, dir=p.tag)
-tsne_df = scimpute.pca_tsne(df_cell_row=X, cluster_info=cluster_info,
+tsne_df_x = scimpute.pca_tsne(df_cell_row=X, cluster_info=cluster_info,
                             title=p.name_input, dir=p.tag)
-tsne_df = scimpute.pca_tsne(df_cell_row=G, cluster_info=cluster_info,
+tsne_df_g = scimpute.pca_tsne(df_cell_row=G, cluster_info=cluster_info,
                             title=p.name_ground_truth, dir=p.tag)
+
+tsne_df_y.to_csv('tsne_y.csv')
+tsne_df_x.to_csv('tsne_x.csv')
+tsne_df_g.to_csv('tsne_gt.csv')
 
 
 # Gene/Pair plots
