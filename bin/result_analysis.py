@@ -187,7 +187,7 @@ scimpute.heatmap_vis(G.values,
 
 # PCA, tSNE
 print('\n> PCA and TSNE')
-if p.cluster_file:
+if p.cluster_file is not None:
     cluster_info = scimpute.read_data_into_cell_row(p.cluster_file)
     # cluster_info = cluster_info.astype('str')
 else:

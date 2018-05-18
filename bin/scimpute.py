@@ -838,7 +838,7 @@ def pca_tsne(df_cell_row, cluster_info=None, title='data', dir='plots',
     colors = cluster_info.reindex(df_pc_df.index)
     colors = colors.dropna().iloc[:, 0]
     print('matched cluster_info:', colors.shape)
-    colors.head()
+    print('unmatched data will be excluded from the plot')  # todo: include unmatched
 
     df_pc_ = df_pc_df.reindex(colors.index)  # only plot labeled data?
     cluster_scatterplot(df_pc_, colors.values.astype(str), title=title+' (PCA)')
