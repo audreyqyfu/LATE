@@ -15,7 +15,7 @@ totalm=$(free -m | awk '/^Mem:/{print $2}') ; echo 'RAM' $totalm 'MB'
 
 
 # PREP SPECIFIC
-source activate py27
+# source activate py27  # with this use CPU, without this use GPU
 cp ~/bin/scVI/* .  #modules
 
 
@@ -26,7 +26,7 @@ echo "*--IMPUTATION STARTED--*"
 imputation_start=$SECONDS
 
 # IMPUTATION
-runipy scVI_cmd.ipynb
+runipy -o scVI_cmd.ipynb
 
 echo "*--IMPUTATION FINISHED--*"
 imputation_end=$SECONDS
