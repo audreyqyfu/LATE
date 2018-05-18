@@ -556,6 +556,59 @@ def nz2_corr(x, y):
     return result
 
 
+def gene_mse_nz_from_df(Y, X):
+    '''
+    get gene_mse from gene_expression_df (cell_row, with cell_id as index)
+    X: input/ground-truth
+    Y: imputation
+    return a [gene, 1] pd.series with index of gene_ids 
+    '''
+    mse_df = pd.DataFrame(columns=['gene_name'])
+    for i in range(X.shape[1]):
+        mse_ = scimpute.mse_omega(Y.iloc[:, i], X.iloc[:, i])
+        gene_name = X.columns[i]
+        mse_df.loc[X.columns[i], 'gene_name']= mse_
+    mse_df = mse_df.iloc[:, 0]
+    print(mse_df.head(), '\n', mse_df.shape)
+    return mse_df
+
+
+def combine_gene_imputation_of_two_df(Y1, Y2, metric1, metric2, mode='smaller'):
+    '''
+    Y1, Y2: two imputation results (cell_row, df)
+    Metric1, Metric2: [num-gene, 1], df, same metircs for Y1 and Y2, e.g. MSE, SD
+    select rows of Y1, Y2 into Y_combined
+    mode: smaller/larger (being selected), e.g. smaller MSE, larger SD
+    Output in index/column order of Y1
+    '''
+    if mode == 'smaller':
+        idx_better = metric1 < metric2
+    elif mode == 'larger':
+        idx_better = metric1 > metric2
+    else:
+        raise Exception('mode err')
+    # try:
+    #         idx_better = idx_better.iloc[:, 0]  # df to series, important
+    #     except 'IndexingError':
+    #         pass
+    print('yg_better boolean series:\n', idx_better.head())
+
+    Y_better_lst = [Y1.transpose()[idx_better],
+                    Y2.transpose()[~idx_better]]  # list of frames
+    Y_better = pd.concat(Y_better_lst)
+    Y_better = Y_better.transpose()  # tr back
+    Y_better = Y_better.loc[
+        Y1.index, Y1.columns]  # get Y1 original order, just in case
+
+    print('Y1:\n', Y1.iloc[:5, :3])
+    print('Y2:\n', Y2.iloc[:5, :3])
+    print("metrics1:\n", metric1.iloc[:5])
+    print("metrics2:\n", metric2.iloc[:5])
+    print('Y_combined:\n', Y_better.iloc[:5, :3])
+
+    return Y_better
+
+
 # PLOTS #
 def refresh_logfolder(log_dir):
     '''delete and recreate log_dir'''
