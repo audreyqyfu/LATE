@@ -23,7 +23,7 @@ transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_
 # For result analysis
 cluster_file = None
 
-fname_imputation = 'MBM.MAGIC.9k.B.msk90.saver.csv.gz'  # can be changed
+fname_imputation = 'MBM.MAGIC.9k.B.msk90.saver.hd5'  # can be changed
 name_imputation = '{}_({})'.format(name_input, mode)
 ori_imputation = 'cell_row'  # gene_row/cell_row
 transformation_imputation = 'log'
