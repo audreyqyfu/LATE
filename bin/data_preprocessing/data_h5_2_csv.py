@@ -35,3 +35,6 @@ print('RAM usage after conversion: ', '{} M'.format(usage()))
 print('writing..')
 df.to_csv(outname)
 print(outname, 'saved')
+
+# fix mouse brain data b'id' issue
+#  cat mouse_brain.1kg.csv |sed s/^b\'//g|sed s/\'//g|sed s/,b/,/g > temp
