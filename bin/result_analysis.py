@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 import importlib
 import scimpute
 
+# todo: save hist for boxplot across imputation methods?
+
 # READ CMD
 print('''
 usage: python -u result_analysis.py params.py
