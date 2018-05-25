@@ -114,15 +114,17 @@ std_ratio_yg_df.to_csv('std_ratio_y_div_g.csv')
 
 
 # HIST OF EXPRESSION
+max_expression = max(G.values.max(), X.values.max(), Y.values.max())
+min_expression = min(G.values.min(), X.values.min(), Y.values.min())
 scimpute.hist_df(
     Y, xlab='expression', title='Imputation({})'.format(p.name_imputation),
-    dir=p.tag)
+    dir=p.tag, range=[min_expression, max_expression])
 scimpute.hist_df(
     X,  xlab='expression', title='Input({})'.format(p.name_input),
-    dir=p.tag)
+    dir=p.tag, range=[min_expression, max_expression])
 scimpute.hist_df(
     G,  xlab='expression', title='Ground_truth({})'.format(p.name_ground_truth),
-    dir=p.tag)
+    dir=p.tag, range=[min_expression, max_expression])
 
 # HIST OF CELL/GENE CORR
 print('\n> Corr between G and Y')
