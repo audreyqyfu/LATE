@@ -25,7 +25,7 @@ cluster_file = None  # path or None (no coloring of tSNE)
 
 fname_imputation = 'gtex_v7.4tissues.msk90.saver.csv.gz'  # can be changed
 name_imputation = '{}_({})'.format(name_input, mode)
-ori_imputation = 'cell_row'  # gene_row/cell_row
+ori_imputation = 'gene_row'  # gene_row/cell_row
 transformation_imputation = 'log'
 tag = 'Eval'  # folder name for analysis results
 

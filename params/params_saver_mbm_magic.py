@@ -25,7 +25,7 @@ cluster_file = None
 
 fname_imputation = 'MBM.MAGIC.9k.B.msk90.saver.hd5'  # can be changed
 name_imputation = '{}_({})'.format(name_input, mode)
-ori_imputation = 'cell_row'  # gene_row/cell_row
+ori_imputation = 'gene_row'  # gene_row/cell_row
 transformation_imputation = 'log'
 tag = 'Eval'  # folder name for analysis results
 
