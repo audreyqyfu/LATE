@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name='imputation'
+#SBATCH --job-name='lt'
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -p gpu-long --gres=gpu:1 --ntasks-per-node=8 --mem=102G
