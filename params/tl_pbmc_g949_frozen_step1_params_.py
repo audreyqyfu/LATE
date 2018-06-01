@@ -10,7 +10,7 @@ mode = 'pre-training'  # pre-training, translate, late, impute
 
 # DATA (the input file should contain index and header)
 # PBMC_G949 [hd5/csv]
-fname_input = home + 'data/cell_row/pbmc_frozen_abc.g949.hd5'
+fname_input = home + '/data/cell_row/pbmc_frozen_abc.g949.hd5'
 name_input = 'pbmc_g949_frozen'
 ori_input = 'cell_row'
 transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
