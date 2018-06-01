@@ -26,8 +26,8 @@ everything_start=$SECONDS
 
 echo "*--IMPUTATION STARTED--*"
 imputation_start=$SECONDS
-python3 -u ./translate.py tl_step1_params_pbmc_g949_frozen.py
-python3 -u ./translate.py tl_step2_params_pbmc_g949_frozen_c10k.py
+python3 -u ./translate.py tl_pbmc_g949_frozen_step1_params_.py
+python3 -u ./translate.py tl_pbmc_g949_frozen_c10k_step2_params.py
 
 echo "*--IMPUTATION FINISHED--*"
 imputation_end=$SECONDS
