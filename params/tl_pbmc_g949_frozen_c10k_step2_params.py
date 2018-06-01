@@ -103,7 +103,7 @@ patience = int(3)  # early stop patience epochs, just print warning, no real sto
 
 # For development usage #
 seed_tf = 3
-test_flag = True  # [True, False]
+test_flag = False  # [True, False]
 if test_flag:
     max_training_epochs = 10 # 3L:100, 5L:1000, 7L:1000, 9L:3000
     display_step = 1  # interval on learning curve
