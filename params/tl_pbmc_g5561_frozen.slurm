@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name='tl_c10k_fro'
+#SBATCH --job-name='tl_5561fro'
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -p gpu-long --gres=gpu:1 --ntasks-per-node=8 --mem=102G
