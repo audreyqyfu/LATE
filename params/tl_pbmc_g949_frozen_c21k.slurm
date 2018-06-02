@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name='tl_9987fro'
+#SBATCH --job-name='tl_c10k_fro'
 #SBATCH --mail-user=rui@uidaho.edu
 #SBATCH --mail-type=BEGIN,END
 #SBATCH -p gpu-long --gres=gpu:1 --ntasks-per-node=8 --mem=102G
@@ -26,8 +26,8 @@ everything_start=$SECONDS
 
 echo "*--IMPUTATION STARTED--*"
 imputation_start=$SECONDS
-python3 -u ./translate.py tl_pbmc_g9987_frozen_step1_params_.py
-python3 -u ./translate.py tl_pbmc_g9987_frozen_step2_params.py
+python3 -u ./translate.py tl_pbmc_g949_frozen_step1_params_.py
+python3 -u ./translate.py tl_pbmc_g949_frozen_c21k_step2_params.py
 
 echo "*--IMPUTATION FINISHED--*"
 imputation_end=$SECONDS
@@ -41,7 +41,7 @@ for file in step2/*_w*npy;do python -u weight_clustmap.py $file step2;done
 for file in step2/code*npy;do python -u weight_clustmap.py $file step2;done
 
 echo "*--RESULT ANALYSIS--*"
-python -u ./result_analysis.py tl_pbmc_g9987_frozen_step2_params.py
+python -u ./result_analysis.py tl_pbmc_g949_frozen_c21k_step2_params.py
 
 echo "*--FINISHED--*\n\n"
 date

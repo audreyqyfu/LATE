@@ -41,7 +41,7 @@ for file in step2/*_w*npy;do python -u weight_clustmap.py $file step2;done
 for file in step2/code*npy;do python -u weight_clustmap.py $file step2;done
 
 echo "*--RESULT ANALYSIS--*"
-python -u ./result_analysis.py tl_pbmc_g949_frozen_c10k_step2_params.py
+python -u ./result_analysis.py tl_pbmc_g5561_frozen_step2_params.py
 
 echo "*--FINISHED--*\n\n"
 date
