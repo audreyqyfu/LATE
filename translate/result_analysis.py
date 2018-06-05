@@ -157,6 +157,10 @@ mse1_omega = scimpute.mse_omega(Y, X)
 mse1_omega = round(mse1_omega, 7)
 print('MSE1_NZ between Imputation and Input: ', mse1_omega)
 
+mse1 = scimpute.mse(Y, X)
+mse1 = round(mse1, 7)
+print('MSE1 between Imputation and Input: ', mse1)
+
 mse2_omega = scimpute.mse_omega(Y, G)
 mse2_omega = round(mse2_omega, 7)
 print('MSE2_NZ between Imputation and Ground_truth: ', mse2_omega)
