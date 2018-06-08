@@ -5,25 +5,26 @@ home = os.environ['HOME']
 
 # MODE
 mse_mode = 'mse_nz'  # mse, mse_nz
-mode = 'LATE_Comb'  # pre-training, translate, late, impute
+mode = 'LATE_Comb'  # pre-training, translate, late, impute  (for result analysis)
 # takes 'scVI/DCA/anything' for result_analysis.py
 
 # DATA (the input file should contain index and header)
-# PBMC_G949 [hd5/csv]
-fname_input = home + '/data/cell_row/pbmc.g9987_c54k.hd5'
-name_input = 'pbmc.g9987_c54k'
+# Mouse retina
+fname_input = home + '/data/cell_row/mouse_retina.broadInst.hd5'
+name_input = 'mouse_retina'
 ori_input = 'cell_row'
-transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
+transformation_input = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (already norm.log)
 
-fname_ground_truth = home + '/data/cell_row/pbmc.g9987_c54k.hd5'
-name_ground_truth = 'pbmc.g9987_c54k'
+fname_ground_truth = fname_input
+name_ground_truth = name_input
 ori_ground_truth = ori_input  # cell_row/gene_row
 transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
 
 # For result analysis
-cluster_file = home + '/data/pbmc_40kC_10clusters.csv'
+cluster_file = home + '/data/clust/clust_retinal_bipolar.csv'
 
 fname_imputation = 'imputation.combined_by_mse.hd5'   # can be changed
+# fname_imputation = 'step2/imputation.step2.hd5'   # can be changed
 name_imputation = '{}_({})'.format(name_input, mode)
 ori_imputation = 'cell_row'  # gene_row/cell_row
 transformation_imputation = 'as_is'
@@ -148,30 +149,11 @@ if 'result_analysis.py' in sys.argv[0]:
 
 
     pair_list = [
-        # PBMC G5561 Non-Linear
-        ['ENSG00000173372',
-        'ENSG00000087086'],
-
-        ['ENSG00000231389',
-        'ENSG00000090382'],
-
-        ['ENSG00000158869',
-        'ENSG00000090382'],
-
-        ['ENSG00000074800',
-        'ENSG00000019582'],
-
-        ['ENSG00000157873',
-        'ENSG00000169583'],
-
-        ['ENSG00000065978',
-        'ENSG00000139193'],
-
-        ['ENSG00000117450',
-        'ENSG00000133112'],
-
-        ['ENSG00000155366',
-        'ENSG00000167996'],
+        # test
+        [0,
+        1],
+        [2,
+         3],
     ]
 
     gene_list = [gene for pair in pair_list for gene in pair]
