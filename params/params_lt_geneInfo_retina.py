@@ -13,7 +13,7 @@ mode = 'late'  # pre-training, translate, late, impute
 fname_input = home + '/data/cell_row/mouse_retina.broadInst.hd5'
 name_input = 'mouse_retina'
 ori_input = 'cell_row'
-transformation_input = 'as_is'  # as_is/log/rpm_log/exp_rpm_log (already norm.log)
+transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log (already norm.log)
 
 fname_ground_truth = fname_input
 name_ground_truth = name_input
