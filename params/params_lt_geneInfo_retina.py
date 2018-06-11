@@ -144,6 +144,7 @@ if 'result_analysis.py' in sys.argv[0]:
         ['Rpl23', 'Rbbp4'],
     ]
 
+
     gene_list = [gene for pair in pair_list for gene in pair]
 
     print('''
