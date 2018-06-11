@@ -48,7 +48,10 @@ else:
 print('> DATA TRANSFORMATION..')
 Y = scimpute.df_transformation(Y.transpose(), transformation=p.transformation_imputation).transpose()
 X = scimpute.df_transformation(X.transpose(), transformation=p.transformation_input).transpose()
-G = scimpute.df_transformation(G.transpose(), transformation=p.transformation_ground_truth).transpose()
+if p.fname_input == p.fname_ground_truth:
+    G = X
+else:
+    G = scimpute.df_transformation(G.transpose(), transformation=p.transformation_ground_truth).transpose()
 
 # subset/sort X, G to match Y
 # todo: support sparse matrix
