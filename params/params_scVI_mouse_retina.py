@@ -23,7 +23,7 @@ transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_
 # For result analysis
 cluster_file = home + '/data/clust/clust_retinal_bipolar.csv'
 
-fname_imputation = 'mouse_retina.px_rate.hd5'  # can be changed
+fname_imputation = 'mouse_retina.px_rate.csv.gz'  # can be changed
 name_imputation = '{}_({})'.format(name_input, mode)
 ori_imputation = 'cell_row'  # gene_row/cell_row
 transformation_imputation = 'log'
