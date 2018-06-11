@@ -39,7 +39,10 @@ scimpute.refresh_logfolder(log_dir)
 print("> READ DATA..")  # todo: add support for h5 sparse
 Y = scimpute.read_data_into_cell_row(p.fname_imputation, p.ori_imputation)
 X = scimpute.read_data_into_cell_row(p.fname_input, p.ori_input)
-G = scimpute.read_data_into_cell_row(p.fname_ground_truth, p.ori_ground_truth)
+if p.fname_input == p.fname_ground_truth:
+    G = X
+else:
+    G = scimpute.read_data_into_cell_row(p.fname_ground_truth, p.ori_ground_truth)
 
 # Data Transformation for Y
 print('> DATA TRANSFORMATION..')
