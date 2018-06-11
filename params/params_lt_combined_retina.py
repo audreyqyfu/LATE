@@ -149,11 +149,11 @@ if 'result_analysis.py' in sys.argv[0]:
 
 
     pair_list = [
-        # test
-        [0,
-        1],
-        [2,
-         3],
+        # mouse retina
+        ['Ankrd37', 'X1110004F10Rik'],
+        ['Hnrnph1', 'X1500011B03Rik'],
+        ['Suclg1', 'Suclg1'],
+        ['Rpl23', 'Rbbp4'],
     ]
 
     gene_list = [gene for pair in pair_list for gene in pair]
