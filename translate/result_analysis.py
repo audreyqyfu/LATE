@@ -79,9 +79,14 @@ print('G.shape', G.shape)
 
 # STD of genes in Y and X
 print('calculating STD for Y and X')
-y_std_df = Y.std(axis=0)
-x_std_df = X.std(axis=0)
-g_std_df = G.std(axis=0)
+# y_std_df = Y.std(axis=0)  # should not include zeros in X
+# x_std_df = X.std(axis=0)
+# g_std_df = G.std(axis=0)
+
+x_std_df, y_std_df = scimpute.nz_std(X, Y)
+x_std_df, g_std_df = scimpute.nz_std(X, G)  # purpose: compare G with Y
+
+
 std_ratio_yx_df = pd.DataFrame(data= y_std_df.values / x_std_df.values,
                             index=X.columns, columns=['std_ratio'])
 std_ratio_yg_df = pd.DataFrame(data= y_std_df.values / g_std_df.values,
@@ -89,6 +94,7 @@ std_ratio_yg_df = pd.DataFrame(data= y_std_df.values / g_std_df.values,
 
 std_min = min(y_std_df.min(), x_std_df.min(), g_std_df.min())
 std_max = max(y_std_df.max(), x_std_df.max(), g_std_df.max())
+
 scimpute.hist_df(
     y_std_df,
     xlab='STD(Imputation)', title='STD Imputation({})'.format(p.name_imputation),

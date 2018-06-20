@@ -543,6 +543,24 @@ def mse(arr_h, arr_m):
     return mse
 
 
+def nz_std(X, Y):
+    '''
+    Goal: Evaluate gene-level imputation with STD of non-zero values of that gene
+    Takes two cell_row DFs, X and Y, with same shape
+    Calculate STD for each column(gene)
+    Treating zeros in X as Nones, And corresponding values in Y as Nones, too
+    :param X: Input cell_row matrix
+    :param Y: Imputation cell_row matrix
+    :return: two list of NZ_STDs, used for evaluation of imputation
+    '''
+    idx_zeros = (X == 0)
+    X_ = X.copy()
+    Y_ = Y.copy()
+    X_[idx_zeros] = None
+    Y_[idx_zeros] = None
+    return (X_.std(), Y_.std())
+
+
 def nz2_corr(x, y):
     '''
     the nz2_corr between two vectors, excluding any element with zero in either vectors
