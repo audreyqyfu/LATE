@@ -5,7 +5,7 @@ home = os.environ['HOME']
 
 # MODE
 mse_mode = 'mse_nz'  # mse, mse_nz
-mode = 'late'  # pre-training, translate, late, impute
+mode = 'pre-training'  # pre-training, translate, late, impute
 # takes 'scVI/DCA/anything' for result_analysis.py
 
 # DATA (the input file should contain index and header)
