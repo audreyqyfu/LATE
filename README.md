@@ -1,6 +1,35 @@
 # Description
-You can read readme.terse.md first
-## Option1: transfer learning (step1 -> TL -> step2) 
+
+Recover Single Cell RNA-seq (scRNA-seq) gene expression profile with Autoencoder, leveraging information of non-linear relationships between genes, from non-zero values in data.
+
+# Installation
+This imputation method is written in python, with deep learning models enpowered by tensorflow. 
+
+## CPU version
+- install anaconda
+  download from https://conda.io/docs/user-guide/install/index.html
+  `bash Anaconda-latest-Linux-x86_64.sh`
+  `conda create -n py35 python=3.5`
+- activate conda environment
+  `source activate py35`
+- install numpy, pandas, matplotlib, and tensorflow, if not already installed by anaconda automatically
+  `conda install numpy pandas matplotlib scipy tensorflow`
+
+## GPU version (only NVIDIA GPU supported)
+  https://www.tensorflow.org/install/install_linux
+- install GPU version of tensorflow
+- install numpy, pandas, matplotlib, scipy
+
+# Usage
+- The main program is called `late.py`
+- User specific parameters should be modified and put in `params.py`, which contains information about input/output, imputation mode, and machine learning parameters. This parameter file can be renamed.
+
+## Option1: 1step training (LATE: Learning with AuToEncoder)
+- 1step: `late.py params.late.py`
+  - randomly initialized parameters (weights and biases)
+  - directly trained on scRNA-seq (single-cell RNA-seq) dataset
+  
+## Option2: 2 step training (TRANSLATE: TRANSfer Learning with AuToEncoder) 
 - step1: `step1.omega.py`
   - pre-trained Autoencoder on dataset A (bulk RNA-seq reference / huge scRNA-seq reference)
   - autoencoder OMEGA structure 
@@ -8,11 +37,6 @@ You can read readme.terse.md first
   - load parameters(weights/biases) pre-trained in step1
   - re-train them on dataset B (scRNA-seq/msk/ds)
   - autoencoder OMEGA structure, excluding zeros from cost function 
-
-## Option2: 1step training
-- 1step: `step1.omega.py`
-  - randomly initialized parameters
-  - directly trained on scRNA-seq/msk/ds dataset
 
 # Workflow
 * working dir: **scImpute/bin/**
