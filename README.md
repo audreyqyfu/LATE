@@ -1,12 +1,19 @@
-# Description
+# Learning with AuToEncoder (LATE)
+Due to dropout and other technical limitations in single cell sequencing technologies. Single Cell RNA-seq 
+(scRNA-seq) gene expression profile is
+noisy 
+with many zero expression values (typically above 80%, or even 95%). With an Autoencoder traind on 
+non-zero values of the data, LATE leverages information of non-linear relationships between genes/cells, and restore 
+gene-gene relationships ovscured by those zeros. With TRANSfer Learning with AuToEncoder (TRANSLATE), a reference 
+dataset was used to pre-train weights and biases, so that better imputation result can be achieved.
 
-Recover Single Cell RNA-seq (scRNA-seq) gene expression profile with Autoencoder, leveraging information of non-linear
- relationships between genes, learned from non-zero values in data.
 
-# Installation
-This imputation method is written in python (3.5), with deep learning models enpowered by tensorflow. 
 
-## CPU version
+## Installation
+This imputation method is written in python (3.5), with deep learning models enpowered by tensorflow. After 
+installing python 3.5, Tensorflow 1.0-1.4, and other related python libraries, this code can run correctly.
+
+### CPU version (easier to install, slower to run)
 - install anaconda
   - download from https://conda.io/docs/user-guide/install/index.html
   - `bash Anaconda-latest-Linux-x86_64.sh`
@@ -16,78 +23,152 @@ This imputation method is written in python (3.5), with deep learning models enp
 - install numpy, pandas, matplotlib, and tensorflow, if not already installed by anaconda automatically
   - `conda install numpy pandas matplotlib scipy tensorflow`
 
-## GPU version (only NVIDIA GPUs supported)
-- https://www.tensorflow.org/install/install_linux
+### GPU version (about 5-10 times faster, only NVIDIA GPUs supported)
+- install anaconda version of python 3.5 as shown above (for simplicity)
 - install GPU version of tensorflow
-- install numpy, pandas, matplotlib, scipy
+    - https://www.tensorflow.org/install/install_linux
+        - install CUDA first
+        - then install tensorflow-gpu
+- install numpy, pandas, matplotlib, scipy as shown above
 
-# Usage
+
+
+## Imputation
+- example: `python3 -u late.py params.py`
 - The main program is called `late.py`
 - User specific parameters should be modified and put in `params.py`, 
-which contains information about input/output, imputation mode, and machine learning parameters. 
-This parameter file can be renamed.
-- example usage: `python3 late.py params.py`
+which contains information about input/output, imputation mode, and machine learning hyper-parameters. 
+This file can be renamed.
 
-## Option1: 1step training (LATE: Learning with AuToEncoder)
-- 1step: `late.py params.late.py`
-  - randomly initialized parameters (weights and biases)
-  - directly trained on scRNA-seq (single-cell RNA-seq) dataset
+### Mode: 1step training (LATE: Learning with AuToEncoder)
+- 1step: `python3 -u late.py params.late.py`
+  - randomly initialized weights and biases
+  - directly trained on scRNA-seq (single-cell RNA-seq) dataset with non-zero values in the dataset to find 
+  gene-gene/cell-gene relationships for imputation.
   
-## Option2: 2 step training (TRANSLATE: TRANSfer Learning with AuToEncoder) 
-- step1: `late.py params.pre_training.py`
+### Mode: 2 step training (TRANSLATE: TRANSfer Learning with AuToEncoder) 
+- step1: `python3 -u late.py params.pre_training.py`
   - pre-trained Autoencoder on reference dataset (bulk RNA-seq reference / huge scRNA-seq reference)
   - parameter modified `mode = 'pre-training'` 
-- step2: `late.py params.translate.py`
+- step2: `python3 -u late.py params.translate.py`
   - load parameters(weights/biases) pre-trained in step1
   - re-train them on dataset B (scRNA-seq expression profile of interest)
   - parameter modified `mode = 'translate'` 
 
 
-# Example Workflow
-* work dir: **./script/**
+  
+## Result Analysis
+Generates plots, statistics by comparing imputation results with input and ground-truth (if applicable)
 
-## 1. Load data
+- `python3 -u result_analysis.py params.py`
+- `params.py` is the same parameter file used for LATE imputation, or step2 parameter file used in TRANSLATE impuation
+    - `tag = 'Eval'`: folder name for analysis results
+    - `pair_list = [[0,1], [2,3]]`: index of genes to be put in gene-gene plots
+    - `pair_list = [['gene1', 'gene2'], ['gene3', 'gene4']]`: gene names of interest
+
+
+
+## Parameters
 
 ### Input format
-- csv/csv.gz/tsv/h5/hd5 formats supported
+- A simple data matrix with cell_id and gene_id as column/row names, csv/csv.gz/tsv/h5/hd5 formats supported
     - csv: comma seperated values in text format
     - tsv: tab seperated values in text format
     - h5: 10x genomics sparse matrix format 
         - https://support.10xgenomics.com/single-cell-gene-expression/datasets
         - https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
     - hd5: output of `late.py`, compressed hd5 format
-
-- data orientation:
-    - both cell_row/gene_row are supported, just specify matrix orientation in `ori_input/ori_ground_truth` in `params.py`
-    - inside the code, data are transformed into cell_row matrix
+- example of 'df':
+  
+  empty|gene1|gene2
+  ---|---|---
+  cell1|0.392652|0.127627
+  cell2|0.377387|0.213198
     
-- Data transformation
-    - as_is/log/rpm_log/exp_rpm_log
-    - as_is: no transformation
+- Both gene_row/cell_row matrices accepted, by specifying parameter `ori_input`
+
+### Input parameter settings
+```
+fname_input = '../data/cell_row/example.msk90.hd5'  # csv/csv.gz/tsv/h5/hd5 formats supported
+name_input = 'example'
+ori_input = 'cell_row'  # cell_row/gene_row
+transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
+```
+- `fname_input`: path to input_file
+- `name_input`: the name shown in plots generated
+- `ori_input`: data matrix orientation, 
+    - 'cell_row'
+    - 'gene_row'    
+- `transformation_input`: Data transformation options
+    - as_is: no transformation (recommended)
     - log: log10(x+1)
     - rpm_log: log(rpm+1), rpm (reads per million)
     - exp_rpm_log: 10^x - 1, to reverse the effect of log10(x+1), usually only useful for testing purposes
 
-- `fname_input` and `fname_ground_truth`
-    - `fname_input` specifies input file, on which the model is trained
-    - `fname_ground_truth` is for evaluation purposes, when ground_truth is available for simulated dataset. For 
-    imputation purposes without ground-truth, this parameter should be set the same to `fname_input` 
+### Output parameter settings
+```
+fname_imputation = './step2/imputation.step2.hd5'  # do not modify for pre-training
+name_imputation = '{}_({})'.format(name_input, mode)  # recommend not to modify
+ori_imputation = 'cell_row'  # gene_row/cell_row
+transformation_imputation = 'as_is'  # log/rpm_log/exp_rpm_log
+tag = 'Eval'  # folder name for analysis results
+```
+- `fname_imputation`: output file_name, do not modify for `pre-training` mode, because `translate` mode will not find
+ pre-training results 
 
-### Pre-processing for h5 format data
-- Download gene expression matrix:
-  - e.g.: 'All_Tissue_Site_Details.combined.reads.gct' (GTEx)
+### Ground-truth parameter settings
+Ground-truth is used for testing purposes, you can leave settings default (same with parameters for 'input') if you 
+don't have ground-truth dataset.
+```buildoutcfg
+fname_ground_truth = fname_input
+name_ground_truth = name_input
+ori_ground_truth = ori_input 
+transformation_ground_truth = transformation_input
+```
 
-- Filtering data:
-  - `./data_preprocessing/data_filter_stat.py` (min-reads/cell, min-reads/gene, histogram of reads/gene reads/cell)
-  - `./data_preprocessing/data_gene_selection.py` (select genes from datasets )
-  - `./data_preprocessing/data_sample_selection.py` (select cells)
-  
-- Output:
-  - **xxx.norm.log.hd5** (normed, log-transformed)(recommended)
-  - xxx.norm.hd5 (normed)
-  - xxx.csv.gz (csv.gz format, slow, large, better compatability)
+### Hyper parameter settings
+The Autoencoder and Transfer Learning hypyer-parameter tuning requires some machine learning / deep learning model 
+experience. If you are not sure what hyper parameter to use, we strongly recommend to use the default settings in the
+ parameter files provided.
+ ```buildoutcfg
+# HYPER PARAMETERS
+# Model structure
+L = 5  # num of layers for Autoencoder, accept: 3/5/7
+l = L//2  # inner usage, do not modify
+n_hidden_1 = 800  # needed for 3/5/7 layer design
+n_hidden_2 = 400  # needed for 5/7 layer design
+# n_hidden_3 = 200 # needed for 7 layer design
 
-## Creating simulated scRNA-seq data
+# SD for rand_init of weights
+sd = 1e-3  # for rand_init of weights. 3-7L:1e-3, 9L:1e-4
+if run_flag == 'rand_init':
+    learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
+elif run_flag == 'load_saved':
+    learning_rate = 3e-5  # step2: 3e-5 for 3-7L, 3e-6 for 9L
+elif run_flag == 'impute':
+    learning_rate = 0.0
+
+# Mini-batch learning parameters
+batch_size = int(256)  # mini-batch size for training
+sample_size = int(1000)  # sample_size for learning curve, slow output
+large_size = int(1e5)  # if num-cells larger than this, use slow but robust method for imputation and output
+
+# Length of training
+max_training_epochs = int(100)  # num_mini_batch / (training_size/batch_size)
+display_step = int(5)  # interval on learning curve, 20 displays recommended
+snapshot_step = int(50)  # interval of saving session, saving imputation
+patience = int(3)  # early stop patience epochs, just print warning, no real stop
+
+# Regularization
+pIn = 0.8  # dropout rate at input layer, default 0.8
+pHidden = 0.5  # dropout rate at hidden layers, default 0.5
+reg_coef = 0.0  # reg3=1e-2, set to 0.0 to desable it
+```
+
+
+
+## Inner-usage
+### Creating simulated scRNA-seq data
 - msk
 - ds
     - Can down-sample from bulk RNA-seq dataset or other high quality dataset 
@@ -96,28 +177,7 @@ This parameter file can be renamed.
     - first, each sample in data matrix was downsampled to typical scRNA-seq lib-size
     - then, additional random zeros introduced to meet the user-defined zero percentage
 
-## step1_training: 
-- script: **step1.omega.py**
-- library: **scimpute.py**
-- parameter file: **step1_params.py** (where user change num_nodes, learning_rate...)
-1. put the 3 files in the same folder, 
-2. edit step1_params.py
-3. edit variables run command: `python -u step1.n_to_n.new.7L.py`
-
-## step1_result analysis:
-`python -u ./result_analysis.py step1`
-  
-## step2_training:
-- script: **step2.omega.py** (7L, 11/03)
-- library: **scimpute.py**
-- parameter file: **step2_params.py** (change num_nodes, learning_rate...)
-- step1 output: **./step1/**
-- put these 4 files in the same folder
-
-## step2_result analysis:
-`python -u ./result_analysis.py step2`
-
-## On ibest cluster
+### On ibest cluster
 1. create a step1.slurm file:
 ```slurm
 #!/bin/bash
@@ -137,46 +197,12 @@ echo "*--done--*"
 sbatch --mem=100G -p gpu-long --gres=gpu:1 --nodelist=n105 step1.slurm
 ```
 3. login into 'fortyfour.ibest.uidaho.edu', start training with `sh step1.sh`
-
-# input data format
-- read hd5 or csv into pandas data-frames
-  - 'df' contains input_data_matrix [cell, genes]
-  - 'df2' contains ground-truth
-  - In step1, 'df2' should be identical to 'df'
   
-  - example of 'df':
-  
-  empty|gene1|gene2
-  ---|---|---
-  cell1|0.392652|0.127627
-  cell2|0.377387|0.213198
-  
-  - function 'scimpute.read_csv', 'scimpute.read_hd5) are good options in implementation
-  - step1 example: 
-  ```python
-  file = "EMT.MAGIC.9k.A.log.hd5"  # input
-  file2 = "EMT.MAGIC.9k.A.log.hd5"  # ground truth (same as input in step1)
-  name1 = '(EMT_MAGIC_A)'
-  name2 = '(EMT_MAGIC_A)'
-  df = pd.read_hdf(file).transpose()  # [cells,genes]
-  df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
-  ```
-  - step2 example: 
-  ```python
-  file = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.msk90.log.hd5"  # input
-  file2 = "EMT_MAGIC_9k/EMT.MAGIC.9k.B.log.hd5"  # ground truth
-  name1 = '(EMT_MAGIC_B.msk90)'
-  name2 = '(EMT_MAGIC_B)'
-  df = pd.read_hdf(file).transpose()  # [cells,genes]
-  df2 = pd.read_hdf(file2).transpose()  # [cells,genes]
-  ```
-
-# development environment:
+### development environment:
   - python version: 3.5.2 (default, Dec 13 2016, 14:11:32)
   - tf.__version__ 1.2.1
 
-
-# parameter setting
+### parameter setting
 Here is a good start point for parameter setting
   - (num_nodes in bottle-neck) x (hidden_node retain rate) == 
   data dimension after PCA reduce dim
