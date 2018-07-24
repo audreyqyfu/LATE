@@ -5,50 +5,38 @@ home = os.environ['HOME']
 
 # MODE
 mse_mode = 'mse_nz'  # mse, mse_nz
-mode = 'pre-training'  # pre-training, translate, late, impute
-# takes 'scVI/DCA/anything' for result_analysis.py
+mode = 'pre-training'  # takes pre-training, translate, late, impute for late.py; takes 'scVI/DCA/anything' for
+# result_analysis.py
 
-# DATA (the input file should contain index and header)
-# PBMC_G949 [hd5/csv]
-fname_input = home + '/data/cell_row/pbmc.g949_c21k.msk90.hd5'
-name_input = 'pbmc_g949_c21k_msk'
-ori_input = 'cell_row'
+# Input (should contain index and header)
+fname_input = '../data/cell_row/example_reference.msk80.hd5'  # csv/csv.gz/tsv/h5/hd5 formats supported
+name_input = 'example_ref'
+ori_input = 'cell_row'  # cell_row/gene_row
 transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
 
-fname_ground_truth = home + '/data/cell_row/pbmc.g949_c21k.hd5'
-name_ground_truth = 'pbmc_g949_c21k'
-ori_ground_truth = ori_input  # cell_row/gene_row
-transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
-
-# For result analysis
-# cluster_info.csv with cell_id as index and cluster_id as 1st column
-cluster_file = None  # path or None (no coloring of tSNE)
-# cluster_file = home + '/data/pbmc_40kC_10clusters.csv'
-
-fname_imputation = './step2/imputation.step2.hd5'  # can be changed
-name_imputation = '{}_({})'.format(name_input, mode)
+# Output
+fname_imputation = './step2/imputation.step2.hd5'  # do not modify for pre-training
+name_imputation = '{}_({})'.format(name_input, mode)  # recommend not to modify
 ori_imputation = 'cell_row'  # gene_row/cell_row
-transformation_imputation = 'as_is'
+transformation_imputation = 'as_is'  # log/rpm_log/exp_rpm_log
 tag = 'Eval'  # folder name for analysis results
 
-# # Mouse Brain Small [h5 from 10x-genomics]
-# fname_input = home + '/imputation/data/10x_mouse_brain_1.3M/20k/' \
-#               'mouse_brain.10kg.h5'
-# genome_input = 'mm10'  # only for 10x_genomics sparse matrix h5 data
-# name_input = 'test_mouse_brain_sub20k'
-# ori_input = 'gene_row'  # cell_row/gene_row
-# transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
-#
-# fname_ground_truth = fname_input
-# name_ground_truth = name_input
-# ori_ground_truth = ori_input  # cell_row/gene_row
-# transformation_ground_truth = transformation_input  # as_is/log/rpm_log/exp_rpm_log
+# Ground Truth
+fname_ground_truth = fname_input
+name_ground_truth = name_input
+ori_ground_truth = ori_input
+transformation_ground_truth = transformation_input
+
+# Pre-defined cluster for PCA/tSNE visualization
+# Format: cluster_info.csv with cell_id as index and cluster_id as 1st column
+cluster_file = None  # if you don't have cluster information, no coloring of tSNE
+# cluster_file = './data/exampleclusters.csv'  # coloring cells in tSNE plots with clusters defined here
+
 
 # DATA SPLIT PROPORTION
 [a, b, c] = [0.7, 0.15, 0.15]  # train/valid/test
 
-
-# Automated Process
+# Inner usage (DO NOT MODIFY)
 if mode == 'pre-training':
     # step1/rand_init for pre-training on reference
     stage = 'step1'
@@ -73,16 +61,14 @@ else:
     print('It can only be used for result_analysis.py')
 
 # HYPER PARAMETERS
-L = 5  # 3/5/7
-l = L//2
-n_hidden_1 = 800  # 3L
-n_hidden_2 = 400  # 5L
-# n_hidden_3 = 200 # 7L
+# Model structure
+L = 5  # num of layers for Autoencoder, accept: 3/5/7
+l = L//2  # inner usage, do not modify
+n_hidden_1 = 800  # needed for 3/5/7 layer design
+n_hidden_2 = 400  # needed for 5/7 layer design
+# n_hidden_3 = 200 # needed for 7 layer design
 
-pIn = 0.8  # 0.8
-pHidden = 0.5  # 0.5
-reg_coef = 0.0  # reg3=1e-2, can set to 0.0
-
+# SD for rand_init of weights
 sd = 1e-3  # for rand_init of weights. 3-7L:1e-3, 9L:1e-4
 if run_flag == 'rand_init':
     learning_rate = 3e-4  # step1: 3e-4 for 3-7L, 3e-5 for 9L
@@ -91,17 +77,23 @@ elif run_flag == 'load_saved':
 elif run_flag == 'impute':
     learning_rate = 0.0
 
+# Mini-batch learning parameters
 batch_size = int(256)  # mini-batch size for training
 sample_size = int(1000)  # sample_size for learning curve, slow output
-large_size = int(1e5)  # if num-cells larger than this, use slow but robust method
-#  for imputation and output
+large_size = int(1e5)  # if num-cells larger than this, use slow but robust method for imputation and output
 
+# Length of training
 max_training_epochs = int(100)  # num_mini_batch / (training_size/batch_size)
 display_step = int(5)  # interval on learning curve, 20 displays recommended
 snapshot_step = int(50)  # interval of saving session, saving imputation
 patience = int(3)  # early stop patience epochs, just print warning, no real stop
 
-# For development usage #
+# Regularization
+pIn = 0.8  # dropout rate at input layer, default 0.8
+pHidden = 0.5  # dropout rate at hidden layers, default 0.5
+reg_coef = 0.0  # reg3=1e-2, set to 0.0 to desable it
+
+# For development usage
 seed_tf = 3
 test_flag = False  # [True, False]
 if test_flag:
@@ -145,38 +137,16 @@ print('snapshot_step', snapshot_step)
 print()
 
 
-# FOR RESULT ANALYSIS
+# RESULT ANALYSIS: Gene Pairs in plot
 if 'result_analysis.py' in sys.argv[0]:
 
 
     pair_list = [
-        # TEST
+        # Index
         [2, 3],
 
-        # # PBMC G5561 Non-Linear
-        # ['ENSG00000173372',
-        # 'ENSG00000087086'],
-        #
-        # ['ENSG00000231389',
-        # 'ENSG00000090382'],
-        #
-        # ['ENSG00000158869',
-        # 'ENSG00000090382'],
-        #
-        # ['ENSG00000074800',
-        # 'ENSG00000019582'],
-        #
-        # ['ENSG00000157873',
-        # 'ENSG00000169583'],
-        #
-        # ['ENSG00000065978',
-        # 'ENSG00000139193'],
-        #
-        # ['ENSG00000117450',
-        # 'ENSG00000133112'],
-        #
-        # ['ENSG00000155366',
-        # 'ENSG00000167996'],
+        # Gene names
+        # ['ENSG00000173372', 'ENSG00000087086'],
     ]
 
     gene_list = [gene for pair in pair_list for gene in pair]
