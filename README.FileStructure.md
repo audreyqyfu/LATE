@@ -1,4 +1,6 @@
-# Main Workflow (TL)
+# Structure of scripts
+
+Main Workflow (TL)
 ## CRC GPU (slurm system)
 - `sh step1.omega.gpu.sh`  (feed reference data)
 - `sh step2.omega.gpu.sh`  (call step2.omega.slurm)
@@ -21,7 +23,7 @@
 - data_svd_variation_plot.py  (use SVD to see the inner PCA dimensionality of data matrix)
 - data_filter_stat.py  (select samples/cells)
 - data_sample_selection.py
-- data_gene_selection.py
+- data_gene_selection.cd sc
 - data_masking.py  (simulate scRNA-seq by masking)
 - data_down_sampling.py  (simulate by down-sampling)
 - data_log_transformation.py
