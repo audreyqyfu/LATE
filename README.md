@@ -1,28 +1,32 @@
 # Description
 
-Recover Single Cell RNA-seq (scRNA-seq) gene expression profile with Autoencoder, leveraging information of non-linear relationships between genes, from non-zero values in data.
+Recover Single Cell RNA-seq (scRNA-seq) gene expression profile with Autoencoder, leveraging information of non-linear
+ relationships between genes, learned from non-zero values in data.
 
 # Installation
-This imputation method is written in python, with deep learning models enpowered by tensorflow. 
+This imputation method is written in python (3.5), with deep learning models enpowered by tensorflow. 
 
 ## CPU version
 - install anaconda
-  download from https://conda.io/docs/user-guide/install/index.html
-  `bash Anaconda-latest-Linux-x86_64.sh`
-  `conda create -n py35 python=3.5`
+  - download from https://conda.io/docs/user-guide/install/index.html
+  - `bash Anaconda-latest-Linux-x86_64.sh`
+  - `conda create -n py35 python=3.5`
 - activate conda environment
-  `source activate py35`
+  - `source activate py35`
 - install numpy, pandas, matplotlib, and tensorflow, if not already installed by anaconda automatically
-  `conda install numpy pandas matplotlib scipy tensorflow`
+  - `conda install numpy pandas matplotlib scipy tensorflow`
 
-## GPU version (only NVIDIA GPU supported)
-  https://www.tensorflow.org/install/install_linux
+## GPU version (only NVIDIA GPUs supported)
+- https://www.tensorflow.org/install/install_linux
 - install GPU version of tensorflow
 - install numpy, pandas, matplotlib, scipy
 
 # Usage
 - The main program is called `late.py`
-- User specific parameters should be modified and put in `params.py`, which contains information about input/output, imputation mode, and machine learning parameters. This parameter file can be renamed.
+- User specific parameters should be modified and put in `params.py`, 
+which contains information about input/output, imputation mode, and machine learning parameters. 
+This parameter file can be renamed.
+- example usage: `python3 late.py params.py`
 
 ## Option1: 1step training (LATE: Learning with AuToEncoder)
 - 1step: `late.py params.late.py`
@@ -30,28 +34,54 @@ This imputation method is written in python, with deep learning models enpowered
   - directly trained on scRNA-seq (single-cell RNA-seq) dataset
   
 ## Option2: 2 step training (TRANSLATE: TRANSfer Learning with AuToEncoder) 
-- step1: `step1.omega.py`
-  - pre-trained Autoencoder on dataset A (bulk RNA-seq reference / huge scRNA-seq reference)
-  - autoencoder OMEGA structure 
-- step2: 'step2.omega.py'
+- step1: `late.py params.pre_training.py`
+  - pre-trained Autoencoder on reference dataset (bulk RNA-seq reference / huge scRNA-seq reference)
+  - parameter modified `mode = 'pre-training'` 
+- step2: `late.py params.translate.py`
   - load parameters(weights/biases) pre-trained in step1
-  - re-train them on dataset B (scRNA-seq/msk/ds)
-  - autoencoder OMEGA structure, excluding zeros from cost function 
+  - re-train them on dataset B (scRNA-seq expression profile of interest)
+  - parameter modified `mode = 'translate'` 
 
-# Workflow
-* working dir: **scImpute/bin/**
 
-## Pre-processing (normalization/log-transformation):
+# Example Workflow
+* work dir: **./script/**
+
+## 1. Load data
+
+### Input format
+- csv/csv.gz/tsv/h5/hd5 formats supported
+    - csv: comma seperated values in text format
+    - tsv: tab seperated values in text format
+    - h5: 10x genomics sparse matrix format 
+        - https://support.10xgenomics.com/single-cell-gene-expression/datasets
+        - https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
+    - hd5: output of `late.py`, compressed hd5 format
+
+- data orientation:
+    - both cell_row/gene_row are supported, just specify matrix orientation in `ori_input/ori_ground_truth` in `params.py`
+    - inside the code, data are transformed into cell_row matrix
+    
+- Data transformation
+    - as_is/log/rpm_log/exp_rpm_log
+    - as_is: no transformation
+    - log: log10(x+1)
+    - rpm_log: log(rpm+1), rpm (reads per million)
+    - exp_rpm_log: 10^x - 1, to reverse the effect of log10(x+1), usually only useful for testing purposes
+
+- `fname_input` and `fname_ground_truth`
+    - `fname_input` specifies input file, on which the model is trained
+    - `fname_ground_truth` is for evaluation purposes, when ground_truth is available for simulated dataset. For 
+    imputation purposes without ground-truth, this parameter should be set the same to `fname_input` 
+
+### Pre-processing for h5 format data
 - Download gene expression matrix:
   - e.g.: 'All_Tissue_Site_Details.combined.reads.gct' (GTEx)
 
 - Filtering data:
-  - `data_filter_stat.py` (min-reads/cell, min-reads/gene)
-  - `data_gene_selection.py` (select genes from reference datasets, so that )
-  - `data_sample_selection.py` (select cells ...)
+  - `./data_preprocessing/data_filter_stat.py` (min-reads/cell, min-reads/gene, histogram of reads/gene reads/cell)
+  - `./data_preprocessing/data_gene_selection.py` (select genes from datasets )
+  - `./data_preprocessing/data_sample_selection.py` (select cells)
   
-- Normalization: 
-
 - Output:
   - **xxx.norm.log.hd5** (normed, log-transformed)(recommended)
   - xxx.norm.hd5 (normed)
