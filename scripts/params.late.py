@@ -12,13 +12,13 @@ mode = 'late'  # takes pre-training, translate, late, impute for late.py; takes 
 fname_input = '../data/cell_row/example.msk90.hd5'  # csv/csv.gz/tsv/h5/hd5 formats supported
 name_input = 'example'
 ori_input = 'cell_row'  # cell_row/gene_row
-transformation_input = 'log'  # as_is/log/rpm_log/exp_rpm_log
+transformation_input = 'log10'  # as_is/log10/rpm_log10/exp_rpm_log10
 
 # Output
 fname_imputation = './step2/imputation.step2.hd5'  # do not modify for pre-training
 name_imputation = '{}_({})'.format(name_input, mode)  # recommend not to modify
 ori_imputation = 'cell_row'  # gene_row/cell_row
-transformation_imputation = 'as_is'  # log/rpm_log/exp_rpm_log
+transformation_imputation = 'as_is'  # log10/rpm_log10/exp_rpm_log10
 tag = 'Eval'  # folder name for analysis results
 
 # Ground Truth

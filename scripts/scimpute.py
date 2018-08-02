@@ -222,18 +222,18 @@ def df_normalization(df, scale=1e6):
     return df_normalized
 
 
-def df_log_transformation(df, pseudocount=1):
+def df_log10_transformation(df, pseudocount=1):
     '''
     log10
     :param df: 
     :param pseudocount: 
     :return: 
     '''
-    df_log = np.log10(np.add(df, pseudocount))
-    return df_log
+    df_log10 = np.log10(np.add(df, pseudocount))
+    return df_log10
 
 
-def df_rpm_log(df, pseudocount=1):
+def df_rpm_log10(df, pseudocount=1):
     '''
     log10
     :param df: [gene, cell]
@@ -241,28 +241,28 @@ def df_rpm_log(df, pseudocount=1):
     '''
     df_tmp = df.copy()
     df_tmp = df_normalization(df_tmp)
-    df_tmp = df_log_transformation(df_tmp, pseudocount=pseudocount)
+    df_tmp = df_log10_transformation(df_tmp, pseudocount=pseudocount)
     return df_tmp
 
 
-def df_exp_rpm_log(df, pseudocount=1):
+def df_exp_rpm_log10(df, pseudocount=1):
     '''
     log10
     :param df: [gene, cell]
-    :pseudocount: for exp transformation and log transformation
+    :pseudocount: for exp transformation and log10 transformation
     :return: 
     '''
     df_tmp = df.copy()
     df_tmp = np.power(10, df_tmp) - pseudocount
     df_tmp = df_normalization(df_tmp)
-    df_tmp = df_log_transformation(df_tmp, pseudocount=pseudocount)
+    df_tmp = df_log10_transformation(df_tmp, pseudocount=pseudocount)
     return df_tmp
 
 
-def df_exp_discretize_log(df, pseudocount=1):
+def df_exp_discretize_log10(df, pseudocount=1):
     '''
     For better comparison with ground-truth in gene-scatterplot visualization
-    Input should be the output of df_log_transformation (log10(x+1))
+    Input should be the output of df_log10_transformation (log10(x+1))
     If so, all values ≥ 0
     1. 10^x-1
     2. arount
@@ -282,17 +282,17 @@ def df_transformation(df, transformation='as_is'):
     data_transformation
     df not copied
     :param df: [genes, cells]
-    :param format: as_is, log, rpm_log, exp_rpm_log
+    :param format: as_is, log10, rpm_log10, exp_rpm_log10
     :return: df_formatted
     '''
     if transformation == 'as_is':
         pass  # do nothing
-    elif transformation == 'log':
-        df = df_log_transformation(df)
-    elif transformation == 'rpm_log':
-        df = df_rpm_log(df)
-    elif transformation == 'exp_rpm_log':
-        df == df_exp_rpm_log(df)
+    elif transformation == 'log10':
+        df = df_log10_transformation(df)
+    elif transformation == 'rpm_log10':
+        df = df_rpm_log10(df)
+    elif transformation == 'exp_rpm_log10':
+        df == df_exp_rpm_log10(df)
     else:
         raise Exception('format {} not recognized'.format(transformation))
 
@@ -385,22 +385,22 @@ def subset_df(df_big, df_subset):
     return (df_big.ix[df_subset.index, df_subset.columns])
 
 
-def sparse_matrix_transformation(csr_matrix, transformation='log'):
+def sparse_matrix_transformation(csr_matrix, transformation='log10'):
     '''
     data_transformation
     df not copied
     :param csr_matrix: 
-    :param transformation: as_is, log
+    :param transformation: as_is, log10
     :return: 
     '''
     if transformation == 'as_is':
         pass  # do nothing
-    elif transformation == 'log':
+    elif transformation == 'log10':
         csr_matrix = csr_matrix.log1p()
-    elif transformation == 'rpm_log':
-        raise Exception('rpm_log not implemented yet')
-    elif transformation == 'exp_rpm_log':
-        raise Exception('exp_rpm_log not implemented yet')
+    elif transformation == 'rpm_log10':
+        raise Exception('rpm_log10 not implemented yet')
+    elif transformation == 'exp_rpm_log10':
+        raise Exception('exp_rpm_log10 not implemented yet')
     else:
         raise Exception('format {} not recognized'.format(transformation))
 

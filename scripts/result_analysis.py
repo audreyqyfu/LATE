@@ -256,7 +256,7 @@ for j in p.gene_list:
 
 
 # Discrete (changed Y, only use at end of script
-Y = scimpute.df_exp_discretize_log(Y)
+Y = scimpute.df_exp_discretize_log10(Y)
 
 print('\n> Discrete Gene-pair relationship in Y')
 gene_pair_dir = p.tag+'/pairs_discrete'
