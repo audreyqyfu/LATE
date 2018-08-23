@@ -26,8 +26,12 @@ When no G is available, set X as G in params, so that the code can run
 
 if len(sys.argv) == 2:
     param_file = sys.argv[1]
-    param_file = param_file.rstrip('.py')
-    p = importlib.import_module(param_file)
+    param_name = param_file.rstrip('.py')
+
+    from importlib.machinery import SourceFileLoader
+    cwd = os.getcwd()
+    p = SourceFileLoader(param_name,
+                           cwd + '/' + param_file).load_module()
 else:
     raise Exception('cmd err')
 
