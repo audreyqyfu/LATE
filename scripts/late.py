@@ -12,6 +12,7 @@ import os
 import psutil
 import time
 import seaborn as sns
+import importlib.util
 import importlib
 from scipy.sparse import csr_matrix
 import scimpute
@@ -260,8 +261,13 @@ print('tf.__version__', tf.__version__)
 print("Usage: python -u <translate.py> <params.py>")
 if len(sys.argv) == 2:
     param_file = sys.argv[1]
-    param_file = param_file.rstrip('.py')
-    p = importlib.import_module(param_file)
+    param_name = param_file.rstrip('.py')
+
+    from importlib.machinery import SourceFileLoader
+    cwd = os.getcwd()
+    p = SourceFileLoader(param_name,
+                           cwd + '/' + param_file).load_module()
+
 else:
     raise Exception('cmd err')
 
