@@ -17,6 +17,11 @@ from MulticoreTSNE import MulticoreTSNE as TSNE  # MCORE
 
 # Sys
 def usage():
+    '''
+    Show usage of memory
+    e.g.: usage()
+    :return:
+    '''
     process = psutil.Process(os.getpid())
     ram = process.memory_info()[0] / float(2 ** 20)
     ram = round(ram, 1)
@@ -25,7 +30,11 @@ def usage():
 
 # DATA I/O # todo: check gene_id barcode uniqueness
 def read_csv(fname):
-    '''read_csv into pd.df, assuming index_col=0, and header=True'''
+    '''
+    read_csv into pd.df,
+    assuming index_col=0, and header=True
+    e.g.: df = read_csv("./path/file.csv")
+    '''
     print('reading ', fname)
     tic = time.time()
     df = pd.read_csv(fname, index_col=0)
@@ -39,7 +48,11 @@ def read_csv(fname):
     return df
 
 def read_tsv(fname):
-    '''read_csv into pd.df, assuming index_col=0, and header=True'''
+    '''
+    read_csv into pd.df,
+    assuming index_col=0, and header=True
+    e.g.: df = read_tsv("./path/file.tsv")
+    '''
     print('reading ', fname)
     tic = time.time()
     df = pd.read_csv(fname, index_col=0, delimiter='\t')
@@ -53,8 +66,15 @@ def read_tsv(fname):
     return df
 
 def save_csv(arr, fname):
-    '''if fname=x.csv.gz, will be compressed
-    if fname=x.csv, will not be compressed'''
+    '''
+    save into csv
+    if fname=x.csv.gz, will be compressed
+    if fname=x.csv, will not be compressed
+    e.g.: save_csv(np.arr, "fname.csv.gz")
+    :param arr: numpy array to save
+    :param fname:
+    :return:
+    '''
     tic = time.time()
     print('saving: ', arr.shape)
     np.savetxt(fname, arr, delimiter=',', newline='\n')
@@ -63,6 +83,13 @@ def save_csv(arr, fname):
 
 
 def save_hd5(df, out_name):
+    '''
+    save into hd5 format for fast reading / writing, and low hard-disk footprint
+    e.g.: save_hd5(df, "outname.hd5")
+    :param df:
+    :param out_name:
+    :return:
+    '''
     tic = time.time()
     print('saving: ', df.shape)
     df.to_hdf(out_name, key='null', mode='w', complevel=9, complib='blosc')
@@ -72,6 +99,8 @@ def save_hd5(df, out_name):
 
 def read_hd5(in_name):
     '''
+    read hd5 saved by save_hd5()
+    e.g. df = read_hd5("./path/name.hd5")
     :param in_name: 
     :return df: 
     '''
@@ -91,14 +120,14 @@ GeneBCMatrix = collections.namedtuple(
 
 def read_sparse_matrix_from_h5(fname, genome, file_ori):
     '''
-    for 10x_genomics h5 file:
+    Read 10x_genomics h5 file:
     always transpose into cell_row if gene_row is the input
     https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
     
     :return: cell_row sparse matrix
-    :param fname: 
-    :param genome: 
-    :return: 
+    :param fname: file name, e.g. "fname.h5"
+    :param genome: genome name, e.g. "mm10"
+    :return: sparse matrix obj
     '''
     tic = time.time()
     print('reading {} {}'.format(fname, genome))
@@ -136,13 +165,12 @@ def read_sparse_matrix_from_h5(fname, genome, file_ori):
 
 def save_sparse_matrix_to_h5(gbm, filename, genome):
     '''
-    for 10x_genomics h5 file:
+    save sparse matrix obj into 10x_genomics h5 file:
     https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/advanced/h5_matrices
 
-    :return: 
-    :param filename: 
-    :param genome: 
-    :return: 
+    :param gbm: sparse matrix
+    :param filename: file name to save into, e.g. "file.h5"
+    :param genome: genome abbreviation, e.g. "mm10"
     '''
     flt = tables.Filters(complevel=1)
     print('saving: ', gbm.matrix.shape)
@@ -163,9 +191,9 @@ def save_sparse_matrix_to_h5(gbm, filename, genome):
 def read_data_into_cell_row(fname, orientation='cell_row', genome='mm10'):
     '''
     read hd5 or csv, into cell_row format
-    :param fname: 
-    :param orientation: of file
-    :return: cell_row df
+    :param fname: fname of input file, e.g. 'file.hd5/file.h5/file.csv/file.csv.gz/file.tsv'
+    :param orientation: matrix orientation of input file, two options: 'cell_row' / 'gene_row'
+    :return: data frame or sparse data frame in the orientation of cell_row
     '''
     tic = time.time()
     print('reading {} into cell_row data frame'.format(fname))
@@ -204,6 +232,11 @@ def read_data_into_cell_row(fname, orientation='cell_row', genome='mm10'):
 
 # PRE-PROCESSING OF DATA FRAMES #
 def df_filter(df):
+    '''
+    Filter out any genes/cells that has no read counts at all
+    :param df: input data frame
+    :return: data frame filtered
+    '''
     df_filtered = df.loc[(df.sum(axis=1) != 0), (df.sum(axis=0) != 0)]
     print("filtered out any rows and columns with sum of zero")
     return df_filtered
@@ -211,10 +244,12 @@ def df_filter(df):
 
 def df_normalization(df, scale=1e6):
     '''
-    RPM when default
-    :param df: [gene, cell]
-    :param scale: 
-    :return: 
+    Normalize count data frame to RPM (Read Per Million) when at default
+    You can change scale parameter to scale back to any number besides 1 million
+
+    :param df: data frame in the orientation of gene_row, i.e. [gene, cell]
+    :param scale: the adjusted sum of reads per cell, can be other than 1 million (1e6)
+    :return: normalized data frame
     '''
     read_counts = df.sum(axis=0)  # colsum
     # df_normalized = df.div(read_counts, axis=1).mul(np.median(read_counts)).mul(1)
@@ -224,10 +259,10 @@ def df_normalization(df, scale=1e6):
 
 def df_log10_transformation(df, pseudocount=1):
     '''
-    log10
-    :param df: 
-    :param pseudocount: 
-    :return: 
+    Performa log10(x+1) transformation to a data frame (pandas)
+    :param df: input data frame to be transformed
+    :param pseudocount: default is 1, can be altered to a small number
+    :return: transformed data frame
     '''
     df_log10 = np.log10(np.add(df, pseudocount))
     return df_log10
