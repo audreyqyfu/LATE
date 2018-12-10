@@ -29,7 +29,7 @@ installing python 3.5, Tensorflow 1.0-1.4, and other related python libraries, t
     - https://www.tensorflow.org/install/install_linux
         - install CUDA first
         - then install tensorflow-gpu
-- install numpy, pandas, matplotlib, scipy as shown above
+- install numpy, pandas, matplotlib, scipy, seaborn, tables, sklearn, MulticoreTSNE,  as shown above
 
 
 
