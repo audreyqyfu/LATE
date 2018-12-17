@@ -1,9 +1,9 @@
 # Learning with AuToEncoder (LATE) and TRANSfer Learning with AuToEncoder (TRANSLATE)
-Due to dropout and other technical limitations in single cell sequencing technologies. Single Cell RNA-seq 
+Due to dropout and other technical limitations in single cell sequencing technologies. Single-cell RNA-seq 
 (scRNA-seq) gene expression profile is
 highly sparse 
 with many zero expression values (typically above 80%, or even 95%). With an Autoencoder traind on 
-nonzero values of the data, LATE leverages information of dependence between genes/cells, and recovers the missing values (zeros). With TRANSfer Learning with AuToEncoder (TRANSLATE), the user can train the autoencoder on a reference 
+nonzero values of the data, LATE leverages information of dependence between genes/cells, and recovers the missing values (zeros). With TRANSLATE that allows for transfer learning, the user can train the autoencoder on a reference 
 gene expression dataset and then use the weights and biases as initial values for imputing the dataset of interest.
 
 
