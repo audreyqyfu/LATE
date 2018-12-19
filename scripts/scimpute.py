@@ -1334,8 +1334,8 @@ def learning_curve(epoch, metrics_batch, metrics_valid,
                    range=None,
                    skip=1,
                    dir='plots'):
-    '''
-    plot learning curve
+    '''plot learning curve
+	
     :param epoch: vector
     :param metrics_batch: vector
     :param metrics_valid: vector

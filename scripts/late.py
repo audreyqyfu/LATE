@@ -4,35 +4,25 @@ import os
 import numpy as np
 import pandas as pd
 import argparse
-#import matplotlib
-#matplotlib.use('Agg')
-#import matplotlib.pyplot as plt
-#from scipy.stats.stats import pearsonr
 import tensorflow as tf
 from importlib.machinery import SourceFileLoader
 import math
 import psutil
 import time
-#import seaborn as sns
-#import importlib.util
-#import importlib
 from scipy.sparse import csr_matrix
 import scimpute
 import gc
 
-#import global_params as p
-	
-#def learning_curve_mse(skip=1): 
 def learning_curve_mse(epoch_log, mse_batch_vec, mse_valid_vec, stage, skip=1):
     '''Save mse curves to csv files
     
     Parameters:
     -----------
-	skip:
+	skip: 
 	epoch_log:
 	mse_batch_vec:
 	mse_valid_vec:
-	stage:
+	stage: step1 or step2
 	
 	'''
     print('> plotting learning curves')
@@ -53,6 +43,7 @@ def learning_curve_mse(epoch_log, mse_batch_vec, mse_valid_vec, stage, skip=1):
 #def learning_curve_mse_nz(skip=1):
 def learning_curve_mse_nz(epoch_log, mse_nz_batch_vec, mse_nz_valid_vec, stage, skip=1):
     '''Save mse curves to csv files	
+	
     Parameters:
     -----------
     skip:

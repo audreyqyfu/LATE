@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-import Late1
+import late
 import time
 import analysis
 
@@ -8,8 +8,8 @@ if __name__ == '__main__':
 	
 	##1. load parameter module and use name 'p'
 	print("Usage: python example.py -mode <late> -infile <xx.hd5>")
-	argms = Late1.parse_args(sys.argv[1:])
-	p = Late1.load_params(argms.mode, argms.infile)	
+	argms = late.parse_args(sys.argv[1:])
+	p = late.load_params(argms.mode, argms.infile)	
 
 	# need to add parameters to global_params
 	# need to add ground truth file name here
@@ -25,14 +25,14 @@ if __name__ == '__main__':
 	##2. refresh folder
 	#log_dir = './{}'.format(p.stage)
 	#scimpute.refresh_logfolder(log_dir)
-	Late1.display_params(p)
+	late.display_params(p)
 	
 	tic_start = time.time()
 	#3. load data
-	#input_matrix, gene_ids, cell_ids = Late1.read_data(p)
+	#input_matrix, gene_ids, cell_ids = late.read_data(p)
 	
 	#4. call late
-	#Late1.late_main(input_matrix, gene_ids, cell_ids, p, log_dir, rand_state = 3)
+	#late.late_main(input_matrix, gene_ids, cell_ids, p, log_dir, rand_state = 3)
 	
 	#5. analyze imputation results
 	analysis.result_analysis(p)
