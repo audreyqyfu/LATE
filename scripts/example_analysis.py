@@ -2,7 +2,6 @@
 import sys
 import late
 import time
-import analysis
 
 if __name__ == '__main__':
 	
@@ -14,28 +13,15 @@ if __name__ == '__main__':
 	# need to add parameters to global_params
 	# need to add ground truth file name here
 	
-	p.fname_ground_truth = '../gtex_v7.4TISSUES.count.cell_row.hd5'
+	# specify ground truth data	   
+	p.fname_ground_truth = '/Users/audreyq.fu/Documents/SingleCell/Code/gtex_v7.4TISSUES.count.cell_row.hd5'
 	
-	#p.L = 7
-	#p.max_training_epochs = int(20)
-	#p.display_step = int(5)
-	#p.snapshot_step = int(50)
-	#p.patience = int(3)
-	
-	##2. refresh folder
-	#log_dir = './{}'.format(p.stage)
-	#scimpute.refresh_logfolder(log_dir)
+	# output parameters for result analysis
 	late.display_params(p)
 	
 	tic_start = time.time()
-	#3. load data
-	#input_matrix, gene_ids, cell_ids = late.read_data(p)
-	
-	#4. call late
-	#late.late_main(input_matrix, gene_ids, cell_ids, p, log_dir, rand_state = 3)
-	
-	#5. analyze imputation results
-	analysis.result_analysis(p)
+	# analyze imputation results
+	late.result_analysis_main(p)
 
 	toc_stop = time.time()
 	time_finish = round((toc_stop - tic_start), 2)
