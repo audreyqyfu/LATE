@@ -73,5 +73,3 @@ gene_pair_list = [
 	# ['ENSG00000173372', 'ENSG00000087086'],
 ]
 
-# genetate a list of genes using the gene_pair_list
-gene_list = [gene for pair in gene_pair_list for gene in pair]

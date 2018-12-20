@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Usage: python example_1.py -mode <training | late | translate | impute> -infile <xx.hd5>")
+Usage: for running LATE or TRANSLATE on input
+
+	$ python example_1.py -mode <pre-training | late | translate | impute> -infile <xx.csv/tsv/h5>
 
 '''
 
@@ -11,27 +13,30 @@ import time
 
 if __name__ == '__main__':
 	##1. load parameter module and use name 'p'
-	#print("Usage: python late.py -mode <late> -infile <xx.hd5>")
 	argms = late.parse_args(sys.argv[1:])
 	p = late.load_params(argms.mode, argms.infile)	
 	
-	#p.ori_input = 'gene_row'
-	p.max_training_epochs = int(20)
+	# a short run with 20 epochs
+	# for the input data, which contains 56202 genes and 3164 cells
+	# about 9 min on a macbook pro with CPU
+#	p.max_training_epochs = int(20)
+	p.max_training_epochs = int(2)
 	p.display_step = int(5)
-	p.snapshot_step = int(50)
+	p.snapshot_step = int(5)
 	p.patience = int(3)
 	
 	late.display_params(p)
+
 	##2. refresh folder
 	log_dir = './{}'.format(p.stage)
 	scimpute.refresh_logfolder(log_dir)
 
 	tic_start = time.time()
 	#3. load data
-	input_matrix, gene_ids, cell_ids = late.read_data(p)
+#	input_matrix, gene_ids, cell_ids = late.read_data(p)
 	
 	#4. call late
-	late.late_main(input_matrix, gene_ids, cell_ids, p, log_dir, rand_state = 3)
+	late.late_main(p, log_dir, rand_state = 3)
 	toc_stop = time.time()
 	time_finish = round((toc_stop - tic_start), 2)
 	

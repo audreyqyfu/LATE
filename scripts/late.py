@@ -210,7 +210,10 @@ def usage():
 #print('python version:', sys.version)
 #print('tf.__version__', tf.__version__)
 
-def late_main(input_matrix, gene_ids, cell_ids, p, log_dir, rand_state=3):
+def late_main(p, log_dir, rand_state=3):
+
+	##0. read data and extract gene IDs and cell IDs
+	input_matrix, gene_ids, cell_ids = read_data(p)
 	
 	##1. split data and save indexes
 	#input p, input_matrix, cell_ids
@@ -442,7 +445,7 @@ def late_main(input_matrix, gene_ids, cell_ids, p, log_dir, rand_state=3):
                        skip=math.floor(epoch / 5 / p.display_step))
 									
 			#4.save save_bottleneck_representation
-			print("> save bottle-neck_representation")
+			print("> save bottleneck_representation")
 			code_bottleneck_input = sess.run(a_bottleneck,
 											  feed_dict={
 												  X: sample_input,
@@ -596,7 +599,7 @@ def load_params(mode, infile):
 		p.stage = 'Eval'
 	else:
 	    print('The mode you entered cannot be recognized.')
-	    print('Valid mode options: training | late | translate | impute')
+	    print('Valid mode options: pre-training | late | translate | impute | analysis')
 	    p.mode = 'invalid'
 	    return p
 		
@@ -616,32 +619,42 @@ def load_params(mode, infile):
 #
 def display_params(p):
 	# PRINT PARAMETERS
+	print('\nmode:', p.mode)
 	print('\nData:')
 	print('fname_input:', p.fname_input)
 	print('name_input:', p.name_input)
 	print('ori_input:', p.ori_input)
 	print('transformation_input:', p.transformation_input)
-	print('data split: [{}/{}/{}]'.format(p.a, p.b, p.c))
-	
-	print('\nParameters:')
-	print('mode:', p.mode)
-	print('mse_mode:', p.mse_mode)
-	print('stage:', p.stage)
-	print('init:', p.run_flag)
-	print('test_mode:', p.test_flag)
-	print('{}L'.format(p.L))
-	for l_tmp in range(1, p.l+1):
-	  print("n_hidden{}: {}".format(l_tmp, eval('p.n_hidden_'+str(l_tmp))))
-	
-	print('learning_rate:', p.learning_rate)
-	print('reg_coef:', p.reg_coef)
-	print('batch_size:', p.batch_size)
-	print('sample_zie: ', p.sample_size)
-	print('pIn:', p.pIn)
-	print('pHidden:', p.pHidden)
-	print('max_training_epochs:', p.max_training_epochs)
-	print('display_step', p.display_step)
-	print('snapshot_step', p.snapshot_step)
+
+	if (p.mode == 'pre-training') or (p.mode == 'late') or (p.mode == 'translate'):
+		print('data split: [{}/{}/{}]'.format(p.a, p.b, p.c))
+		
+		print('\nParameters:')
+		print('mse_mode:', p.mse_mode)
+		print('stage:', p.stage)
+		print('init:', p.run_flag)
+		print('test_mode:', p.test_flag)
+		print('total number of layers: {}'.format(p.L))
+		for l_tmp in range(1, p.l+1):
+		  print("n_hidden{}: {}".format(l_tmp, eval('p.n_hidden_'+str(l_tmp))))
+		
+		print('learning_rate:', p.learning_rate)
+		print('reg_coef:', p.reg_coef)
+		print('batch_size:', p.batch_size)
+		print('sample_zie: ', p.sample_size)
+		print('pIn:', p.pIn)
+		print('pHidden:', p.pHidden)
+		print('max_training_epochs:', p.max_training_epochs)
+		print('display_step', p.display_step)
+		print('snapshot_step', p.snapshot_step)
+	elif p.mode == 'analysis':
+		print('fname_imputation:', p.fname_imputation)
+		print('transformation_imputation', p.transformation_imputation)
+		print('fname_ground_truth: ', p.fname_ground_truth)
+		print('transformation_ground_truth', p.transformation_ground_truth)
+		print('gene_pair_list: ', p.gene_pair_list)
+		
+	print('\n')
 
 def read_data(p):
 	'''READ DATA
@@ -986,14 +999,19 @@ def visualize_selected_genes(X, Y, G, p):
 	'''
 
 	gene_pair_dir = p.tag+'/pairs'
+
 	List = p.gene_pair_list
+	print(">n> Scatterplots of selected gene pairs")
 	scimpute.gene_pair_plot(Y, list=List, tag='(Imputation)', dir=gene_pair_dir)
 	scimpute.gene_pair_plot(X, list=List, tag='(Input)', dir=gene_pair_dir)
 	scimpute.gene_pair_plot(G, list=List, tag='(Ground_truth)', dir=gene_pair_dir)
 
-	print("\n> ground truth vs imputation, ground truth vs input")
+	print("\n> Scatterplots for selected genes")
+	print("ground truth vs imputation, ground truth vs input")
 	gene_dir = p.tag+'/genes'
-	for j in p.gene_list:
+	# genetate a list of genes using the gene_pair_list
+	gene_list = [gene for pair in List for gene in pair]
+	for j in gene_list:
 		try:
 			print('for ', j)
 			Y_j = Y.ix[:, j]
@@ -1023,13 +1041,13 @@ def visualize_selected_genes(X, Y, G, p):
 
 	print('\n> Discrete gene pair relationship in imputation')
 	gene_pair_dir = p.tag+'/pairs_discrete'
-	List = p.gene_pair_list
+#	List = p.gene_pair_list
 	scimpute.gene_pair_plot(Y, list=List, tag='(Imputation Discrete) ',
                         dir=gene_pair_dir)
 
 	print("\n> Discrete imputation vs ground truth")
 	gene_dir = p.tag+'/genes_discrete'
-	for j in p.gene_list:
+	for j in gene_list:
 		try:
 			print('for ', j)
 			Y_j = Y.ix[:, j]
@@ -1064,19 +1082,6 @@ def result_analysis_main(p):
         -----------
 		None
 	'''
-	# show analysis parameters
-	print('''
-	Result analysis mode:
-	fname_imputation: {}
-	name_imputation: {}
-	ori_imputation: {}
-	trannsformation_imputation: {}
-	pair_list: {}
-	'''.format(p.fname_imputation, 
-				p.name_imputation, 
-				p.ori_imputation, 
-				p.transformation_imputation,
-				p.gene_pair_list))
 
 	# load imputation results and input data
 	X, Y, G = load_results(p)
@@ -1085,18 +1090,18 @@ def result_analysis_main(p):
 #	mse1_nz, mse1, mse2_nz, mse2 = calculate_MSEs(X, Y, G)
 
 	# calculate and visualize variation in genes
-	analyze_variation_in_genes(X, Y, G, p)
+#	analyze_variation_in_genes(X, Y, G, p)
 
 	# visualize results using all genes
 #	visualize_all_genes(X, Y, G, p)
 
 	# visualize selected genes
-#	visualize_selected_genes(X, Y, G, p)
+	visualize_selected_genes(X, Y, G, p)
 
 
 def parse_args(argv):
 	parser = argparse.ArgumentParser(description = 'Help information')
-	parser.add_argument('-mode', help='mode options: training | late | translate | impute | analysis')
+	parser.add_argument('-mode', help='mode options: pre-training | late | translate | impute | analysis')
 	parser.add_argument('-infile', help='file path of input data') 
 	
 	return parser.parse_args(argv)
