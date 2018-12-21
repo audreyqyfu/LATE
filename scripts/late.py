@@ -1087,13 +1087,13 @@ def result_analysis_main(p):
 	X, Y, G = load_results(p)
 
 	# calculate MSEs
-#	mse1_nz, mse1, mse2_nz, mse2 = calculate_MSEs(X, Y, G)
+	mse1_nz, mse1, mse2_nz, mse2 = calculate_MSEs(X, Y, G)
 
 	# calculate and visualize variation in genes
-#	analyze_variation_in_genes(X, Y, G, p)
+	analyze_variation_in_genes(X, Y, G, p)
 
 	# visualize results using all genes
-#	visualize_all_genes(X, Y, G, p)
+	visualize_all_genes(X, Y, G, p)
 
 	# visualize selected genes
 	visualize_selected_genes(X, Y, G, p)

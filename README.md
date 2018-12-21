@@ -18,9 +18,11 @@ For example, one may use conda to install these modules:
 Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 
 ## Usage
-- example: `python example.py -mode='late' -infile=path/filename`
-  - `example.py` reads in the input data, sets parameters and calls function `late_main` to perform imputation or function `analysis_main` to summarize and visualize imputation results.  
+- example 1: `python example_late.py -mode='late' -infile='../data/example.msk90.hd5'`
+  - `example_late.py` reads in the input data, sets parameters and calls function `late_main` to perform imputation.  
   - Default values for imputation and analysis parameters are provided in `global_params.py`, and may be modified in `example.py`.
+- example 2: after running example 1 and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results.
+  `python example_analysis.py -mode='analysis' -infile='../data/example.msk90.hd5'`
 - In the current version of LATE, imputation or analysis needs to run where the Python scripts included in this distribution are stored on your computer.  Imputation and analysis will generate folders in the same directory.  Datasets used for imputation or analysis (e.g., the input, the reference, or the ground truth) may be stored elsewhere.
 
 ### mode: 
