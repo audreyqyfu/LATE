@@ -6,14 +6,17 @@ with many zero expression values (typically above 80%, or even 95%). With an Aut
 nonzero values of the data, LATE leverages information of dependence between genes/cells, and recovers the missing values (zeros). With TRANSLATE that allows for transfer learning, the user can train the autoencoder on a reference 
 gene expression dataset and then use the weights and biases as initial values for imputing the dataset of interest.
 
+Referece:
 
+Md. Bahadur Badsha, Rui Li, Boxiang Liu, Yang I. Li, Min Xian, Nicholas E. Banovich, Audrey Qiuyan Fu 
+Imputation of single-cell gene expression with an autoencoder neural network. bioRxiv 504977; doi: https://doi.org/10.1101/504977.
 
 ## Installation
 This implementation is written in Python (3.5+) and builds on TensorFlow (1.0-1.4). Additional Python modules needed are:
 numpy, pandas, matplotlib, scipy, seaborn, tables, sklearn, MulticoreTSNE
 
-For example, one may use conda to install these modules:
-`conda install numpy`
+For example, one may use conda or pip to install these modules:
+`conda install numpy` or `pip install numpy`
 
 Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 
@@ -21,8 +24,8 @@ Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 - example 1: `python example_late.py -mode='late' -infile='../data/example.msk90.hd5'`
   - `example_late.py` reads in the input data, sets parameters and calls function `late_main` to perform imputation.  
   - Default values for imputation and analysis parameters are provided in `global_params.py`, and may be modified in `example.py`.
-- example 2: after running example 1 and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results.
-  `python example_analysis.py -mode='analysis' -infile='../data/example.msk90.hd5'`
+- example 2: after running example 1 and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results. 
+    `python example_analysis.py -mode='analysis' -infile='../data/example.msk90.hd5'`
 - In the current version of LATE, imputation or analysis needs to run where the Python scripts included in this distribution are stored on your computer.  Imputation and analysis will generate folders in the same directory.  Datasets used for imputation or analysis (e.g., the input, the reference, or the ground truth) may be stored elsewhere.
 
 ### mode: 
