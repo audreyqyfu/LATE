@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Usage: running LATE or TRANSLATE.  The general syntax is:
+Usage: Step 1 of TRANSLATE: running TRANSLATE on the reference data
 
-	$ python example_script.py -mode <pre-training | late | translate | impute> -infile <xx.csv/tsv/h5>
+	$ python example_translate_step1.py -mode='pre-training' -infile='../data/ref_example.mdk50.hd5'
 
 '''
 
@@ -17,8 +17,8 @@ if __name__ == '__main__':
 	p = late.load_params(argms.mode, argms.infile)	
 	
 	# a short run with 20 epochs
-	# for the input data, which contains 949 genes and 10k cells
-	# about 44 seconds on a macbook pro with CPU
+	# for the reference data, which contains 949 genes and 30k cells
+	# about 118 seconds on a macbook pro with CPU
 	p.max_training_epochs = int(20)
 	p.display_step = int(10)
 	p.snapshot_step = int(10)
@@ -33,6 +33,7 @@ if __name__ == '__main__':
 	tic_start = time.time()
 	
 	##3. call late
+	# output is in folder step1/
 	late.late_main(p, log_dir, rand_state = 3)
 	toc_stop = time.time()
 	time_finish = round((toc_stop - tic_start), 2)

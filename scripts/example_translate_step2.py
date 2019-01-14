@@ -17,8 +17,8 @@ if __name__ == '__main__':
 	p = late.load_params(argms.mode, argms.infile)	
 	
 	# a short run with 20 epochs
-	# for the input data, which contains 949 genes and 10k cells
-	# about 44 seconds on a macbook pro with CPU
+	# for the reference data, which contains 949 genes and 10k cells
+	# about 45 seconds on a macbook pro with CPU
 	p.max_training_epochs = int(20)
 	p.display_step = int(10)
 	p.snapshot_step = int(10)
@@ -33,6 +33,7 @@ if __name__ == '__main__':
 	tic_start = time.time()
 	
 	##3. call late
+	# output is in folder step2/
 	late.late_main(p, log_dir, rand_state = 3)
 	toc_stop = time.time()
 	time_finish = round((toc_stop - tic_start), 2)
