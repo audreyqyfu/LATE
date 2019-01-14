@@ -10,6 +10,7 @@ fname_input = '../data/pbmc.g949_c10k.msk90.hd5'  # csv/csv.gz/tsv/h5/hd5 format
 name_input = 'example'
 ori_input = 'cell_row'  # cell_row/gene_row
 transformation_input = 'log10'  # as_is/log10/rpm_log10/exp_rpm_log10
+genome_input = 'mm10'  # only for sparse matrix h5 data from 10x Genomics
 
 # Output
 fname_imputation = './step2/imputation.step2.hd5'  # do not modify for pre-training
