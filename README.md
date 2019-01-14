@@ -22,22 +22,23 @@ Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 
 ## Usage
 Note: In the current version of LATE, code described below needs to run where the Python scripts included in this distribution are stored on your computer.  Imputation and analysis will generate folders in the same directory.  Datasets used for imputation or analysis (e.g., the input, the reference, or the ground truth) may be stored elsewhere.
-### An example of running LATE
+### Running LATE
 - Imputation: `python example_late.py -mode='late' -infile='../data/example.msk90.hd5'`
   - `example_late.py` reads in the input data, sets parameters and calls function `late_main` to perform imputation.  
   - Default values for imputation and analysis parameters are provided in `global_params.py`, and may be modified in `example.py`.
-- Analysis of imputation results: after running imputation and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results. 
+### Analyzing imputation results
+- After running imputation and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results. 
     `python example_analysis.py -mode='analysis' -infile='../data/example.msk90.hd5'`
 ### An example of running TRANSLATE
 - Step 1: `python example_translate_step1.py -mode='pre-training' -infile='../data/ref_example.mdk50.hd5'`
   - This step runs LATE on the reference data `ref_example.mdk50.hd5`.
   - This step creates folder `step1/` and stores the output.
-- Step 2: `python example_translate_step2.py -mode='translate' -infile='../data/example.hd5'`
-  - This step runs LATE on the input data `example.hd5`.
+- Step 2: `python example_translate_step2.py -mode='translate' -infile='../data/example.msk90.hd5'`
+  - This step runs LATE on the input data `example.msk90.hd5`.
   - This step creates folder `step2/` and stores the output.
 - Note: `example_translate_step1.py` and `example_translate_step2.py` are identical in this example, although the parameters used for training may be specified differently. 
 
-
+## Additional details
 ### Mode: 
 - `late`:
   - Random initialization;

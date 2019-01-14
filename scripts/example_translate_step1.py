@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Usage: Step 1 of TRANSLATE: running TRANSLATE on the reference data
+Usage: running LATE or TRANSLATE.  The general syntax is:
 
-	$ python example_translate_step1.py -mode='pre-training' -infile='../data/ref_example.mdk50.hd5'
+	$ python example_script.py -mode <pre-training | late | translate | impute> -infile <xx.csv/tsv/h5>
 
 '''
 
