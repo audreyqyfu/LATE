@@ -25,7 +25,7 @@ Note: In the current version of LATE, code described below needs to run where th
 ### Running LATE
 - Imputation: `python example_late.py -mode='late' -infile='../data/example.msk90.hd5'`
   - `example_late.py` reads in the input data, sets parameters and calls function `late_main` to perform imputation.  
-  - Default values for imputation and analysis parameters are provided in `global_params.py`, and may be modified in `example.py`.
+  - Default values for imputation and analysis parameters are provided in `global_params.py`, and may be modified in `example_late.py` (for example, see how `example_late.py` specifies a short run).
 ### Analyzing imputation results
 - After running imputation and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results. 
     `python example_analysis.py -mode='analysis' -infile='../data/example.msk90.hd5'`
