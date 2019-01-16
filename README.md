@@ -22,21 +22,29 @@ Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 
 ## Usage
 Note: In the current version of LATE, code described below needs to run where the Python scripts included in this distribution are stored on your computer.  Imputation and analysis will generate folders in the same directory.  Datasets used for imputation or analysis (e.g., the input, the reference, or the ground truth) may be stored elsewhere.
-### Running LATE
+### Example 1: Running LATE
 - Imputation: `python example_late.py -mode='late' -infile='../data/example.msk90.hd5'`
   - `example_late.py` reads in the input data, sets parameters and calls function `late_main` to perform imputation.  
   - Default values for imputation and analysis parameters are provided in `global_params.py`, and may be modified in `example_late.py` (for example, see how `example_late.py` specifies a short run).
-### Analyzing imputation results
-- After running imputation and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results. 
+### Example 2: Analyzing imputation results
+- Following Example 1, after running imputation and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results. 
     `python example_analysis.py -mode='analysis' -infile='../data/example.msk90.hd5'`
-### An example of running TRANSLATE
+### Example 3: Running TRANSLATE
 - Step 1: `python example_translate_step1.py -mode='pre-training' -infile='../data/ref_example.mdk50.hd5'`
   - This step runs LATE on the reference data `ref_example.mdk50.hd5`.
   - This step creates folder `step1/` and stores the output.
 - Step 2: `python example_translate_step2.py -mode='translate' -infile='../data/example.msk90.hd5'`
   - This step runs LATE on the input data `example.msk90.hd5`.
   - This step creates folder `step2/` and stores the output.
-- Note: `example_translate_step1.py` and `example_translate_step2.py` are identical in this example, although the parameters used for training may be specified differently. 
+- Note: `example_translate_step1.py` and `example_translate_step2.py` are identical in this example, although the parameters used for training may be specified differently.
+### Example 4: Running LATE on 10x Genomics data
+- A small data set from mouse brain that contains 10,000 genes and 10,000 cells.
+- Data in the h5 format and has genes in the rows and cells in the columns.
+- Imputation with LATE: `python example_late_10x.py -mode='late' -infile='../data/example_mouse_brain_10x.h5'`
+  - Note that the orientation of the input data needs to be specified.
+- Result analysis: `python example_analysis_10x.py -mode='analysis' -infile='../data/example_mouse_brain_10x.h5'`
+  - Note that the orientation of the input data needs to be specified.
+  - Note also that there is no ground truth here, and that the ground truth is set to be the same as the input.
 
 ## Additional details
 ### Mode: 
@@ -80,13 +88,15 @@ Note: In the current version of LATE, code described below needs to run where th
 
 ### Output files
 
-Imputed data matrix is in the hd5 format and stored in `step2/imputation.step2.hd5`.  Values in this matrix have the same layout as the input, and are on the log10(count+1) scale.
+- Imputed data matrix is in the hd5 format and stored in `step2/imputation.step2.hd5`.  
+- Values in this matrix have the same layout as the input, and are on the log10(count+1) scale.
 
 ### Ground truth
-The ground truth data should also be a matrix of read counts with the same format as the input.  
+- The ground truth data should also be a matrix of read counts with the same format as the input.  
+- When the ground truth does not exist, set it to be the same as the input.  See Example 4.
 
 ### Parameters
-Default parameters are specified in `global_params.py`.  They may be modified in `example.py`.  See `example.py` for examples of modifications.  
+Default parameters are specified in `global_params.py`.  They may be modified in `example*.py`.  
 
 
 
