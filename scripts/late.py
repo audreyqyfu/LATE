@@ -750,17 +750,20 @@ def load_results(p):
                 G: ground truth	
 	'''
 
-	print('>READING DATA..')
-	X = scimpute.read_data_into_cell_row(p.fname_input, p.ori_input)
+#	print('>READING DATA..')
+#	X = scimpute.read_data_into_cell_row(p.fname_input, p.ori_input)
+	X, gene_ids, cell_ids = read_data(p)
+	X = pd.DataFrame(data=X.todense(), index=cell_ids,
+					 columns=gene_ids)
 	Y = scimpute.read_data_into_cell_row(p.fname_imputation, p.ori_imputation)
 	if p.fname_input == p.fname_ground_truth:
 		G = X
 	else:
 		G = scimpute.read_data_into_cell_row(p.fname_ground_truth, p.ori_ground_truth)
 	
-	print('> DATA TRANSFORMATION..')
+#	print('> DATA TRANSFORMATION..')
 	Y = scimpute.df_transformation(Y.transpose(), transformation=p.transformation_imputation).transpose()
-	X = scimpute.df_transformation(X.transpose(), transformation=p.transformation_input).transpose()
+#	X = scimpute.df_transformation(X.transpose(), transformation=p.transformation_input).transpose()
 	if p.fname_input == p.fname_ground_truth:
 		G = X
 	else:
@@ -779,10 +782,10 @@ def load_results(p):
 		X = X.ix[0:p.m, 0:p.n]
 
 	# INPUT SUMMARY
-	print('\ninside this code, matrices are supposed to be transformed into cell_row')
-	print('Y:', p.fname_imputation, p.ori_imputation, p.transformation_imputation,'\n', Y.ix[0:20, 0:3])
-	print('X:', p.fname_input, p.ori_input, p.transformation_input,'\n', X.ix[0:20, 0:3])
-	print('G:', p.fname_ground_truth, p.ori_ground_truth, p.transformation_ground_truth,'\n', G.ix[0:20, 0:3])
+	print('\nIn this code, matrices should have already been transformed into cell_row')
+	print('Y (imputation):', p.fname_imputation, p.ori_imputation, p.transformation_imputation,'\n', Y.ix[0:20, 0:3])
+	print('X (input):', p.fname_input, p.ori_input, p.transformation_input,'\n', X.ix[0:20, 0:3])
+	print('G (ground truth):', p.fname_ground_truth, p.ori_ground_truth, p.transformation_ground_truth,'\n', G.ix[0:20, 0:3])
 	print('Y.shape', Y.shape)
 	print('X.shape', X.shape)
 	print('G.shape', G.shape)
