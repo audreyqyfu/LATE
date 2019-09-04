@@ -21,7 +21,9 @@ For example, one may use conda or pip to install these modules:
 Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 
 ## Usage
-Note: In the current version of LATE, code described below needs to run where the Python scripts included in this distribution are stored on your computer.  Imputation and analysis will generate folders in the same directory.  Datasets used for imputation or analysis (e.g., the input, the reference, or the ground truth) may be stored elsewhere.
+Note: In the current version of LATE, code described below needs to run where it is stored on your computer.  To do so, go to the folder 'scripts/'
+`cd scripts/`
+Imputation and analysis will generate folders in the same directory.  Datasets used for imputation or analysis (e.g., the input, the reference, or the ground truth) may be stored elsewhere.
 ### Example 1: Running LATE
 - Imputation: `python example_late.py -mode='late' -infile='../data/example.msk90.hd5'`
   - `example_late.py` reads in the input data, sets parameters and calls function `late_main` to perform imputation.  
@@ -29,6 +31,7 @@ Note: In the current version of LATE, code described below needs to run where th
 ### Example 2: Analyzing imputation results
 - Following Example 1, after running imputation and generating the folder 'step2/', one may run analysis to summarize and visualize imputation results. 
     `python example_analysis.py -mode='analysis' -infile='../data/example.msk90.hd5'`
+- In this analysis, the ground truth data exists in `example.hd5`, and is specified in `example_analysis.py`.
 ### Example 3: Running TRANSLATE
 - Step 1: `python example_translate_step1.py -mode='pre-training' -infile='../data/ref_example.mdk50.hd5'`
   - This step runs LATE on the reference data `ref_example.mdk50.hd5`.

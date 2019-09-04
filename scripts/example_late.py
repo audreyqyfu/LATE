@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	# a short run with 20 epochs
 	# for the input data, which contains 949 genes and 10k cells
 	# about 210 seconds on a macbook pro with CPU
-	p.max_training_epochs = int(100)
+	p.max_training_epochs = int(20)
 	p.display_step = int(10)
 	p.snapshot_step = int(10)
 	p.patience = int(3)

@@ -1,3 +1,0 @@
-  cp ~/data/cell_row/pbmc.g949_c10k.hd5 example.hd5
-  cp ~/data/cell_row/pbmc.g949_c10k.msk90.hd5 example.msk90.hd5
-  cp ~/data/cell_row/pbmc.g949_c30k.hd5 ref_example.mdk50.hd5
