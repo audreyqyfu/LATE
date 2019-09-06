@@ -1,2 +1,0 @@
-model_checkpoint_path: "step2.ckpt"
-all_model_checkpoint_paths: "step2.ckpt"
