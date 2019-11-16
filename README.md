@@ -11,6 +11,10 @@ Referece:
 Md. Bahadur Badsha, Rui Li, Boxiang Liu, Yang I. Li, Min Xian, Nicholas E. Banovich, Audrey Qiuyan Fu 
 Imputation of single-cell gene expression with an autoencoder neural network. bioRxiv 504977; doi: https://doi.org/10.1101/504977.
 
+Data sets:
+
+Data sets analyzed in the paper are here: https://drive.google.com/drive/folders/1K8JIFLQBT89Z6jp97YojkXBMiluU7WS6.
+
 ## Installation
 This implementation is written in Python (3.5+) and builds on TensorFlow (1.0-1.4). Additional Python modules needed are:
 numpy, pandas, matplotlib, scipy, seaborn, tables, sklearn, MulticoreTSNE
