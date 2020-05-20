@@ -28,13 +28,21 @@ Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 LATE is not compatible with TensorFlow 2 yet.  You may want to create a virtual environment to use TensorFlow 1.  To do so, you can follow the instructions at https://www.tensorflow.org/install/pip.  The same instructions are also given below for macOS:
 
 In terminal, create a virtual environment:
+
 `$ virtualenv --system-site-packages -p python3 ./tensorflow1`
+
 `$ source ./tensorflow1/bin/activate`
+
 In the virtual environment, install tensorflow 1.x (e.g., 1.15):
+
 `(tensorflow1)$ pip install --upgrade pip`
+
 `(tensorflow1)$ pip list`
+
 `(tensorflow1)$ pip install --upgrade tensorflow==1.15`
+
 Once you are done with the analysis, you can deactivate the virtual environment:
+
 `(tensorflow1)$ deactivate`
 
 
