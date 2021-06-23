@@ -25,7 +25,7 @@ For example, one may use conda or pip to install these modules:
 Install `tensorflow` to use CPUs and `tensorflow-gpu` to use GPUs.
 
 ### Create a virtual environment for installation
-LATE is not compatible with TensorFlow 2 yet.  You may want to create a virtual environment to use TensorFlow 1.  To do so, you can follow the instructions at https://www.tensorflow.org/install/pip.  The same instructions are also given below for macOS:
+LATE is not compatible with TensorFlow 2 yet.  You may want to create a virtual environment to use TensorFlow 1.  To do so, you can follow the instructions at https://www.tensorflow.org/install/pip.  The same instructions are also given below:
 
 In terminal, create a virtual environment:
 
@@ -33,13 +33,15 @@ In terminal, create a virtual environment:
 
 `$ source ./tensorflow1/bin/activate`
 
-In the virtual environment, install tensorflow 1.x (e.g., 1.15):
+In the virtual environment, install tensorflow 1.x (e.g., 1.15) and pandas 0.25.1:
 
 `(tensorflow1)$ pip install --upgrade pip`
 
 `(tensorflow1)$ pip list`
 
 `(tensorflow1)$ pip install --upgrade tensorflow==1.15`
+
+`(tensorflow1)$ pip install --upgrade pandas==0.25.1`
 
 Once you are done with the analysis, you can deactivate the virtual environment:
 
